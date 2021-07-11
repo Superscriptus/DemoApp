@@ -26,15 +26,15 @@ st.markdown(
     unsafe_allow_html=True,
 )
 query_params = st.experimental_get_query_params()
-tabs = ["Home", "About", "Contact"]
+tabs = ["Simulation", "Comparison", "Hypotheses"]
 if "tab" in query_params:
     active_tab = query_params["tab"][0]
 else:
-    active_tab = "Home"
+    active_tab = "Simulation"
 
 if active_tab not in tabs:
-    st.experimental_set_query_params(tab="Home")
-    active_tab = "Home"
+    st.experimental_set_query_params(tab="Simulation")
+    active_tab = "Simulation"
 
 li_items = "".join(
     f"""
