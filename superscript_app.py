@@ -3,6 +3,8 @@
 # - check if tabs works on Github sharing (find alternative option to show MC)
 # - add requirements.txt and README.md (with instructions for MC)
 # - check new github access and push
+# - read about secrets management
+# - issues with layout and SVG display...
 # """
 #
 # import streamlit as st
@@ -20,6 +22,17 @@
 # }))
 #
 import streamlit as st
+
+col1, col2, col3 = st.beta_columns([1,5,1])
+
+with col1:
+    st.write("")
+with col2:
+    st.image('images/logo.png', use_column_width=True)#, width=400)
+with col3:
+    st.write("")
+
+st.header('Simulation engine for a social teamwork game')
 
 st.markdown(
     '<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/css/bootstrap.min.css" integrity="sha384-TX8t27EcRE3e/ihU7zmQxVncDAy5uIKz4rEkgIXeMed4M0jlfIDPvg6uqKI2xXr2" crossorigin="anonymous">',
