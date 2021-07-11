@@ -131,10 +131,10 @@ ehthumbs.db
 Thumbs.db
 
 # Images
-*.jpg
-*.gif
-*.png
-*.svg
+#*.jpg
+#*.gif
+#*.png
+#*.svg
 # *.ico
 
 # Video
