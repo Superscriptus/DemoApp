@@ -16,6 +16,7 @@ class Application:
         """
 
         st.sidebar.image('images/logo.png', use_column_width=True)
+        st.sidebar.header('Simulation engine for a social teamwork game.')
         selected_page = st.sidebar.selectbox(
             'App Navigation',
             [*self.pages.keys()]
