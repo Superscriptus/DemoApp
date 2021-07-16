@@ -1,6 +1,6 @@
 """
 TODO:
-
+- see if we need Altair for better plotting?
 - README.md (with instructions for MC)
 - create notebook to generate static images
 - implement live plotting from data (create data aggregation/pre-processing)
