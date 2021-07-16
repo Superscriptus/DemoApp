@@ -14,11 +14,12 @@ Resources:
  """
 
 from application import Application
-from pages import hypotheses, simulation, comparison
+from pages import hypotheses, simulation, comparison, about
 
 app = Application()
-app.create_page("Hypotheses", hypotheses)
+app.create_page("About", about)
 app.create_page("Simulation", simulation)
+app.create_page("Hypotheses", hypotheses)
 app.create_page("Comparison", comparison)
 app.execute()
 
