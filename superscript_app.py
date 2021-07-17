@@ -1,6 +1,7 @@
 """
 TODO:
-- see if we need Altair for better plotting?
+- plot simulation data from disk/memory
+- investigate if we need session state (e.g. to update parameters during simulation)
 - README.md (with instructions for MC)
 - create notebook to generate static images
 - implement live plotting from data (create data aggregation/pre-processing)
