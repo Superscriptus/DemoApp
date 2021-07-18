@@ -3,6 +3,8 @@ import numpy as np
 import pandas as pd
 import altair as alt
 import time
+import pickle
+from random import randint
 
 
 def play_label(playing):
@@ -15,8 +17,27 @@ def play_label(playing):
 def handle_play_click():
     st.session_state.playing = not st.session_state.playing
 
+    if st.session_state.playing:
+        st.session_state.rep = randint(0, 9)
+
+
+def load_data(rep=0):
+    with open('data/model_vars_rep_%d.pickle' % rep, 'rb') as ifile:
+        df = pickle.load(ifile)
+
+    return df
+
 
 def page_code():
+
+    replicate = (
+        st.session_state.rep
+        if 'rep' in st.session_state
+        else 0
+    )
+    data = load_data()#replicate)
+    print(data.head())
+
     st.title("Simulation")
     st.write("This tab will show animation of a simulation (approximately like running the Mesa server).")
     st.write("(Note: Currently just showing dummy sinusoidal data.")
