@@ -5,6 +5,17 @@ import altair as alt
 import time
 
 
+def play_label(playing):
+    if playing:
+        return 'Stop'
+    else:
+        return 'Play'
+
+
+def handle_play_click():
+    st.session_state.playing = not st.session_state.playing
+
+
 def page_code():
     st.title("Simulation")
     st.write("This tab will show animation of a simulation (approximately like running the Mesa server).")
@@ -16,7 +27,14 @@ def page_code():
             max_value=10,
             value=5,
         )
-    play = st.sidebar.button('Play')
+
+    if 'playing' not in st.session_state:
+        st.session_state.playing = False
+
+    play = st.sidebar.button(
+        play_label(st.session_state.playing),
+        on_click=handle_play_click
+    )
 
     domain_colours = dict(zip(
         ['successful', 'failed', 'null'],
@@ -53,7 +71,7 @@ def page_code():
         use_container_width=True
     )
 
-    if play:
+    if st.session_state.playing:
         for t in range(1, 100):
             chart.add_rows(
                 pd.DataFrame(
@@ -66,3 +84,5 @@ def page_code():
                 )[plot_series].melt('time')
             )
             time.sleep(0.2 / speed)
+
+    st.session_state.playing = False
