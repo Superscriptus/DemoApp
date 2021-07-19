@@ -35,8 +35,10 @@ def page_code():
         if 'rep' in st.session_state
         else 0
     )
-    data = load_data()#replicate)
+    data = load_data(replicate)
+    data['time'] = data.index
     print(data.head())
+    print('time' in data.columns)
 
     st.title("Simulation")
     st.write("This tab will show animation of a simulation (approximately like running the Mesa server).")
@@ -66,6 +68,11 @@ def page_code():
         options=list(domain_colours),
         default=list(domain_colours)
     )
+    column_key = {
+        'SuccessfulProjects': 'successful',
+        'FailedProjects': 'failed',
+        'NullProjects': 'null'
+    }
 
     domain = [s for s in selection]
     range_ = [domain_colours[d] for d in domain]
@@ -92,6 +99,16 @@ def page_code():
         use_container_width=True
     )
 
+    chart2 = st.altair_chart(
+        alt.Chart(
+            data[['time', 'SuccessfulProjects', 'FailedProjects', 'NullProjects']].melt('time')).mark_line().encode(
+            x=alt.X('time', axis=alt.Axis(title='timestep')),
+            y=alt.Y('value', axis=alt.Axis(title='number of projects')),
+            color=alt.Color('variable', scale=alt.Scale(domain=list(column_key), range=range_))
+        ),
+        use_container_width=True
+    )
+
     if st.session_state.playing:
         for t in range(1, 100):
             chart.add_rows(
@@ -107,3 +124,4 @@ def page_code():
             time.sleep(0.2 / speed)
 
     st.session_state.playing = False
+    #st.experimental_rerun()
