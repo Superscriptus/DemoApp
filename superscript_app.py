@@ -1,7 +1,8 @@
 """
 TODO:
 - plot simulation data from disk/memory
-- investigate if we need session state (e.g. to update parameters during simulation)
+- change Stop to Play at end of simulation
+- not that pickle is not robust to library version changes - consider migrating to alternative format.
 - README.md (with instructions for MC)
 - create notebook to generate static images
 - implement live plotting from data (create data aggregation/pre-processing)
