@@ -27,7 +27,7 @@ def handle_play_click():
 
 
 def load_data(rep=0):
-    with open('data/model_vars_rep_%d.pickle' % rep, 'rb') as ifile:
+    with open('data/projects_per_timestep_2/basin_w_flex/model_vars_rep_%d.pickle' % rep, 'rb') as ifile:
         df = pickle.load(ifile)
         df['time'] = df.index
 
