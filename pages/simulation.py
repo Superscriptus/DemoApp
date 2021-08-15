@@ -2,7 +2,7 @@ import streamlit as st
 import altair as alt
 import time
 import pickle
-from random import randint
+from random import choice
 
 
 def play_label(playing):
@@ -12,35 +12,44 @@ def play_label(playing):
         return 'Play'
 
 
+def reload():
+
+    st.session_state.global_time = 0
+    replicate = choice([i for i in range(10) if i != st.session_state.replicate])
+    st.session_state.data = load_data(st.session_state.project_count, replicate)
+
+
 def handle_play_click():
-    st.session_state.playing = not st.session_state.playing
+    if st.session_state.data is not None:
+        st.session_state.playing = not st.session_state.playing
 
     if st.session_state.global_time == 99:
-        st.session_state.global_time = 0
-
-        replicate = randint(0, 9)
-        while replicate == st.session_state.replicate:
-            replicate = randint(0, 9)
-            st.session_state.replicate = replicate
-
-        st.session_state.data = load_data(replicate)
+        reload()
 
 
-def load_data(rep=0):
-    with open('data/projects_per_timestep_2/basin_w_flex/model_vars_rep_%d.pickle' % rep, 'rb') as ifile:
-        df = pickle.load(ifile)
-        df['time'] = df.index
+def load_data(project_count, rep):
 
-    return df
+    try:
+        with open(
+                'data/projects_per_timestep_%d/basin_w_flex/model_vars_rep_%d.pickle' % (project_count, rep), 'rb'
+        ) as ifile:
+
+            df = pickle.load(ifile)
+            df['time'] = df.index
+
+        return df
+
+    except FileNotFoundError:
+        st.error("Sorry, we do not currently have data for that parameter combination. "
+                 "Please change your parameter selection."
+                 'data/projects_per_timestep_%d/basin_w_flex/model_vars_rep_%d.pickle' % (project_count, rep))
+        return None
 
 
 def page_code():
 
     if 'replicate' not in st.session_state:
         st.session_state.replicate = 0
-
-    if 'data' not in st.session_state:
-        st.session_state.data = load_data(st.session_state.replicate)
 
     st.title("Simulation")
     st.write("This tab will show animation of a simulation (approximately like running the Mesa server).")
@@ -50,6 +59,23 @@ def page_code():
             min_value=1,
             max_value=10,
             value=5,
+        )
+
+    if 'project_count' not in st.session_state:
+        st.session_state.project_count = 2
+
+    # Note: 'key' links the widget to session state variable of same name. This is not documented behaviour?!
+    project_count = st.sidebar.radio(
+        "Number of new projects created each time step:",
+        options=[1, 2, 3, 5, 10],
+        key='project_count',
+        on_change=reload
+    )
+
+    if 'data' not in st.session_state:
+        st.session_state.data = load_data(
+            project_count=st.session_state.project_count,
+            rep=st.session_state.replicate
         )
 
     if 'playing' not in st.session_state:
@@ -73,35 +99,39 @@ def page_code():
         default=list(domain_colours)
     )
 
-    domain = [s for s in selection]
-    range_ = [domain_colours[d] for d in domain]
-    plot_series = ['time'] + [s for s in selection]
-    # note: updating 'selection' was messing with the contents of the slider variables
-    # hence creation of a new list 'plot_series'
+    if st.session_state.data is not None:
 
-    chart = st.altair_chart(
-        alt.Chart(
-            st.session_state.data.loc[
-                0:st.session_state.global_time,
-                plot_series
-            ].melt('time')).mark_line().encode(
-                x=alt.X('time', axis=alt.Axis(title='timestep')),
-                y=alt.Y('value', axis=alt.Axis(title='number of projects')),
-                color=alt.Color('variable', scale=alt.Scale(domain=domain, range=range_))
-        ),
-        use_container_width=True
-    )
+        domain = [s for s in selection]
+        range_ = [domain_colours[d] for d in domain]
+        plot_series = ['time'] + [s for s in selection]
+        # note: updating 'selection' was messing with the contents of the slider variables
+        # hence creation of a new list 'plot_series'
 
-    if st.session_state.playing:
-        start = st.session_state.global_time + 1
+        chart = st.altair_chart(
+            alt.Chart(
+                st.session_state.data.loc[
+                    0:st.session_state.global_time,
+                    plot_series
+                ].melt('time')).mark_line().encode(
+                    x=alt.X('time', axis=alt.Axis(title='timestep')),
+                    y=alt.Y('value', axis=alt.Axis(title='number of projects')),
+                    color=alt.Color('variable', scale=alt.Scale(domain=domain, range=range_))
+            ),
+            use_container_width=True
+        )
 
-        for t in range(start, 100):
-            chart.add_rows(
-                st.session_state.data.loc[t:t, plot_series].melt('time')
-            )
-            time.sleep(0.2 / speed)
-            st.session_state.global_time += 1
+        if st.session_state.playing:
+            start = st.session_state.global_time + 1
 
-            if t == 99:
-                st.session_state.playing = False
-                st.experimental_rerun()
+            for t in range(start, 100):
+
+                if chart is not None:
+                    chart.add_rows(
+                        st.session_state.data.loc[t:t, plot_series].melt('time')
+                    )
+                time.sleep(0.2 / speed)
+                st.session_state.global_time += 1
+
+                if t == 99:
+                    st.session_state.playing = False
+                    st.experimental_rerun()
