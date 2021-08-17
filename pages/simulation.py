@@ -16,7 +16,7 @@ def reload():
 
     st.session_state.global_time = 0
     replicate = choice([i for i in range(10) if i != st.session_state.replicate])
-    st.session_state.data = load_data(st.session_state.project_count, replicate)
+    load_data(st.session_state.project_count, replicate)
 
 
 def handle_play_click():
@@ -27,12 +27,9 @@ def handle_play_click():
         reload()
 
 
-def load_data(project_count, rep):
-
+def unpickle(file_path):
     try:
-        with open(
-                'data/projects_per_timestep_%d/basin_w_flex/model_vars_rep_%d.pickle' % (project_count, rep), 'rb'
-        ) as ifile:
+        with open(file_path, 'rb') as ifile:
 
             df = pickle.load(ifile)
             df['time'] = df.index
@@ -42,9 +39,15 @@ def load_data(project_count, rep):
 
     except FileNotFoundError:
         st.error("Sorry, we do not currently have data for that parameter combination. "
-                 "Please change your parameter selection."
-                 'data/projects_per_timestep_%d/basin_w_flex/model_vars_rep_%d.pickle' % (project_count, rep))
+                 "Please change your parameter selection. (%s)" % file_path)
         return None
+
+
+def load_data(project_count, rep):
+
+    st.session_state.data = unpickle(
+        'data/projects_per_timestep_%d/basin_w_flex/model_vars_rep_%d.pickle' % (project_count, rep)
+    )
 
 
 class TimeSeriesPlot:
@@ -137,7 +140,7 @@ def page_code():
     )
 
     if 'data' not in st.session_state:
-        st.session_state.data = load_data(
+        load_data(
             project_count=st.session_state.project_count,
             rep=st.session_state.replicate
         )
