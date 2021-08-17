@@ -49,13 +49,19 @@ def load_data(project_count, rep):
 
 class TimeSeriesPlot:
 
-    def __init__(self, selection, domain_colours):
+    def __init__(self, column_selection, domain_colours, axis_scrolling):
 
-        self.domain = [s for s in selection]
+        self.domain = [s for s in column_selection]
         self.range_ = [domain_colours[d] for d in self.domain]
-        self.plot_series = ['time'] + [s for s in selection]
+        self.plot_series = ['time'] + [s for s in column_selection]
         # note: updating 'selection' was messing with the contents of the slider variables
         # hence creation of a new list 'plot_series'
+
+        _x = (
+            alt.X('time', axis=alt.Axis(title='timestep'))
+            if axis_scrolling else
+            alt.X('time', axis=alt.Axis(title='timestep'), scale=alt.Scale(domain=[0, 100]))
+        )
 
         self.chart = st.altair_chart(
             alt.Chart(
@@ -63,7 +69,7 @@ class TimeSeriesPlot:
                     0:st.session_state.global_time,
                     self.plot_series
                 ].melt('time')).mark_line().encode(
-                x=alt.X('time', axis=alt.Axis(title='timestep')),
+                x=_x,
                 y=alt.Y('value', axis=alt.Axis(title='number of projects')),
                 color=alt.Color('variable', scale=alt.Scale(domain=self.domain, range=self.range_))
             ),
@@ -129,10 +135,16 @@ def page_code():
         options=list(domain_colours),
         default=list(domain_colours)
     )
+    # Note: to change button colour and style...
+    # https://discuss.streamlit.io/t/how-to-change-the-backgorund-color-of-button-widget/12103/10
+    axis_scrolling = st.checkbox(
+        label='Toggle axis scrolling',
+        value=True
+    )
 
     if st.session_state.data is not None:
 
-        project_plot = TimeSeriesPlot(selection, domain_colours)
+        project_plot = TimeSeriesPlot(selection, domain_colours, axis_scrolling)
 
         if st.session_state.playing:
             start = st.session_state.global_time + 1
