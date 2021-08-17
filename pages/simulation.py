@@ -49,7 +49,9 @@ def load_data(project_count, rep):
 
 class TimeSeriesPlot:
 
-    def __init__(self, column_names, column_colours, plot_name=None):
+    def __init__(self, column_names, column_colours, plot_name, y_label):
+
+        st.header(plot_name)
 
         domain_colours = dict(zip(
             column_names,
@@ -66,7 +68,8 @@ class TimeSeriesPlot:
         # https://discuss.streamlit.io/t/how-to-change-the-backgorund-color-of-button-widget/12103/10
         axis_scrolling = st.checkbox(
             label='Axis scrolling',
-            value=True
+            value=True,
+            key=plot_name + "_checkbox"
         )
 
         self.domain = [s for s in column_selection]
@@ -88,7 +91,7 @@ class TimeSeriesPlot:
                     self.plot_series
                 ].melt('time')).mark_line().encode(
                 x=_x,
-                y=alt.Y('value', axis=alt.Axis(title='number of projects')),
+                y=alt.Y('value', axis=alt.Axis(title=y_label)),
                 color=alt.Color('variable', scale=alt.Scale(domain=self.domain, range=self.range_))
             ),
             use_container_width=True
@@ -152,9 +155,53 @@ def page_code():
 
     if st.session_state.data is not None:
 
+        active_plot = TimeSeriesPlot(
+            column_names=['ActiveProjects'],
+            column_colours=['blue'],
+            plot_name='Active Project Count',
+            y_label='number of projects'
+        )
+
         project_plot = TimeSeriesPlot(
             column_names=['SuccessfulProjects', 'FailedProjects', 'NullProjects'],
-            column_colours=['green', 'red', 'orange']
+            column_colours=['green', 'red', 'orange'],
+            plot_name='Project Plot',
+            y_label='number of projects'
+        )
+
+        worker_plot = TimeSeriesPlot(
+            column_names=['WorkersOnProjects', 'WorkersWithoutProjects', 'WorkersOnTraining'],
+            column_colours=['green', 'red', 'orange'],
+            plot_name='Worker Plot',
+            y_label='Number of workers'
+        )
+
+        load_plot = TimeSeriesPlot(
+            column_names=['ProjectLoad', 'TrainingLoad', 'DeptLoad', 'Slack'],
+            column_colours=['green', 'orange', 'red', 'blue'],
+            plot_name='Load Plot',
+            y_label='Fraction of capacity'
+        )
+
+        ovr_plot = TimeSeriesPlot(
+            column_names=['AverageWorkerOvr', 'AverageTeamOvr'],
+            column_colours=['green', 'blue'],
+            plot_name='OVR Plot',
+            y_label='OVR'
+        )
+
+        success_plot = TimeSeriesPlot(
+            column_names=['RecentSuccessRate', 'AverageSuccessProbability'],
+            column_colours=['green', 'blue'],
+            plot_name='Success Plot',
+            y_label='Rate / Probability'
+        )
+
+        turnover_plot = TimeSeriesPlot(
+            column_names=['WorkerTurnover', 'ProjectsPerWorker', 'AverageTeamSize'],
+            column_colours=['red', 'green', 'blue'],
+            plot_name='Turnover Plot',
+            y_label='Count'
         )
 
         if st.session_state.playing:
@@ -162,7 +209,14 @@ def page_code():
 
             for t in range(start, 100):
 
+                active_plot.update(t)
                 project_plot.update(t)
+                worker_plot.update(t)
+                ovr_plot.update(t)
+                load_plot.update(t)
+                success_plot.update(t)
+                turnover_plot.update(t)
+
                 time.sleep(0.2 / speed)
                 st.session_state.global_time += 1
 
