@@ -36,6 +36,7 @@ def load_data(project_count, rep):
 
             df = pickle.load(ifile)
             df['time'] = df.index
+            print(df.columns)
 
         return df
 
@@ -44,6 +45,36 @@ def load_data(project_count, rep):
                  "Please change your parameter selection."
                  'data/projects_per_timestep_%d/basin_w_flex/model_vars_rep_%d.pickle' % (project_count, rep))
         return None
+
+
+class TimeSeriesPlot:
+
+    def __init__(self, selection, domain_colours):
+
+        self.domain = [s for s in selection]
+        self.range_ = [domain_colours[d] for d in self.domain]
+        self.plot_series = ['time'] + [s for s in selection]
+        # note: updating 'selection' was messing with the contents of the slider variables
+        # hence creation of a new list 'plot_series'
+
+        self.chart = st.altair_chart(
+            alt.Chart(
+                st.session_state.data.loc[
+                    0:st.session_state.global_time,
+                    self.plot_series
+                ].melt('time')).mark_line().encode(
+                x=alt.X('time', axis=alt.Axis(title='timestep')),
+                y=alt.Y('value', axis=alt.Axis(title='number of projects')),
+                color=alt.Color('variable', scale=alt.Scale(domain=self.domain, range=self.range_))
+            ),
+            use_container_width=True
+        )
+
+    def update(self, timestep):
+
+        self.chart.add_rows(
+            st.session_state.data.loc[timestep:timestep, self.plot_series].melt('time')
+        )
 
 
 def page_code():
@@ -101,34 +132,14 @@ def page_code():
 
     if st.session_state.data is not None:
 
-        domain = [s for s in selection]
-        range_ = [domain_colours[d] for d in domain]
-        plot_series = ['time'] + [s for s in selection]
-        # note: updating 'selection' was messing with the contents of the slider variables
-        # hence creation of a new list 'plot_series'
-
-        chart = st.altair_chart(
-            alt.Chart(
-                st.session_state.data.loc[
-                    0:st.session_state.global_time,
-                    plot_series
-                ].melt('time')).mark_line().encode(
-                    x=alt.X('time', axis=alt.Axis(title='timestep')),
-                    y=alt.Y('value', axis=alt.Axis(title='number of projects')),
-                    color=alt.Color('variable', scale=alt.Scale(domain=domain, range=range_))
-            ),
-            use_container_width=True
-        )
+        project_plot = TimeSeriesPlot(selection, domain_colours)
 
         if st.session_state.playing:
             start = st.session_state.global_time + 1
 
             for t in range(start, 100):
 
-                if chart is not None:
-                    chart.add_rows(
-                        st.session_state.data.loc[t:t, plot_series].melt('time')
-                    )
+                project_plot.update(t)
                 time.sleep(0.2 / speed)
                 st.session_state.global_time += 1
 
