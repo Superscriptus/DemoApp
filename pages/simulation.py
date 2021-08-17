@@ -49,7 +49,25 @@ def load_data(project_count, rep):
 
 class TimeSeriesPlot:
 
-    def __init__(self, column_selection, domain_colours, axis_scrolling):
+    def __init__(self, column_names, column_colours, plot_name=None):
+
+        domain_colours = dict(zip(
+            column_names,
+            column_colours
+        ))
+
+        column_selection = st.multiselect(
+            label='Select series to plot:',
+            options=list(domain_colours),
+            default=list(domain_colours)
+        )
+
+        # Note: to change button colour and style...
+        # https://discuss.streamlit.io/t/how-to-change-the-backgorund-color-of-button-widget/12103/10
+        axis_scrolling = st.checkbox(
+            label='Axis scrolling',
+            value=True
+        )
 
         self.domain = [s for s in column_selection]
         self.range_ = [domain_colours[d] for d in self.domain]
@@ -89,7 +107,13 @@ def page_code():
         st.session_state.replicate = 0
 
     st.title("Simulation")
-    st.write("This tab will show animation of a simulation (approximately like running the Mesa server).")
+    st.write("This page will show animation of a simulation (approximately like running the Mesa server).")
+    st.write("Below, you can explore all the available columns in the data by selecting which ones to visualise "
+             "on each plot. We can then choose which ones we want to keep in the finished product. " 
+             "All of these variables are available for each of the simulations that we ran. The "
+             "simulation will be selected by choosing the parameters in the sidebar (currently just number of projects,"
+             " but we will add skill_decay etc).")
+    st.write("You can vary the axis scrolling behaviour for each plot by toggling the 'Axis Scrolling' checkbox.")
 
     speed = st.sidebar.slider(
             "Set simulation speed:",
@@ -126,25 +150,12 @@ def page_code():
         on_click=handle_play_click
     )
 
-    domain_colours = dict(zip(
-        ['SuccessfulProjects', 'FailedProjects', 'NullProjects'],
-        ['green', 'red', 'orange']
-    ))
-    selection = st.multiselect(
-        label='Select series to plot:',
-        options=list(domain_colours),
-        default=list(domain_colours)
-    )
-    # Note: to change button colour and style...
-    # https://discuss.streamlit.io/t/how-to-change-the-backgorund-color-of-button-widget/12103/10
-    axis_scrolling = st.checkbox(
-        label='Toggle axis scrolling',
-        value=True
-    )
-
     if st.session_state.data is not None:
 
-        project_plot = TimeSeriesPlot(selection, domain_colours, axis_scrolling)
+        project_plot = TimeSeriesPlot(
+            column_names=['SuccessfulProjects', 'FailedProjects', 'NullProjects'],
+            column_colours=['green', 'red', 'orange']
+        )
 
         if st.session_state.playing:
             start = st.session_state.global_time + 1
