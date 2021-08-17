@@ -48,6 +48,12 @@ def load_data(project_count, rep):
     st.session_state.data = unpickle(
         'data/projects_per_timestep_%d/basin_w_flex/model_vars_rep_%d.pickle' % (project_count, rep)
     )
+    # st.session_state.worker_data = unpickle(
+    #     'data/projects_per_timestep_%d/basin_w_flex/agents_vars_rep_%d.pickle' % (project_count, rep)
+    # )
+    # st.session_state.project_data = unpickle(
+    #     'data/projects_per_timestep_%d/basin_w_flex/projects_table_rep_%d.pickle' % (project_count, rep)
+    # )
 
 
 class TimeSeriesPlot:
