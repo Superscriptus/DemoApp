@@ -52,9 +52,14 @@ def unpickle(file_path):
 
 def load_data(project_count, dept_workload, rep):
 
+    optimiser_dict = dict(zip(
+        ['Random', 'Optimised', 'Flexible start time'],
+        ['Random', 'Basin', 'Basin_w_flex']
+    ))
+
     sub_dir = "pps_%d_dwl_%.1f_budget_%d_sd_%.3f_train_%.1f" % (project_count, dept_workload, 1, 0.99, 0.1)
     st.session_state.data = unpickle(
-        "data/" + sub_dir + "/Basin_w_flex/model_vars_rep_%d.pickle" % rep
+        "data/" + sub_dir + "/%s/model_vars_rep_%d.pickle" % (optimiser_dict[st.session_state.team_allocation], rep)
     )
     # st.session_state.worker_data = unpickle(
     #     'data/projects_per_timestep_%d/basin_w_flex/agents_vars_rep_%d.pickle' % (project_count, rep)
@@ -144,6 +149,13 @@ def page_code():
 
     if 'project_count' not in st.session_state:
         st.session_state.project_count = 2
+
+    team_allocation = st.sidebar.radio(
+        "Team allocation method:",
+        options=['Random', 'Optimised', 'Flexible start time'],
+        key='team_allocation',
+        on_change=reload
+    )
 
     # Note: 'key' links the widget to session state variable of same name. This is not documented behaviour?!
     project_count = st.sidebar.radio(

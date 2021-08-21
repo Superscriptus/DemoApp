@@ -6,6 +6,7 @@ usage:  python data_transfer.py <path_to_simulation_io>
 
 Note: currently only model_vars files are retained (more granular agent, project and network data are stripped out).
 Note: this also limits the number of replicate simulations to 10 by default (can reduce to save space).
+NOte: train = 2 encodes the 'training boost' scenario
 """
 
 import os
