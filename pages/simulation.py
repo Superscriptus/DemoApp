@@ -1,3 +1,9 @@
+# TODO: - refactor sidebar logic into a class
+#       - write script for copying data files from main SuperScript repo (folder names to include all parameter values)
+#       - download main superscript repo (temporarily) and check data files size
+#       - test on ipad
+#       - run new simulations (check github issues first)
+
 import streamlit as st
 import altair as alt
 import time
@@ -16,7 +22,7 @@ def reload():
 
     st.session_state.global_time = 0
     replicate = choice([i for i in range(10) if i != st.session_state.replicate])
-    load_data(st.session_state.project_count, replicate)
+    load_data(st.session_state.project_count, st.session_state.dept_workload, replicate)
 
 
 def handle_play_click():
@@ -43,10 +49,11 @@ def unpickle(file_path):
         return None
 
 
-def load_data(project_count, rep):
+def load_data(project_count, dept_workload, rep):
 
+    sub_dir = "pps_%d_dwl_%.1f_budget_%d_sd_%.3f_train_%.1f" % (project_count, dept_workload, 1, 0.99, 0.1)
     st.session_state.data = unpickle(
-        'data/projects_per_timestep_%d/basin_w_flex/model_vars_rep_%d.pickle' % (project_count, rep)
+        "data/" + sub_dir + "/Basin_w_flex/model_vars_rep_%d.pickle" % rep
     )
     # st.session_state.worker_data = unpickle(
     #     'data/projects_per_timestep_%d/basin_w_flex/agents_vars_rep_%d.pickle' % (project_count, rep)
@@ -145,9 +152,20 @@ def page_code():
         on_change=reload
     )
 
+    if 'dept_workload' not in st.session_state:
+        st.session_state.dept_workload = 0.1
+
+    dept_workload = st.sidebar.radio(
+        "Departmental workload:",
+        options=[0.1, 0.3],
+        key='dept_workload',
+        on_change=reload
+    )
+
     if 'data' not in st.session_state:
         load_data(
             project_count=st.session_state.project_count,
+            dept_workload=st.session_state.dept_workload,
             rep=st.session_state.replicate
         )
 
