@@ -3,6 +3,7 @@
 #       - download main superscript repo (temporarily) and check data files size
 #       - test on ipad
 #       - run new simulations (check github issues first)
+#       - replace TRAIN_OFF simulation directory on github (only contains one replicate)
 
 import streamlit as st
 import altair as alt
