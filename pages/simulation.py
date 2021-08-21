@@ -1,7 +1,7 @@
 # TODO: - refactor sidebar logic into a class
-#       - write script for copying data files from main SuperScript repo (folder names to include all parameter values)
 #       - download main superscript repo (temporarily) and check data files size
 #       - test on ipad
+#       - pass variable descriptions to plot function (from config file)
 #       - run new simulations (check github issues first)
 #       - replace TRAIN_OFF simulation directory on github (only contains one replicate)
 
@@ -106,18 +106,21 @@ class TimeSeriesPlot:
             alt.X('time', axis=alt.Axis(title='timestep'), scale=alt.Scale(domain=[0, 100]))
         )
 
-        self.chart = st.altair_chart(
-            alt.Chart(
-                st.session_state.data.loc[
-                    0:st.session_state.global_time,
-                    self.plot_series
-                ].melt('time')).mark_line().encode(
-                x=_x,
-                y=alt.Y('value', axis=alt.Axis(title=y_label)),
-                color=alt.Color('variable', scale=alt.Scale(domain=self.domain, range=self.range_))
-            ),
-            use_container_width=True
+        base = alt.Chart(
+            st.session_state.data.loc[
+                0:st.session_state.global_time,
+                self.plot_series
+            ].melt('time')
         )
+        points = base.mark_point(filled=True, size=40)
+        line = base.mark_line()
+        chart = (line + points).encode(
+            x=_x,
+            y=alt.Y('value', axis=alt.Axis(title=y_label)),
+            color=alt.Color('variable', scale=alt.Scale(domain=self.domain, range=self.range_)),
+            tooltip=['variable']
+        )
+        self.chart = st.altair_chart(chart, use_container_width=True)
 
     def update(self, timestep):
 
@@ -154,7 +157,11 @@ def page_code():
         "Team allocation method:",
         options=['Random', 'Optimised', 'Flexible start time'],
         key='team_allocation',
-        on_change=reload
+        on_change=reload,
+        help="The method used for allocating a team of workers to each project.  \n"
+             "* Random: randomly assigned team.  \n"
+             "* Optimised: success probability optimised using basin-hopping algorithm.  \n"
+             "* Flexible start time: same as _Optimised_ but with flexible project start time."
     )
 
     # Note: 'key' links the widget to session state variable of same name. This is not documented behaviour?!
