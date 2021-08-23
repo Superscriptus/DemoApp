@@ -142,25 +142,14 @@ class TimeSeriesPlot:
         )
 
 
-def page_code():
-
-    if 'replicate' not in st.session_state:
-        st.session_state.replicate = 0
-
-    st.title("Simulation")
-    st.write("This page will show animation of a simulation (approximately like running the Mesa server).")
-    st.write("Below, you can explore all the available columns in the data by selecting which ones to visualise "
-             "on each plot. We can then choose which ones we want to keep in the finished product. " 
-             "All of these variables are available for each of the simulations that we ran. The "
-             "simulation will be selected by choosing the parameters in the sidebar (currently just number of projects,"
-             " but we will add skill_decay etc).")
-    st.write("You can vary the axis scrolling behaviour for each plot by toggling the 'Axis Scrolling' checkbox.")
+def create_sidebar_controls():
 
     speed = st.sidebar.slider(
             "Set simulation speed:",
             min_value=1,
             max_value=10,
             value=5,
+            key='speed'
         )
 
     if 'project_count' not in st.session_state:
@@ -178,7 +167,7 @@ def page_code():
     )
 
     # Note: 'key' links the widget to session state variable of same name. This is not documented behaviour?!
-    project_count = st.sidebar.radio(
+    project_count = st.sidebar.selectbox(
         "Number of new projects created each time step:",
         options=[1, 2, 3, 5, 10],
         key='project_count',
@@ -193,6 +182,17 @@ def page_code():
         options=[0.1, 0.3],
         key='dept_workload',
         on_change=reload
+    )
+
+    if 'skill_decay' not in st.session_state:
+        st.session_state.skill_decay = 0.99
+
+    skill_decay = st.sidebar.radio(
+        "Skill decay:",
+        options=[0.950, 0.990, 0.995],
+        key='skill_decay',
+        on_change=reload,
+        format_func=lambda x: '%.3f' % x
     )
 
     if 'data' not in st.session_state:
@@ -212,6 +212,23 @@ def page_code():
         play_label(st.session_state.playing),
         on_click=handle_play_click
     )
+
+
+def page_code():
+
+    if 'replicate' not in st.session_state:
+        st.session_state.replicate = 0
+
+    st.title("Simulation")
+    st.write("This page will show animation of a simulation (approximately like running the Mesa server).")
+    st.write("Below, you can explore all the available columns in the data by selecting which ones to visualise "
+             "on each plot. We can then choose which ones we want to keep in the finished product. " 
+             "All of these variables are available for each of the simulations that we ran. The "
+             "simulation will be selected by choosing the parameters in the sidebar (currently just number of projects,"
+             " but we will add skill_decay etc).")
+    st.write("You can vary the axis scrolling behaviour for each plot by toggling the 'Axis Scrolling' checkbox.")
+
+    create_sidebar_controls()
 
     if st.session_state.data is not None:
 
@@ -277,7 +294,7 @@ def page_code():
                 success_plot.update(t)
                 turnover_plot.update(t)
 
-                time.sleep(0.2 / speed)
+                time.sleep(0.2 / st.session_state.speed)
                 st.session_state.global_time += 1
 
                 if t == 99:
