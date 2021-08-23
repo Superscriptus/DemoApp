@@ -153,6 +153,7 @@ class TimeSeriesPlot:
 
 def create_sidebar_controls():
 
+    st.sidebar.subheader("Simulation parameter selection")
     speed = st.sidebar.slider(
             "Set simulation speed:",
             min_value=1,
@@ -190,7 +191,7 @@ def create_sidebar_controls():
             help="Budgetary constraint on/off."
         )
 
-    row_1 = st.sidebar.beta_columns([1, 1])
+    row_1 = st.sidebar.beta_columns([1, 2])
 
     with row_1[0]:
         # Note: 'key' links the widget to session state variable of same name. This is not documented behaviour?!
@@ -212,18 +213,21 @@ def create_sidebar_controls():
             max_value=0.3,
             step=0.2,
             key='dept_workload',
-            on_change=reload
+            on_change=reload,
+            help='Fraction of capacity that must be keep free to meet departmental workload.'
         )
 
     if 'skill_decay' not in st.session_state:
         st.session_state.skill_decay = 0.99
 
-    skill_decay = st.sidebar.selectbox(
+    skill_decay = st.sidebar.radio(
         "Skill decay:",
         options=[0.950, 0.990, 0.995],
         key='skill_decay',
         on_change=reload,
-        format_func=lambda x: '%.3f' % x
+        format_func=lambda x: '%.3f' % x,
+        help="The multiplicative decay of worker unused hard skills.  \n"
+             "_Note: a lower value means faster decay._"
     )
 
     if 'train_load' not in st.session_state:
@@ -234,7 +238,9 @@ def create_sidebar_controls():
         options=[0.0, 0.1, 0.3, 2.0],
         key='train_load',
         on_change=reload,
-        format_func=lambda x: '%.1f' % x if x < 2 else 'Boost'
+        format_func=lambda x: '%.1f' % x if x < 2 else 'Boost',
+        help="Fraction of workforce that should be in training for any timestep.  \n"
+             "_Note: this cannot always be met if their is insufficient slack._"
     )
 
     if 'data' not in st.session_state:
