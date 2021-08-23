@@ -15,11 +15,16 @@ class Application:
         page_code for the selected page.
         """
 
+        if 'config' not in st.session_state:
+            from config import Config
+            st.session_state.config = Config()
+
         st.sidebar.image('images/logo.png', use_column_width=True)
         st.sidebar.header('Simulation engine for a social teamwork game.')
         selected_page = st.sidebar.selectbox(
             'App Navigation',
-            [*self.pages.keys()]
+            [*self.pages.keys()],
+            help="Select page to view."
         )
 
         self.pages[selected_page].page_code()
