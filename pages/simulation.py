@@ -61,6 +61,7 @@ def load_data(project_count, dept_workload, rep):
     st.session_state.data = unpickle(
         "data/" + sub_dir + "/%s/model_vars_rep_%d.pickle" % (optimiser_dict[st.session_state.team_allocation], rep)
     )
+
     # st.session_state.worker_data = unpickle(
     #     'data/projects_per_timestep_%d/basin_w_flex/agents_vars_rep_%d.pickle' % (project_count, rep)
     # )
@@ -106,26 +107,38 @@ class TimeSeriesPlot:
             alt.X('time', axis=alt.Axis(title='timestep'), scale=alt.Scale(domain=[0, 100]))
         )
 
-        base = alt.Chart(
-            st.session_state.data.loc[
-                0:st.session_state.global_time,
-                self.plot_series
-            ].melt('time')
-        )
+        chart_data = st.session_state.data.loc[
+                         0:st.session_state.global_time,
+                         self.plot_series
+                     ].melt('time')
+
+        chart_data['description'] = [
+            st.session_state.config.simulation_variables.get(v, '(undefined)')
+            for v in chart_data.variable
+        ]
+
+        base = alt.Chart(chart_data)
         points = base.mark_point(filled=True, size=40)
         line = base.mark_line()
+
         chart = (line + points).encode(
             x=_x,
             y=alt.Y('value', axis=alt.Axis(title=y_label)),
             color=alt.Color('variable', scale=alt.Scale(domain=self.domain, range=self.range_)),
-            tooltip=['variable']
+            tooltip=['description']
         )
         self.chart = st.altair_chart(chart, use_container_width=True)
 
     def update(self, timestep):
 
+        chart_data = st.session_state.data.loc[timestep:timestep, self.plot_series].melt('time')
+
+        chart_data['description'] = [
+            st.session_state.config.simulation_variables.get(v, '(undefined)')
+            for v in chart_data.variable
+        ]
         self.chart.add_rows(
-            st.session_state.data.loc[timestep:timestep, self.plot_series].melt('time')
+            chart_data
         )
 
 
