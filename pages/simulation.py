@@ -1,4 +1,8 @@
 # TODO: - refactor sidebar logic into a class
+#       - refactor preset logic into a class
+#       - select presets -> change sidebar widget default values
+#       - change parameter values -> preset not active. Change page header.
+#       - bespoke preset button with conditional formatting
 #       - download main superscript repo (temporarily) and check data files size
 #       - test on ipad
 #       - pass variable descriptions to plot function (from config file)
@@ -19,7 +23,10 @@ def play_label(playing):
         return 'Play simulation'
 
 
-def reload():
+def reload(remove_preset=False):
+
+    if remove_preset:
+        deactivate_preset()
 
     st.session_state.global_time = 0
     replicate = choice([i for i in range(10) if i != st.session_state.replicate])
@@ -151,12 +158,46 @@ class TimeSeriesPlot:
         )
 
 
-def create_preset_button(layout_element, label):
+def deactivate_preset():
+    st.session_state.preset_active = False
+
+
+def preset_label(value):
+    if (
+            "preset" in st.session_state
+            and "preset_active" in st.session_state
+            and st.session_state.preset == value
+            and st.session_state.preset_active
+    ):
+        return "!"
+    else:
+        return value
+
+
+def create_preset_button(layout_element, value):
 
     with layout_element:
         preset_a = st.button(
-            label=label
+            label=preset_label(value),
+            key=value,
+            on_click=set_preset,
+            args=value
         )
+
+
+def set_preset(value):
+    st.session_state.preset = value
+    st.session_state.preset_active = True
+
+
+def get_preset_names(value):
+    preset_dict = {
+        'A': 'The Overcommitted Organization',
+        'B': 'The Undercommitted Organization',
+        'C': 'The Emergent Organization',
+        'D': 'The Rigid Organization',
+    }
+    return preset_dict[value]
 
 
 def create_sidebar_controls():
@@ -171,12 +212,11 @@ def create_sidebar_controls():
         )
 
     st.sidebar.write("Select parameter presets:")
-    row_presets_1 = st.sidebar.beta_columns([1, 1])
-    row_presets_2 = st.sidebar.beta_columns([1, 1])
-    create_preset_button(row_presets_1[0], "A: Overcommitted")
-    create_preset_button(row_presets_1[1], "B: Undercommitted")
-    create_preset_button(row_presets_2[0], "C: Emergent Organization")
-    create_preset_button(row_presets_2[1], "D: Rigid Organization")
+    row_presets = st.sidebar.beta_columns([1, 1, 1, 1])
+    create_preset_button(row_presets[0], "A")
+    create_preset_button(row_presets[1], "B")
+    create_preset_button(row_presets[2], "C")
+    create_preset_button(row_presets[3], "D")
 
     st.sidebar.write("Set value for all parameters:")
     with st.sidebar.beta_expander("Expand for full parameter control"):
@@ -193,6 +233,7 @@ def create_sidebar_controls():
                 options=['Random', 'Optimised', 'Flexible start time'],
                 key='team_allocation',
                 on_change=reload,
+                args=(True,),
                 help="The method used for allocating a team of workers to each project.  \n"
                      "* Random: randomly assigned team.  \n"
                      "* Optimised: success probability optimised using basin-hopping algorithm.  \n"
@@ -205,6 +246,7 @@ def create_sidebar_controls():
                 options=[True, False],
                 key='budget_func',
                 on_change=reload,
+                args=(True,),
                 format_func=lambda x: 'On' if x else 'Off',
                 help="Budgetary constraint on/off."
             )
@@ -218,6 +260,7 @@ def create_sidebar_controls():
                 options=[1, 2, 3, 5, 10],
                 key='project_count',
                 on_change=reload,
+                args=(True,),
                 help="Number of new projects created each time step:"
             )
 
@@ -232,6 +275,7 @@ def create_sidebar_controls():
                 step=0.2,
                 key='dept_workload',
                 on_change=reload,
+                args=(True,),
                 help='Fraction of capacity that must be keep free to meet departmental workload.'
             )
 
@@ -243,6 +287,7 @@ def create_sidebar_controls():
             options=[0.950, 0.990, 0.995],
             key='skill_decay',
             on_change=reload,
+            args=(True,),
             format_func=lambda x: '%.3f' % x,
             help="The multiplicative decay of worker unused hard skills.  \n"
                  "_Note: a lower value means faster decay._"
@@ -256,6 +301,7 @@ def create_sidebar_controls():
             options=[0.0, 0.1, 0.3, 2.0],
             key='train_load',
             on_change=reload,
+            args=(True,),
             format_func=lambda x: '%.1f' % x if x < 2 else 'Boost',
             help="Fraction of workforce that should be in training for any timestep.  \n"
                  "_Note: this cannot always be met if their is insufficient slack._"
@@ -288,14 +334,20 @@ def page_code():
     if 'replicate' not in st.session_state:
         st.session_state.replicate = 0
 
+    if 'preset_active' not in st.session_state:
+        st.session_state.preset_active = False
+
     st.title("Simulation")
-    st.write("This page will show animation of a simulation (approximately like running the Mesa server).")
-    st.write("Below, you can explore all the available columns in the data by selecting which ones to visualise "
-             "on each plot. We can then choose which ones we want to keep in the finished product. " 
-             "All of these variables are available for each of the simulations that we ran. The "
-             "simulation will be selected by choosing the parameters in the sidebar (currently just number of projects,"
-             " but we will add skill_decay etc).")
-    st.write("You can vary the axis scrolling behaviour for each plot by toggling the 'Axis Scrolling' checkbox.")
+
+    if st.session_state.preset_active:
+        st.subheader(
+            "Using parameter preset %s: %s" % (
+                st.session_state.preset,
+                get_preset_names(st.session_state.preset)
+            )
+        )
+
+    st.write("A short description of this preset and how to navigate/interpret the plots below...")
 
     create_sidebar_controls()
 
