@@ -1,5 +1,5 @@
 # TODO: - refactor sidebar logic into a class
-#       - download main superscript repo (temporarily) and check data files size
+#       - download main superscript repo (temporarily) and check data.bak files size
 #       - test on ipad
 #       - pass variable descriptions to plot function (from config file)
 #       - run new simulations (check github issues first)
@@ -51,7 +51,7 @@ def unpickle(file_path):
         return df
 
     except FileNotFoundError:
-        st.error("Sorry, we do not currently have data for that parameter combination. "
+        st.error("Sorry, we do not currently have data.bak for that parameter combination. "
                  "Please change your parameter selection. (%s)" % file_path)
         return None
 
@@ -68,14 +68,14 @@ def load_data(project_count, dept_workload, budget_func, skill_decay, train_load
             % (project_count, dept_workload, budget_func, skill_decay, train_load)
     )
     st.session_state.data = unpickle(
-        "data/" + sub_dir + "/%s/model_vars_rep_%d.pickle" % (optimiser_dict[st.session_state.team_allocation], rep)
+        "data.bak/" + sub_dir + "/%s/model_vars_rep_%d.pickle" % (optimiser_dict[st.session_state.team_allocation], rep)
     )
 
     # st.session_state.worker_data = unpickle(
-    #     'data/projects_per_timestep_%d/basin_w_flex/agents_vars_rep_%d.pickle' % (project_count, rep)
+    #     'data.bak/projects_per_timestep_%d/basin_w_flex/agents_vars_rep_%d.pickle' % (project_count, rep)
     # )
     # st.session_state.project_data = unpickle(
-    #     'data/projects_per_timestep_%d/basin_w_flex/projects_table_rep_%d.pickle' % (project_count, rep)
+    #     'data.bak/projects_per_timestep_%d/basin_w_flex/projects_table_rep_%d.pickle' % (project_count, rep)
     # )
 
 
@@ -243,7 +243,7 @@ def create_sidebar_controls():
              "_Note: this cannot always be met if their is insufficient slack._"
     )
 
-    if 'data' not in st.session_state:
+    if 'data.bak' not in st.session_state:
         load_data(
             project_count=st.session_state.project_count,
             dept_workload=st.session_state.dept_workload,
@@ -272,7 +272,7 @@ def page_code():
 
     st.title("Simulation")
     st.write("This page will show animation of a simulation (approximately like running the Mesa server).")
-    st.write("Below, you can explore all the available columns in the data by selecting which ones to visualise "
+    st.write("Below, you can explore all the available columns in the data.bak by selecting which ones to visualise "
              "on each plot. We can then choose which ones we want to keep in the finished product. " 
              "All of these variables are available for each of the simulations that we ran. The "
              "simulation will be selected by choosing the parameters in the sidebar (currently just number of projects,"

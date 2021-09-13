@@ -4,7 +4,7 @@ Configuration file for application.
 Config is loaded and stored in the session state.
 
 Contents:
-    'simulation_variables' : definitions of coarse variables from model_vars data files, that are displayed
+    'simulation_variables' : definitions of coarse variables from model_vars data.bak files, that are displayed
                              on the simulation page.
 """
 
