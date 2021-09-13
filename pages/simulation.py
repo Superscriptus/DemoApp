@@ -1,5 +1,6 @@
-# TODO: - refactor sidebar logic into a class
-#       - download main superscript repo (temporarily) and check data.bak files size
+# TODO: - fix replicate choice so it choose from how ever many are present in the data dir
+#       - refactor sidebar logic into a class
+#       - download main superscript repo (temporarily) and check data files size
 #       - test on ipad
 #       - pass variable descriptions to plot function (from config file)
 #       - run new simulations (check github issues first)
@@ -22,7 +23,7 @@ def play_label(playing):
 def reload():
 
     st.session_state.global_time = 0
-    replicate = choice([i for i in range(10) if i != st.session_state.replicate])
+    replicate = 0  # choice([i for i in range(10) if i != st.session_state.replicate])
     load_data(
         st.session_state.project_count,
         st.session_state.dept_workload,
@@ -51,7 +52,7 @@ def unpickle(file_path):
         return df
 
     except FileNotFoundError:
-        st.error("Sorry, we do not currently have data.bak for that parameter combination. "
+        st.error("Sorry, we do not currently have data for that parameter combination. "
                  "Please change your parameter selection. (%s)" % file_path)
         return None
 
@@ -63,19 +64,29 @@ def load_data(project_count, dept_workload, budget_func, skill_decay, train_load
         ['Random', 'Basin', 'Basin_w_flex']
     ))
 
+    training_load = 0.1 if train_load == 2.0 else train_load
+    training_boost = True if train_load == 2.0 else False
+    training_flag = False if train_load == 0.0 else True
     sub_dir = (
-            "pps_%d_dwl_%.1f_budget_%d_sd_%.3f_train_%.1f"
-            % (project_count, dept_workload, budget_func, skill_decay, train_load)
+            'pps_%d_sd_%.3f_dw_%.1f_tl_%.1f_tf_%d_tb_%d_bf_%d_010921_v1.1'
+            % (
+                project_count, skill_decay, dept_workload,
+                training_load, training_flag, training_boost, budget_func
+            )
     )
+    #     (
+    #         "pps_%d_dwl_%.1f_budget_%d_sd_%.3f_train_%.1f"
+    #         % (project_count, dept_workload, budget_func, skill_decay, train_load)
+    # )
     st.session_state.data = unpickle(
-        "data.bak/" + sub_dir + "/%s/model_vars_rep_%d.pickle" % (optimiser_dict[st.session_state.team_allocation], rep)
+        "data/" + sub_dir + "/%s/model_vars_rep_%d.pickle" % (optimiser_dict[st.session_state.team_allocation], rep)
     )
 
     # st.session_state.worker_data = unpickle(
-    #     'data.bak/projects_per_timestep_%d/basin_w_flex/agents_vars_rep_%d.pickle' % (project_count, rep)
+    #     'data/projects_per_timestep_%d/basin_w_flex/agents_vars_rep_%d.pickle' % (project_count, rep)
     # )
     # st.session_state.project_data = unpickle(
-    #     'data.bak/projects_per_timestep_%d/basin_w_flex/projects_table_rep_%d.pickle' % (project_count, rep)
+    #     'data/projects_per_timestep_%d/basin_w_flex/projects_table_rep_%d.pickle' % (project_count, rep)
     # )
 
 
@@ -243,7 +254,7 @@ def create_sidebar_controls():
              "_Note: this cannot always be met if their is insufficient slack._"
     )
 
-    if 'data.bak' not in st.session_state:
+    if 'data' not in st.session_state:
         load_data(
             project_count=st.session_state.project_count,
             dept_workload=st.session_state.dept_workload,
@@ -272,7 +283,7 @@ def page_code():
 
     st.title("Simulation")
     st.write("This page will show animation of a simulation (approximately like running the Mesa server).")
-    st.write("Below, you can explore all the available columns in the data.bak by selecting which ones to visualise "
+    st.write("Below, you can explore all the available columns in the data by selecting which ones to visualise "
              "on each plot. We can then choose which ones we want to keep in the finished product. " 
              "All of these variables are available for each of the simulations that we ran. The "
              "simulation will be selected by choosing the parameters in the sidebar (currently just number of projects,"
