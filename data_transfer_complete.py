@@ -25,7 +25,7 @@ sim_path = sys.argv[1]
 
 
 def data_not_found(path):
-    print("Could not find simulation data.bak at: " + path)
+    print("Could not find simulation data at: " + path)
 
 
 def strip_unwanted(path, max_reps=True):
