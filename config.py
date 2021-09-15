@@ -46,6 +46,18 @@ class Config:
             }
         }
 
+        self.default_simulation_parameters = {
+            'project_count': 2,
+            'budget_func': True,
+            'dept_workload': 0.1,
+            'skill_decay': 0.99,
+            'train_load': 0.1
+        }
+
     def __repr__(self):
-        return self.simulation_variables
+        return (
+            self.simulation_variables,
+            self.simulation_presets,
+            self.default_simulation_parameters
+        )
 

@@ -222,15 +222,15 @@ def get_preset_names(value):
 def set_default_parameters():
 
     if st.session_state.preset_active:
-        preset_dict = st.session_state.config.simulation_presets[st.session_state.preset]
-        st.session_state.project_count = preset_dict['project_count']
-        st.session_state.budget_func = preset_dict['budget_func']
+        parameter_dict = st.session_state.config.simulation_presets[st.session_state.preset]
+        for key, value in parameter_dict.items():
+            st.session_state[key] = value
 
     else:
-        if 'project_count' not in st.session_state:
-            st.session_state.project_count = 2
-        if 'budget_func' not in st.session_state:
-            st.session_state.budget_func = True
+        parameter_dict = st.session_state.config.default_simulation_parameters
+        for key, value in parameter_dict.items():
+            if key not in st.session_state:
+                st.session_state[key] = value
 
 
 def create_sidebar_controls():
@@ -294,9 +294,6 @@ def create_sidebar_controls():
                 help="Number of new projects created each time step:"
             )
 
-        if 'dept_workload' not in st.session_state:
-            st.session_state.dept_workload = 0.1
-
         with row_1[-1]:
             dept_workload = st.slider(
                 "Departmental workload:",
@@ -309,9 +306,6 @@ def create_sidebar_controls():
                 help='Fraction of capacity that must be keep free to meet departmental workload.'
             )
 
-        if 'skill_decay' not in st.session_state:
-            st.session_state.skill_decay = 0.99
-
         skill_decay = st.radio(
             "Skill decay:",
             options=[0.950, 0.990, 0.995],
@@ -322,9 +316,6 @@ def create_sidebar_controls():
             help="The multiplicative decay of worker unused hard skills.  \n"
                  "_Note: a lower value means faster decay._"
         )
-
-        if 'train_load' not in st.session_state:
-            st.session_state.train_load = 0.1
 
         train_load = st.selectbox(
             "Training load:",
