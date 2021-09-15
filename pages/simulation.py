@@ -209,14 +209,9 @@ def set_preset(value):
     reload()
 
 
-def get_preset_names(value):
-    preset_dict = {
-        'A': 'The Overcommitted Organization',
-        'B': 'The Undercommitted Organization',
-        'C': 'The Emergent Organization',
-        'D': 'The Rigid Organization',
-    }
-    return preset_dict[value]
+def get_preset_details(value, detail='preset_name'):
+    preset_dict = st.session_state.config.simulation_presets[value]
+    return preset_dict[detail]
 
 
 def set_default_parameters():
@@ -364,11 +359,14 @@ def page_code():
         st.subheader(
             "Using parameter preset %s: %s" % (
                 st.session_state.preset,
-                get_preset_names(st.session_state.preset)
+                get_preset_details(st.session_state.preset, detail='preset_name')
             )
         )
+        st.write(get_preset_details(st.session_state.preset, detail='blurb'))
 
-    st.write("A short description of this preset and how to navigate/interpret the plots below...")
+    else:
+        st.write("Explore the behaviour of the simulation by selecting "
+                 "your own parameter values in the sidebar (click 'Expand for full parameter control').")
 
     create_sidebar_controls()
 
