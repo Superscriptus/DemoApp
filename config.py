@@ -35,6 +35,17 @@ class Config:
             'AverageTeamSize': 'Mean number of workers in a team, across active projects.'
         }
 
+        self.simulation_presets = {
+            'A': {
+                'project_count': 10,
+                'budget_func': True
+            },
+            'B': {
+                'project_count': 1,
+                'budget_func': True
+            }
+        }
+
     def __repr__(self):
         return self.simulation_variables
 

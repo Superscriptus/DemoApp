@@ -9,6 +9,8 @@
 #       - pass variable descriptions to plot function (from config file)
 #       - run new simulations (check github issues first)
 #       - replace TRAIN_OFF simulation directory on github (only contains one replicate)
+# Note: to change button colour and style...
+# https://discuss.streamlit.io/t/how-to-change-the-backgorund-color-of-button-widget/12103/10
 
 import streamlit as st
 import altair as alt
@@ -37,7 +39,8 @@ def reload(remove_preset=False):
         st.session_state.budget_func,
         st.session_state.skill_decay,
         st.session_state.train_load,
-        replicate)
+        replicate
+    )
 
 
 def handle_play_click():
@@ -99,7 +102,10 @@ def load_data(project_count, dept_workload, budget_func, skill_decay, train_load
 
 class TimeSeriesPlot:
 
-    def __init__(self, column_names, column_colours, plot_name, y_label):
+    def __init__(
+            self, column_names, column_colours,
+            plot_name, y_label, allow_x_axis_scrolling=False
+    ):
 
         st.header(plot_name)
 
@@ -114,13 +120,14 @@ class TimeSeriesPlot:
             default=list(domain_colours)
         )
 
-        # Note: to change button colour and style...
-        # https://discuss.streamlit.io/t/how-to-change-the-backgorund-color-of-button-widget/12103/10
-        axis_scrolling = st.checkbox(
-            label='Axis scrolling',
-            value=True,
-            key=plot_name + "_checkbox"
-        )
+        if allow_x_axis_scrolling:
+            axis_scrolling = st.checkbox(
+                label='Axis scrolling',
+                value=True,
+                key=plot_name + "_checkbox"
+            )
+        else:
+            axis_scrolling = False
 
         self.domain = [s for s in column_selection]
         self.range_ = [domain_colours[d] for d in self.domain]
@@ -188,7 +195,7 @@ def preset_label(value):
 def create_preset_button(layout_element, value):
 
     with layout_element:
-        preset_a = st.button(
+        st.button(
             label=preset_label(value),
             key=value,
             on_click=set_preset,
@@ -199,6 +206,7 @@ def create_preset_button(layout_element, value):
 def set_preset(value):
     st.session_state.preset = value
     st.session_state.preset_active = True
+    reload()
 
 
 def get_preset_names(value):
@@ -209,6 +217,20 @@ def get_preset_names(value):
         'D': 'The Rigid Organization',
     }
     return preset_dict[value]
+
+
+def set_default_parameters():
+
+    if st.session_state.preset_active:
+        preset_dict = st.session_state.config.simulation_presets[st.session_state.preset]
+        st.session_state.project_count = preset_dict['project_count']
+        st.session_state.budget_func = preset_dict['budget_func']
+
+    else:
+        if 'project_count' not in st.session_state:
+            st.session_state.project_count = 2
+        if 'budget_func' not in st.session_state:
+            st.session_state.budget_func = True
 
 
 def create_sidebar_controls():
@@ -231,10 +253,8 @@ def create_sidebar_controls():
 
     st.sidebar.write("Set value for all parameters:")
     with st.sidebar.beta_expander("Expand for full parameter control"):
-        if 'project_count' not in st.session_state:
-            st.session_state.project_count = 2
-        if 'budget_func' not in st.session_state:
-            st.session_state.budget_func = True
+
+        set_default_parameters()
 
         row_0 = st.beta_columns([2, 1])
 
@@ -265,7 +285,6 @@ def create_sidebar_controls():
         row_1 = st.beta_columns([1, 2])
 
         with row_1[0]:
-            # Note: 'key' links the widget to session state variable of same name. This is not documented behaviour?!
             project_count = st.selectbox(
                 label="New projects:",
                 options=[1, 2, 3, 5, 10],
