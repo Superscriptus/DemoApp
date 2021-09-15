@@ -42,11 +42,11 @@ def strip_unwanted(path, max_reps=True):
                 os.remove(f)
 
 
-def copy_data(src, dst):
+def copy_data(src, dst, overwrite=False):
     if not os.path.isdir(src):
         data_not_found(src)
     else:
-        if not os.path.isdir(dst):
+        if overwrite or not os.path.isdir(dst):
             shutil.copytree(src, dst)
             strip_unwanted(dst)
 
@@ -79,5 +79,5 @@ for parameters in combinations:
 
     from_path = sim_path + batch_name
     to_path = 'data/' + batch_name
-    copy_data(from_path, to_path)
+    copy_data(from_path, to_path, overwrite=True)
 
