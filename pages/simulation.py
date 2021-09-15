@@ -11,7 +11,7 @@
 #       - replace TRAIN_OFF simulation directory on github (only contains one replicate)
 # Note: to change button colour and style...
 # https://discuss.streamlit.io/t/how-to-change-the-backgorund-color-of-button-widget/12103/10
-
+import numpy as np
 import streamlit as st
 import altair as alt
 import time
@@ -51,19 +51,23 @@ def handle_play_click():
         reload()
 
 
-def unpickle(file_path):
+def unpickle(file_path, data_type='df', silent=False):
     try:
         with open(file_path, 'rb') as ifile:
 
-            df = pickle.load(ifile)
-            df['time'] = df.index
-            print(df.columns)
+            if data_type == 'df':
+                data = pickle.load(ifile)
+                data['time'] = data.index
 
-        return df
+            elif data_type == 'list':
+                data = np.asarray(pickle.load(ifile))
+
+        return data
 
     except FileNotFoundError:
-        st.error("Sorry, we do not currently have data for that parameter combination. "
-                 "Please change your parameter selection. (%s)" % file_path)
+        if not silent:
+            st.error("Sorry, we do not currently have data for that parameter combination. "
+                     "Please change your parameter selection. (%s)" % file_path)
         return None
 
 
@@ -91,6 +95,17 @@ def load_data(project_count, dept_workload, budget_func, skill_decay, train_load
     st.session_state.data = unpickle(
         "data/" + sub_dir + "/%s/model_vars_rep_%d.pickle" % (optimiser_dict[st.session_state.team_allocation], rep)
     )
+    if st.session_state.data is not None:
+        # We add ROI as this was computed and saved retrospectively (after simulations were run)
+        roi = unpickle(
+            "data/" + sub_dir + "/%s/roi_rep_%d.pickle" % (optimiser_dict[st.session_state.team_allocation], rep),
+            data_type='list',
+            silent=True
+        )
+        if roi is not None:
+            st.session_state.data['roi'] = roi
+        else:
+            st.session_state.data['roi'] = np.zeros(len(st.session_state.data))
 
     # st.session_state.worker_data = unpickle(
     #     'data/projects_per_timestep_%d/basin_w_flex/agents_vars_rep_%d.pickle' % (project_count, rep)
@@ -373,6 +388,13 @@ def page_code():
 
     if st.session_state.data is not None:
 
+        roi_plot = TimeSeriesPlot(
+            column_names=['roi'],
+            column_colours=['blue'],
+            plot_name='Return on Investment (ROI)',
+            y_label='ROI'
+        )
+
         active_plot = TimeSeriesPlot(
             column_names=['ActiveProjects'],
             column_colours=['blue'],
@@ -427,6 +449,7 @@ def page_code():
 
             for t in range(start, 100):
 
+                roi_plot.update(t)
                 active_plot.update(t)
                 project_plot.update(t)
                 worker_plot.update(t)
