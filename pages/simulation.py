@@ -107,7 +107,7 @@ class TimeSeriesPlot:
             plot_name, y_label, allow_x_axis_scrolling=False
     ):
 
-        st.header(plot_name)
+        st.subheader(plot_name)
 
         domain_colours = dict(zip(
             column_names,
