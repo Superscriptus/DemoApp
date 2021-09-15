@@ -45,7 +45,8 @@ class Config:
                 'budget_func': True,
                 'dept_workload': 0.3,
                 'skill_decay': 0.95,
-                'train_load': 0.3
+                'train_load': 0.3,
+                'team_allocation': 'Flexible start time'
             },
             'B': {
                 'preset_name': 'The Undercommitted Organization',
@@ -56,7 +57,8 @@ class Config:
                 'budget_func': True,
                 'dept_workload': 0.1,
                 'skill_decay': 0.95,
-                'train_load': 0.0
+                'train_load': 0.0,
+                'team_allocation': 'Flexible start time'
             },
             'C': {
                 'preset_name': 'The Emergent Organization',
@@ -67,7 +69,8 @@ class Config:
                 'budget_func': True,
                 'dept_workload': 0.1,
                 'skill_decay': 0.995,
-                'train_load': 0.1
+                'train_load': 0.1,
+                'team_allocation': 'Flexible start time'
             },
             'D': {
                 'preset_name': 'The Rigid Organization',
@@ -77,7 +80,8 @@ class Config:
                 'budget_func': False,
                 'dept_workload': 0.3,
                 'skill_decay': 0.95,
-                'train_load': 0.0
+                'train_load': 0.0,
+                'team_allocation': 'Flexible start time'
             }
         }
 

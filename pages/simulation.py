@@ -199,7 +199,8 @@ def create_preset_button(layout_element, value):
             label=preset_label(value),
             key=value,
             on_click=set_preset,
-            args=value
+            args=value,
+            help=st.session_state.config.simulation_presets[value]['preset_name']
         )
 
 
