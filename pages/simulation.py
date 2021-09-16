@@ -11,6 +11,7 @@
 #       - replace TRAIN_OFF simulation directory on github (only contains one replicate)
 # Note: to change button colour and style...
 # https://discuss.streamlit.io/t/how-to-change-the-backgorund-color-of-button-widget/12103/10
+
 import numpy as np
 import streamlit as st
 import altair as alt
@@ -26,21 +27,27 @@ def play_label(playing):
         return 'Play simulation'
 
 
-def reload(remove_preset=False):
-
+def reload(remove_preset=False, rerun=True):
+    """
+    Note: rerun re-draws plots and widgets. Needs to run before reloading data in order to activate presets.
+    """
     if remove_preset:
         deactivate_preset()
 
     st.session_state.global_time = 0
-    replicate = 0  # choice([i for i in range(10) if i != st.session_state.replicate])
-    load_data(
-        st.session_state.project_count,
-        st.session_state.dept_workload,
-        st.session_state.budget_func,
-        st.session_state.skill_decay,
-        st.session_state.train_load,
-        replicate
-    )
+    st.session_state.replicate = 0  # choice([i for i in range(10) if i != st.session_state.replicate])
+    if rerun:
+        del st.session_state['data']
+        st.experimental_rerun()
+    else:
+        load_data(
+            st.session_state.project_count,
+            st.session_state.dept_workload,
+            st.session_state.budget_func,
+            st.session_state.skill_decay,
+            st.session_state.train_load,
+            st.session_state.replicate
+        )
 
 
 def handle_play_click():
@@ -88,10 +95,7 @@ def load_data(project_count, dept_workload, budget_func, skill_decay, train_load
                 training_load, training_flag, training_boost, budget_func
             )
     )
-    #     (
-    #         "pps_%d_dwl_%.1f_budget_%d_sd_%.3f_train_%.1f"
-    #         % (project_count, dept_workload, budget_func, skill_decay, train_load)
-    # )
+
     st.session_state.data = unpickle(
         "data/" + sub_dir + "/%s/model_vars_rep_%d.pickle" % (optimiser_dict[st.session_state.team_allocation], rep)
     )
@@ -106,13 +110,6 @@ def load_data(project_count, dept_workload, budget_func, skill_decay, train_load
             st.session_state.data['roi'] = roi
         else:
             st.session_state.data['roi'] = np.zeros(len(st.session_state.data))
-
-    # st.session_state.worker_data = unpickle(
-    #     'data/projects_per_timestep_%d/basin_w_flex/agents_vars_rep_%d.pickle' % (project_count, rep)
-    # )
-    # st.session_state.project_data = unpickle(
-    #     'data/projects_per_timestep_%d/basin_w_flex/projects_table_rep_%d.pickle' % (project_count, rep)
-    # )
 
 
 class TimeSeriesPlot:
@@ -222,7 +219,7 @@ def create_preset_button(layout_element, value):
 def set_preset(value):
     st.session_state.preset = value
     st.session_state.preset_active = True
-    reload()
+    reload(remove_preset=False, rerun=True)
 
 
 def get_preset_details(value, detail='preset_name'):
@@ -275,7 +272,7 @@ def create_sidebar_controls():
                 options=['Random', 'Optimised', 'Flexible start time'],
                 key='team_allocation',
                 on_change=reload,
-                args=(True,),
+                args=(True, False),
                 help="The method used for allocating a team of workers to each project.  \n"
                      "* Random: randomly assigned team.  \n"
                      "* Optimised: success probability optimised using basin-hopping algorithm.  \n"
@@ -288,7 +285,7 @@ def create_sidebar_controls():
                 options=[True, False],
                 key='budget_func',
                 on_change=reload,
-                args=(True,),
+                args=(True, False),
                 format_func=lambda x: 'On' if x else 'Off',
                 help="Budgetary constraint on/off."
             )
@@ -301,7 +298,7 @@ def create_sidebar_controls():
                 options=[1, 2, 3, 5, 10],
                 key='project_count',
                 on_change=reload,
-                args=(True,),
+                args=(True, False),
                 help="Number of new projects created each time step:"
             )
 
@@ -313,7 +310,7 @@ def create_sidebar_controls():
                 step=0.2,
                 key='dept_workload',
                 on_change=reload,
-                args=(True,),
+                args=(True, False),
                 help='Fraction of capacity that must be keep free to meet departmental workload.'
             )
 
@@ -322,7 +319,7 @@ def create_sidebar_controls():
             options=[0.950, 0.990, 0.995],
             key='skill_decay',
             on_change=reload,
-            args=(True,),
+            args=(True, False),
             format_func=lambda x: '%.3f' % x,
             help="The multiplicative decay of worker unused hard skills.  \n"
                  "_Note: a lower value means faster decay._"
@@ -333,7 +330,7 @@ def create_sidebar_controls():
             options=[0.0, 0.1, 0.3, 2.0],
             key='train_load',
             on_change=reload,
-            args=(True,),
+            args=(True, False),
             format_func=lambda x: '%.1f' % x if x < 2 else 'Boost',
             help="Fraction of workforce that should be in training for any timestep.  \n"
                  "_Note: this cannot always be met if their is insufficient slack._"
@@ -463,4 +460,4 @@ def page_code():
 
                 if t == 99:
                     st.session_state.playing = False
-                    st.experimental_rerun()
+                    reload(rerun=False)
