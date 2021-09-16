@@ -1,10 +1,18 @@
-# TODO: - refactor sidebar logic into a class
+# TODO: - fix replicate choice so it choose from how ever many are present in the data dir
+#       - refactor sidebar logic into a class
+#       - refactor preset logic into a class
+#       - select presets -> change sidebar widget default values
+#       - change parameter values -> preset not active. Change page header.
+#       - bespoke preset button with conditional formatting
 #       - download main superscript repo (temporarily) and check data files size
 #       - test on ipad
 #       - pass variable descriptions to plot function (from config file)
 #       - run new simulations (check github issues first)
 #       - replace TRAIN_OFF simulation directory on github (only contains one replicate)
+# Note: to change button colour and style...
+# https://discuss.streamlit.io/t/how-to-change-the-backgorund-color-of-button-widget/12103/10
 
+import numpy as np
 import streamlit as st
 import altair as alt
 import time
@@ -19,17 +27,27 @@ def play_label(playing):
         return 'Play simulation'
 
 
-def reload():
+def reload(remove_preset=False, rerun=True):
+    """
+    Note: rerun re-draws plots and widgets. Needs to run before reloading data in order to activate presets.
+    """
+    if remove_preset:
+        deactivate_preset()
 
     st.session_state.global_time = 0
-    replicate = choice([i for i in range(10) if i != st.session_state.replicate])
-    load_data(
-        st.session_state.project_count,
-        st.session_state.dept_workload,
-        st.session_state.budget_func,
-        st.session_state.skill_decay,
-        st.session_state.train_load,
-        replicate)
+    st.session_state.replicate = 0  # choice([i for i in range(10) if i != st.session_state.replicate])
+    if rerun:
+        del st.session_state['data']
+        st.experimental_rerun()
+    else:
+        load_data(
+            st.session_state.project_count,
+            st.session_state.dept_workload,
+            st.session_state.budget_func,
+            st.session_state.skill_decay,
+            st.session_state.train_load,
+            st.session_state.replicate
+        )
 
 
 def handle_play_click():
@@ -40,19 +58,23 @@ def handle_play_click():
         reload()
 
 
-def unpickle(file_path):
+def unpickle(file_path, data_type='df', silent=False):
     try:
         with open(file_path, 'rb') as ifile:
 
-            df = pickle.load(ifile)
-            df['time'] = df.index
-            print(df.columns)
+            if data_type == 'df':
+                data = pickle.load(ifile)
+                data['time'] = data.index
 
-        return df
+            elif data_type == 'list':
+                data = np.asarray(pickle.load(ifile))
+
+        return data
 
     except FileNotFoundError:
-        st.error("Sorry, we do not currently have data for that parameter combination. "
-                 "Please change your parameter selection. (%s)" % file_path)
+        if not silent:
+            st.error("Sorry, we do not currently have data for that parameter combination. "
+                     "Please change your parameter selection. (%s)" % file_path)
         return None
 
 
@@ -63,27 +85,41 @@ def load_data(project_count, dept_workload, budget_func, skill_decay, train_load
         ['Random', 'Basin', 'Basin_w_flex']
     ))
 
+    training_load = 0.1 if train_load == 2.0 else train_load
+    training_boost = True if train_load == 2.0 else False
+    training_flag = False if train_load == 0.0 else True
     sub_dir = (
-            "pps_%d_dwl_%.1f_budget_%d_sd_%.3f_train_%.1f"
-            % (project_count, dept_workload, budget_func, skill_decay, train_load)
+            'pps_%d_sd_%.3f_dw_%.1f_tl_%.1f_tf_%d_tb_%d_bf_%d_010921_v1.1'
+            % (
+                project_count, skill_decay, dept_workload,
+                training_load, training_flag, training_boost, budget_func
+            )
     )
+
     st.session_state.data = unpickle(
         "data/" + sub_dir + "/%s/model_vars_rep_%d.pickle" % (optimiser_dict[st.session_state.team_allocation], rep)
     )
-
-    # st.session_state.worker_data = unpickle(
-    #     'data/projects_per_timestep_%d/basin_w_flex/agents_vars_rep_%d.pickle' % (project_count, rep)
-    # )
-    # st.session_state.project_data = unpickle(
-    #     'data/projects_per_timestep_%d/basin_w_flex/projects_table_rep_%d.pickle' % (project_count, rep)
-    # )
+    if st.session_state.data is not None:
+        # We add ROI as this was computed and saved retrospectively (after simulations were run)
+        roi = unpickle(
+            "data/" + sub_dir + "/%s/roi_rep_%d.pickle" % (optimiser_dict[st.session_state.team_allocation], rep),
+            data_type='list',
+            silent=True
+        )
+        if roi is not None:
+            st.session_state.data['roi'] = roi
+        else:
+            st.session_state.data['roi'] = np.zeros(len(st.session_state.data))
 
 
 class TimeSeriesPlot:
 
-    def __init__(self, column_names, column_colours, plot_name, y_label):
+    def __init__(
+            self, column_names, column_colours,
+            plot_name, y_label, allow_x_axis_scrolling=False
+    ):
 
-        st.header(plot_name)
+        st.subheader(plot_name)
 
         domain_colours = dict(zip(
             column_names,
@@ -96,13 +132,14 @@ class TimeSeriesPlot:
             default=list(domain_colours)
         )
 
-        # Note: to change button colour and style...
-        # https://discuss.streamlit.io/t/how-to-change-the-backgorund-color-of-button-widget/12103/10
-        axis_scrolling = st.checkbox(
-            label='Axis scrolling',
-            value=True,
-            key=plot_name + "_checkbox"
-        )
+        if allow_x_axis_scrolling:
+            axis_scrolling = st.checkbox(
+                label='Axis scrolling',
+                value=True,
+                key=plot_name + "_checkbox"
+            )
+        else:
+            axis_scrolling = False
 
         self.domain = [s for s in column_selection]
         self.range_ = [domain_colours[d] for d in self.domain]
@@ -151,6 +188,59 @@ class TimeSeriesPlot:
         )
 
 
+def deactivate_preset():
+    st.session_state.preset_active = False
+
+
+def preset_label(value):
+    if (
+            "preset" in st.session_state
+            and "preset_active" in st.session_state
+            and st.session_state.preset == value
+            and st.session_state.preset_active
+    ):
+        return "!"
+    else:
+        return value
+
+
+def create_preset_button(layout_element, value):
+
+    with layout_element:
+        st.button(
+            label=preset_label(value),
+            key=value,
+            on_click=set_preset,
+            args=value,
+            help=st.session_state.config.simulation_presets[value]['preset_name']
+        )
+
+
+def set_preset(value):
+    st.session_state.preset = value
+    st.session_state.preset_active = True
+    reload(remove_preset=False, rerun=True)
+
+
+def get_preset_details(value, detail='preset_name'):
+    preset_dict = st.session_state.config.simulation_presets[value]
+    return preset_dict[detail]
+
+
+def set_default_parameters():
+
+    if st.session_state.preset_active:
+        parameter_dict = st.session_state.config.simulation_presets[st.session_state.preset]
+        for key, value in parameter_dict.items():
+            st.session_state[key] = value
+
+    else:
+        parameter_dict = st.session_state.config.default_simulation_parameters
+        for key, value in parameter_dict.items():
+            if key not in st.session_state:
+                st.session_state[key] = value
+
+
 def create_sidebar_controls():
 
     st.sidebar.subheader("Simulation parameter selection")
@@ -162,86 +252,89 @@ def create_sidebar_controls():
             key='speed'
         )
 
-    if 'project_count' not in st.session_state:
-        st.session_state.project_count = 2
-    if 'budget_func' not in st.session_state:
-        st.session_state.budget_func = True
+    st.sidebar.write("Select parameter presets:")
+    row_presets = st.sidebar.beta_columns([1, 1, 1, 1])
+    create_preset_button(row_presets[0], "A")
+    create_preset_button(row_presets[1], "B")
+    create_preset_button(row_presets[2], "C")
+    create_preset_button(row_presets[3], "D")
 
-    row_0 = st.sidebar.beta_columns([2, 1])
+    st.sidebar.write("Set value for all parameters:")
+    with st.sidebar.beta_expander("Expand for full parameter control"):
 
-    with row_0[0]:
-        team_allocation = st.selectbox(
-            "Team allocation:",
-            options=['Random', 'Optimised', 'Flexible start time'],
-            key='team_allocation',
+        set_default_parameters()
+
+        row_0 = st.beta_columns([2, 1])
+
+        with row_0[0]:
+            team_allocation = st.selectbox(
+                "Team allocation:",
+                options=['Random', 'Optimised', 'Flexible start time'],
+                key='team_allocation',
+                on_change=reload,
+                args=(True, False),
+                help="The method used for allocating a team of workers to each project.  \n"
+                     "* Random: randomly assigned team.  \n"
+                     "* Optimised: success probability optimised using basin-hopping algorithm.  \n"
+                     "* Flexible start time: same as _Optimised_ but with flexible project start time."
+            )
+
+        with row_0[-1]:
+            budget_func = st.selectbox(
+                "Budget:",
+                options=[True, False],
+                key='budget_func',
+                on_change=reload,
+                args=(True, False),
+                format_func=lambda x: 'On' if x else 'Off',
+                help="Budgetary constraint on/off."
+            )
+
+        row_1 = st.beta_columns([1, 2])
+
+        with row_1[0]:
+            project_count = st.selectbox(
+                label="New projects:",
+                options=[1, 2, 3, 5, 10],
+                key='project_count',
+                on_change=reload,
+                args=(True, False),
+                help="Number of new projects created each time step:"
+            )
+
+        with row_1[-1]:
+            dept_workload = st.slider(
+                "Departmental workload:",
+                min_value=0.1,
+                max_value=0.3,
+                step=0.2,
+                key='dept_workload',
+                on_change=reload,
+                args=(True, False),
+                help='Fraction of capacity that must be keep free to meet departmental workload.'
+            )
+
+        skill_decay = st.radio(
+            "Skill decay:",
+            options=[0.950, 0.990, 0.995],
+            key='skill_decay',
             on_change=reload,
-            help="The method used for allocating a team of workers to each project.  \n"
-                 "* Random: randomly assigned team.  \n"
-                 "* Optimised: success probability optimised using basin-hopping algorithm.  \n"
-                 "* Flexible start time: same as _Optimised_ but with flexible project start time."
+            args=(True, False),
+            format_func=lambda x: '%.3f' % x,
+            help="The multiplicative decay of worker unused hard skills.  \n"
+                 "_Note: a lower value means faster decay._"
         )
 
-    with row_0[-1]:
-        budget_func = st.selectbox(
-            "Budget:",
-            options=[True, False],
-            key='budget_func',
+        train_load = st.selectbox(
+            "Training load:",
+            options=[0.0, 0.1, 0.3, 2.0],
+            key='train_load',
             on_change=reload,
-            format_func=lambda x: 'On' if x else 'Off',
-            help="Budgetary constraint on/off."
+            args=(True, False),
+            format_func=lambda x: '%.1f' % x if x < 2 else 'Boost',
+            help="Fraction of workforce that should be in training for any timestep.  \n"
+                 "_Note: this cannot always be met if their is insufficient slack._"
         )
-
-    row_1 = st.sidebar.beta_columns([1, 2])
-
-    with row_1[0]:
-        # Note: 'key' links the widget to session state variable of same name. This is not documented behaviour?!
-        project_count = st.selectbox(
-            label="New projects:",
-            options=[1, 2, 3, 5, 10],
-            key='project_count',
-            on_change=reload,
-            help="Number of new projects created each time step:"
-        )
-
-    if 'dept_workload' not in st.session_state:
-        st.session_state.dept_workload = 0.1
-
-    with row_1[-1]:
-        dept_workload = st.slider(
-            "Departmental workload:",
-            min_value=0.1,
-            max_value=0.3,
-            step=0.2,
-            key='dept_workload',
-            on_change=reload,
-            help='Fraction of capacity that must be keep free to meet departmental workload.'
-        )
-
-    if 'skill_decay' not in st.session_state:
-        st.session_state.skill_decay = 0.99
-
-    skill_decay = st.sidebar.radio(
-        "Skill decay:",
-        options=[0.950, 0.990, 0.995],
-        key='skill_decay',
-        on_change=reload,
-        format_func=lambda x: '%.3f' % x,
-        help="The multiplicative decay of worker unused hard skills.  \n"
-             "_Note: a lower value means faster decay._"
-    )
-
-    if 'train_load' not in st.session_state:
-        st.session_state.train_load = 0.1
-
-    train_load = st.sidebar.selectbox(
-        "Training load:",
-        options=[0.0, 0.1, 0.3, 2.0],
-        key='train_load',
-        on_change=reload,
-        format_func=lambda x: '%.1f' % x if x < 2 else 'Boost',
-        help="Fraction of workforce that should be in training for any timestep.  \n"
-             "_Note: this cannot always be met if their is insufficient slack._"
-    )
 
     if 'data' not in st.session_state:
         load_data(
@@ -270,18 +363,34 @@ def page_code():
     if 'replicate' not in st.session_state:
         st.session_state.replicate = 0
 
+    if 'preset_active' not in st.session_state:
+        st.session_state.preset_active = False
+
     st.title("Simulation")
-    st.write("This page will show animation of a simulation (approximately like running the Mesa server).")
-    st.write("Below, you can explore all the available columns in the data by selecting which ones to visualise "
-             "on each plot. We can then choose which ones we want to keep in the finished product. " 
-             "All of these variables are available for each of the simulations that we ran. The "
-             "simulation will be selected by choosing the parameters in the sidebar (currently just number of projects,"
-             " but we will add skill_decay etc).")
-    st.write("You can vary the axis scrolling behaviour for each plot by toggling the 'Axis Scrolling' checkbox.")
+
+    if st.session_state.preset_active:
+        st.subheader(
+            "Using parameter preset %s: %s" % (
+                st.session_state.preset,
+                get_preset_details(st.session_state.preset, detail='preset_name')
+            )
+        )
+        st.write(get_preset_details(st.session_state.preset, detail='blurb'))
+
+    else:
+        st.write("Explore the behaviour of the simulation by selecting "
+                 "your own parameter values in the sidebar (click 'Expand for full parameter control').")
 
     create_sidebar_controls()
 
     if st.session_state.data is not None:
+
+        roi_plot = TimeSeriesPlot(
+            column_names=['roi'],
+            column_colours=['blue'],
+            plot_name='Return on Investment (ROI)',
+            y_label='ROI'
+        )
 
         active_plot = TimeSeriesPlot(
             column_names=['ActiveProjects'],
@@ -337,6 +446,7 @@ def page_code():
 
             for t in range(start, 100):
 
+                roi_plot.update(t)
                 active_plot.update(t)
                 project_plot.update(t)
                 worker_plot.update(t)
@@ -350,4 +460,4 @@ def page_code():
 
                 if t == 99:
                     st.session_state.playing = False
-                    st.experimental_rerun()
+                    reload(rerun=False)

@@ -4,7 +4,7 @@ Configuration file for application.
 Config is loaded and stored in the session state.
 
 Contents:
-    'simulation_variables' : definitions of coarse variables from model_vars data files, that are displayed
+    'simulation_variables' : definitions of coarse variables from model_vars data.bak files, that are displayed
                              on the simulation page.
 """
 
@@ -35,6 +35,68 @@ class Config:
             'AverageTeamSize': 'Mean number of workers in a team, across active projects.'
         }
 
+        self.simulation_presets = {
+            'A': {
+                'preset_name': 'The Overcommitted Organization',
+                'blurb': 'These organisations have committed too many staff to training, departmental workload and to '
+                         'project work. As such, they do not have enough spare capacity (slack) to be able to choose '
+                         'effective teams. Their project success rate and ROI suffer as a result.',
+                'project_count': 10,
+                'budget_func': True,
+                'dept_workload': 0.3,
+                'skill_decay': 0.95,
+                'train_load': 0.3,
+                'team_allocation': 'Flexible start time'
+            },
+            'B': {
+                'preset_name': 'The Undercommitted Organization',
+                'blurb': 'These organisations have too much slack and as a result they are not making '
+                         'effective use of their workforce. They could afford to allocate more staff to project work '
+                         'or introduce staff training for inactive workers.',
+                'project_count': 1,
+                'budget_func': True,
+                'dept_workload': 0.1,
+                'skill_decay': 0.95,
+                'train_load': 0.0,
+                'team_allocation': 'Flexible start time'
+            },
+            'C': {
+                'preset_name': 'The Emergent Organization',
+                'blurb': 'These organisations have achieved a balance between project work, staff training and '
+                         'departmental workload. The emergent behaviour shows and orgnaisation that improves '
+                         'over time.',
+                'project_count': 3,
+                'budget_func': True,
+                'dept_workload': 0.1,
+                'skill_decay': 0.995,
+                'train_load': 0.1,
+                'team_allocation': 'Flexible start time'
+            },
+            'D': {
+                'preset_name': 'The Rigid Organization',
+                'blurb': 'These organisations are too inflexible. They are burdened by departmental workload and do not'
+                         ' train inactive staff. NOTE THAT BUDGET OFF MAKES THEM MORE FLEXIBLE.',
+                'project_count': 2,
+                'budget_func': False,
+                'dept_workload': 0.3,
+                'skill_decay': 0.95,
+                'train_load': 0.0,
+                'team_allocation': 'Flexible start time'
+            }
+        }
+
+        self.default_simulation_parameters = {
+            'project_count': 2,
+            'budget_func': True,
+            'dept_workload': 0.1,
+            'skill_decay': 0.99,
+            'train_load': 0.1
+        }
+
     def __repr__(self):
-        return self.simulation_variables
+        return (
+            self.simulation_variables,
+            self.simulation_presets,
+            self.default_simulation_parameters
+        )
 
