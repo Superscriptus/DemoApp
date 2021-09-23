@@ -17,6 +17,8 @@ import streamlit as st
 import altair as alt
 import time
 import pickle
+import networkx as nx
+from pyvis.network import Network
 from random import choice
 
 
@@ -78,7 +80,10 @@ def unpickle(file_path, data_type='df', silent=False):
         return None
 
 
-def load_data(project_count, dept_workload, budget_func, skill_decay, train_load, rep):
+def load_data(
+        project_count, dept_workload, budget_func,
+        skill_decay, train_load, rep, duration=100
+):
 
     optimiser_dict = dict(zip(
         ['Random', 'Optimised', 'Flexible start time'],
@@ -100,6 +105,15 @@ def load_data(project_count, dept_workload, budget_func, skill_decay, train_load
         "data/" + sub_dir + "/%s/model_vars_rep_%d.pickle" % (optimiser_dict[st.session_state.team_allocation], rep)
     )
     if st.session_state.data is not None:
+        # We load the networks for each timestep up to 'duration'
+        st.session_state.networks = {
+            t: nx.read_multiline_adjlist(
+                "data/" + sub_dir + "/%s/network_rep_%d_timestep_%d.pickle"
+                % (optimiser_dict[st.session_state.team_allocation], rep, t)
+            )
+            for t in range(1, duration+1)
+        }
+
         # We add ROI as this was computed and saved retrospectively (after simulations were run)
         roi = unpickle(
             "data/" + sub_dir + "/%s/roi_rep_%d.pickle" % (optimiser_dict[st.session_state.team_allocation], rep),
@@ -110,6 +124,9 @@ def load_data(project_count, dept_workload, budget_func, skill_decay, train_load
             st.session_state.data['roi'] = roi
         else:
             st.session_state.data['roi'] = np.zeros(len(st.session_state.data))
+
+    print(st.session_state.data.head())
+    print(st.session_state.data.tail())
 
 
 class TimeSeriesPlot:
