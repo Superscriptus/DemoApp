@@ -122,7 +122,7 @@ def load_data(
             silent=True
         )
         if roi is not None:
-            st.session_state.data['roi'] = roi
+            st.session_state.data['roi'] = moving_average(roi * 100, window_size=10)
         else:
             st.session_state.data['roi'] = np.zeros(len(st.session_state.data))
 
@@ -130,11 +130,18 @@ def load_data(
         st.session_state.networks = None
 
 
+def moving_average(interval, window_size):
+    window = np.ones(int(window_size)) / float(window_size)
+    return np.convolve(interval, window, 'same')
+
+
 class TimeSeriesPlot:
 
     def __init__(
             self, column_names, column_colours,
-            plot_name, y_label, allow_x_axis_scrolling=False
+            plot_name, y_label,
+            allow_x_axis_scrolling=False,
+            use_moving_average=False
     ):
 
         st.subheader(plot_name)
@@ -438,7 +445,7 @@ def page_code():
             column_names=['roi'],
             column_colours=['blue'],
             plot_name='Return on Investment (ROI)',
-            y_label='ROI'
+            y_label='ROI (%)'
         )
 
         active_plot = TimeSeriesPlot(
