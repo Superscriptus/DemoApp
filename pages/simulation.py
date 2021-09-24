@@ -343,7 +343,7 @@ def create_sidebar_controls():
                 key='project_count',
                 on_change=reload,
                 args=(True, False),
-                help="Number of new projects created each time step:"
+                help="Number of new projects created each time step."
             )
 
         with row_1[-1]:

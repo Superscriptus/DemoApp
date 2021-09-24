@@ -38,7 +38,7 @@ class Config:
         self.simulation_presets = {
             'A': {
                 'preset_name': 'The Overcommitted Organization',
-                'blurb': 'These organisations have committed too many staff to training, departmental workload and to '
+                'blurb': 'These organizations have committed too many staff to training, departmental workload and to '
                          'project work. As such, they do not have enough spare capacity (slack) to be able to choose '
                          'effective teams. Their project success rate and ROI suffer as a result.',
                 'project_count': 10,
@@ -50,7 +50,7 @@ class Config:
             },
             'B': {
                 'preset_name': 'The Undercommitted Organization',
-                'blurb': 'These organisations have too much slack and as a result they are not making '
+                'blurb': 'These organizations have too much slack and as a result they are not making '
                          'effective use of their workforce. They could afford to allocate more staff to project work '
                          'or introduce staff training for inactive workers.',
                 'project_count': 1,
@@ -62,8 +62,8 @@ class Config:
             },
             'C': {
                 'preset_name': 'The Emergent Organization',
-                'blurb': 'These organisations have achieved a balance between project work, staff training and '
-                         'departmental workload. The emergent behaviour shows and orgnaisation that improves '
+                'blurb': 'These organizations have achieved a balance between project work, staff training and '
+                         'departmental workload. The emergent behaviour shows an organization that improves '
                          'over time.',
                 'project_count': 3,
                 'budget_func': True,
@@ -74,8 +74,8 @@ class Config:
             },
             'D': {
                 'preset_name': 'The Rigid Organization',
-                'blurb': 'These organisations are too inflexible. They are burdened by departmental workload and do not'
-                         ' train inactive staff. NOTE THAT BUDGET OFF MAKES THEM MORE FLEXIBLE.',
+                'blurb': 'These organizations are too inflexible. They are burdened by departmental workload and do not'
+                         ' train inactive staff.',
                 'project_count': 2,
                 'budget_func': False,
                 'dept_workload': 0.3,
