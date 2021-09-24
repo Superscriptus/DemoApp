@@ -14,6 +14,7 @@ class Config:
     def __init__(self):
 
         self.simulation_variables = {
+            'Roi': 'Return on investment as %.',
             'ActiveProjects': 'Number of currently active projects.',
             'SuccessfulProjects': 'Number of successful projects that finished on this timestep.',
             'FailedProjects': 'Number of failed projects that finished on this timestep.',

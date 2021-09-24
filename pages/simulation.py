@@ -122,9 +122,9 @@ def load_data(
             silent=True
         )
         if roi is not None:
-            st.session_state.data['roi'] = moving_average(roi * 100, window_size=10)
+            st.session_state.data['Roi'] = moving_average(roi * 100, window_size=10)
         else:
-            st.session_state.data['roi'] = np.zeros(len(st.session_state.data))
+            st.session_state.data['Roi'] = np.zeros(len(st.session_state.data))
 
     else:
         st.session_state.networks = None
@@ -442,7 +442,7 @@ def page_code():
         )
 
         roi_plot = TimeSeriesPlot(
-            column_names=['roi'],
+            column_names=['Roi'],
             column_colours=['blue'],
             plot_name='Return on Investment (ROI)',
             y_label='ROI (%)'
