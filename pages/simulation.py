@@ -14,6 +14,7 @@
 
 import numpy as np
 import streamlit as st
+import streamlit.components.v1 as components
 import altair as alt
 import time
 import pickle
@@ -107,8 +108,8 @@ def load_data(
     if st.session_state.data is not None:
         # We load the networks for each timestep up to 'duration'
         st.session_state.networks = {
-            t: nx.read_multiline_adjlist(
-                "data/" + sub_dir + "/%s/network_rep_%d_timestep_%d.pickle"
+            t-1: nx.read_multiline_adjlist(
+                "data/" + sub_dir + "/%s/network_rep_%d_timestep_%d.adjlist"
                 % (optimiser_dict[st.session_state.team_allocation], rep, t)
             )
             for t in range(1, duration+1)
@@ -125,8 +126,8 @@ def load_data(
         else:
             st.session_state.data['roi'] = np.zeros(len(st.session_state.data))
 
-    print(st.session_state.data.head())
-    print(st.session_state.data.tail())
+    else:
+        st.session_state.networks = None
 
 
 class TimeSeriesPlot:
@@ -203,6 +204,32 @@ class TimeSeriesPlot:
         self.chart.add_rows(
             chart_data
         )
+
+
+class NetworkPlot:
+
+    def __init__(self, plot_name, timestep=0):
+
+        st.subheader(plot_name)
+        self.net = Network(height='465px', bgcolor='#222222', font_color='white')
+
+        if st.session_state.networks is not None:
+            self.net.from_nx(st.session_state.networks.get(timestep, nx.Graph()))
+
+        path = '/tmp'
+        self.net.save_graph(f'{path}/pyvis_graph.html')
+        self.html_file = open(f'{path}/pyvis_graph.html', 'r', encoding='utf-8')
+        self.chart = components.html(self.html_file.read(), height=435)
+
+    def update(self, timestep):
+
+        if st.session_state.networks is not None:
+            self.net.from_nx(st.session_state.networks.get(timestep, nx.Graph()))
+
+        path = '/tmp'
+        self.net.save_graph(f'{path}/pyvis_graph.html')
+        self.html_file = open(f'{path}/pyvis_graph.html', 'r', encoding='utf-8')
+        #self.chart = components.html(html_file.read(), height=435)
 
 
 def deactivate_preset():
@@ -402,6 +429,11 @@ def page_code():
 
     if st.session_state.data is not None:
 
+        net_plot = NetworkPlot(
+            plot_name='Social Network',
+            timestep=st.session_state.global_time
+        )
+
         roi_plot = TimeSeriesPlot(
             column_names=['roi'],
             column_colours=['blue'],
@@ -463,6 +495,7 @@ def page_code():
 
             for t in range(start, 100):
 
+                net_plot.update(t)
                 roi_plot.update(t)
                 active_plot.update(t)
                 project_plot.update(t)
