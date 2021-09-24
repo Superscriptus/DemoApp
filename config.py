@@ -94,6 +94,61 @@ class Config:
             'train_load': 0.1
         }
 
+        self.simulation_plots = {
+            'Return on Investment (ROI)': {
+                'column_names': ['Roi'],
+                'column_colours': ['blue'],
+                'y_label': 'ROI (%)',
+                'info': 'Return on investment as a %.'
+            },
+            'Active Project Count': {
+                'column_names': ['ActiveProjects'],
+                'column_colours': ['blue'],
+                'y_label': 'Number of projects',
+                'info': 'The number of projects that are currently running.'
+            },
+            'Project Plot': {
+                'column_names': ['SuccessfulProjects', 'FailedProjects', 'NullProjects'],
+                'column_colours': ['green', 'red', 'orange'],
+                'y_label': 'Number of projects',
+                'info': 'The number of successful, failed and null projects that finish on a each timestep. (Null '
+                        'projects are those to which a team could not be assigned.)'
+            },
+            'Worker Plot': {
+                'column_names': ['WorkersOnProjects', 'WorkersWithoutProjects', 'WorkersOnTraining'],
+                'column_colours': ['green', 'red', 'orange'],
+                'y_label': 'Number of workers',
+                'info': 'The number of workers on projects, without projects and on training on a each timestep.'
+            },
+            'Load Plot': {
+                'column_names': ['ProjectLoad', 'TrainingLoad', 'DeptLoad', 'Slack'],
+                'column_colours': ['green', 'orange', 'red', 'blue'],
+                'y_label': 'Fraction of capacity',
+                'info': 'Workforce activity by fraction of total capacity.'
+            },
+            'OVR Plot': {
+                'column_names': ['AverageWorkerOvr', 'AverageTeamOvr'],
+                'column_colours': ['green', 'blue'],
+                'y_label': 'OVR',
+                'info': 'Overall Rating (OVR) values for workers and teams. OVR is a measure of skill level across the '
+                        'five hard skills.'
+            },
+            'Success Plot': {
+                'column_names': ['RecentSuccessRate', 'AverageSuccessProbability'],
+                'column_colours': ['green', 'blue'],
+                'y_label': 'Rate ; Probability',
+                'info': 'Recent project success rate and current average success probability for active teams.'
+            },
+            'Turnover Plot': {
+                'column_names': ['WorkerTurnover', 'ProjectsPerWorker', 'AverageTeamSize'],
+                'column_colours': ['red', 'green', 'blue'],
+                'y_label': 'Count',
+                'info': 'Worker turnover: number of workers replaced due to inactivity. \n'
+                        'Projects per worker: mean number of projects that each worker contributes to. \n'
+                        'Average team size: mean number of workers per team.'
+            },
+        }
+
     def __repr__(self):
         return (
             self.simulation_variables,

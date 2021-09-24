@@ -151,11 +151,7 @@ class TimeSeriesPlot:
             column_colours
         ))
 
-        column_selection = st.multiselect(
-            label='Select series to plot:',
-            options=list(domain_colours),
-            default=list(domain_colours)
-        )
+        column_selection = list(domain_colours)
 
         if allow_x_axis_scrolling:
             axis_scrolling = st.checkbox(
