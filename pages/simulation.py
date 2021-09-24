@@ -510,4 +510,5 @@ def page_code():
 
                 if t == 99:
                     st.session_state.playing = False
-                    reload(rerun=False)
+                    #reload(rerun=False)
+                    st.experimental_rerun()
