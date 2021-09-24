@@ -9,6 +9,7 @@
 #       - pass variable descriptions to plot function (from config file)
 #       - run new simulations (check github issues first)
 #       - replace TRAIN_OFF simulation directory on github (only contains one replicate)
+#       - change font size (for infoboxes) if desired: https://discuss.streamlit.io/t/change-font-size-and-font-color/12377/3
 # Note: to change button colour and style...
 # https://discuss.streamlit.io/t/how-to-change-the-backgorund-color-of-button-widget/12103/10
 
@@ -139,12 +140,13 @@ class TimeSeriesPlot:
 
     def __init__(
             self, column_names, column_colours,
-            plot_name, y_label,
+            plot_name, y_label, info,
             allow_x_axis_scrolling=False,
             use_moving_average=False
     ):
 
         st.subheader(plot_name)
+        st.write(info)
 
         domain_colours = dict(zip(
             column_names,
@@ -437,61 +439,17 @@ def page_code():
             timestep=st.session_state.global_time
         )
 
-        roi_plot = TimeSeriesPlot(
-            column_names=['Roi'],
-            column_colours=['blue'],
-            plot_name='Return on Investment (ROI)',
-            y_label='ROI (%)'
-        )
-
-        active_plot = TimeSeriesPlot(
-            column_names=['ActiveProjects'],
-            column_colours=['blue'],
-            plot_name='Active Project Count',
-            y_label='number of projects'
-        )
-
-        project_plot = TimeSeriesPlot(
-            column_names=['SuccessfulProjects', 'FailedProjects', 'NullProjects'],
-            column_colours=['green', 'red', 'orange'],
-            plot_name='Project Plot',
-            y_label='number of projects'
-        )
-
-        worker_plot = TimeSeriesPlot(
-            column_names=['WorkersOnProjects', 'WorkersWithoutProjects', 'WorkersOnTraining'],
-            column_colours=['green', 'red', 'orange'],
-            plot_name='Worker Plot',
-            y_label='Number of workers'
-        )
-
-        load_plot = TimeSeriesPlot(
-            column_names=['ProjectLoad', 'TrainingLoad', 'DeptLoad', 'Slack'],
-            column_colours=['green', 'orange', 'red', 'blue'],
-            plot_name='Load Plot',
-            y_label='Fraction of capacity'
-        )
-
-        ovr_plot = TimeSeriesPlot(
-            column_names=['AverageWorkerOvr', 'AverageTeamOvr'],
-            column_colours=['green', 'blue'],
-            plot_name='OVR Plot',
-            y_label='OVR'
-        )
-
-        success_plot = TimeSeriesPlot(
-            column_names=['RecentSuccessRate', 'AverageSuccessProbability'],
-            column_colours=['green', 'blue'],
-            plot_name='Success Plot',
-            y_label='Rate / Probability'
-        )
-
-        turnover_plot = TimeSeriesPlot(
-            column_names=['WorkerTurnover', 'ProjectsPerWorker', 'AverageTeamSize'],
-            column_colours=['red', 'green', 'blue'],
-            plot_name='Turnover Plot',
-            y_label='Count'
-        )
+        plot_list = []
+        for plot, details in st.session_state.config.simulation_plots.items():
+            plot_list.append(
+                TimeSeriesPlot(
+                    column_names=details['column_names'],
+                    column_colours=details['column_colours'],
+                    plot_name=plot,
+                    y_label=details['y_label'],
+                    info=details['info']
+                )
+            )
 
         if st.session_state.playing:
             start = st.session_state.global_time + 1
@@ -499,14 +457,8 @@ def page_code():
             for t in range(start, 100):
 
                 net_plot.update(t)
-                roi_plot.update(t)
-                active_plot.update(t)
-                project_plot.update(t)
-                worker_plot.update(t)
-                ovr_plot.update(t)
-                load_plot.update(t)
-                success_plot.update(t)
-                turnover_plot.update(t)
+                for plot in plot_list:
+                    plot.update(t)
 
                 time.sleep(0.2 / st.session_state.speed)
                 st.session_state.global_time += 1

@@ -143,8 +143,8 @@ class Config:
                 'column_names': ['WorkerTurnover', 'ProjectsPerWorker', 'AverageTeamSize'],
                 'column_colours': ['red', 'green', 'blue'],
                 'y_label': 'Count',
-                'info': 'Worker turnover: number of workers replaced due to inactivity. \n'
-                        'Projects per worker: mean number of projects that each worker contributes to. \n'
+                'info': 'Worker turnover: number of workers replaced due to inactivity.  \n'
+                        'Projects per worker: mean number of projects that each worker contributes to.  \n'
                         'Average team size: mean number of workers per team.'
             },
         }
