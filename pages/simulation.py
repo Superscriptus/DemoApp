@@ -120,14 +120,24 @@ def load_data(
         "data/" + sub_dir + "/%s/model_vars_rep_%d.pickle" % (optimiser_dict[st.session_state.team_allocation], rep)
     )
     if st.session_state.data is not None:
-        # We load the networks for each timestep up to 'duration'
-        st.session_state.networks = {
-            t - 1: nx.read_multiline_adjlist(
-                "data/" + sub_dir + "/%s/network_rep_%d_timestep_%d.adjlist"
-                % (optimiser_dict[st.session_state.team_allocation], rep, t)
+        # We load the networks for each timestep up to 'duration' and convert them to an html string that
+        # can be read by PyVis.
+        st.session_state.networks = {}
+
+        for t in range(1, duration + 1):
+            #net = Network(height='400px', width='590px', bgcolor='#ffffff', font_color='white')
+            net = Network(height='400px', width='85%', bgcolor='#ffffff', font_color='white')
+            net.from_nx(
+                nx.read_multiline_adjlist(
+                    "data/" + sub_dir + "/%s/network_rep_%d_timestep_%d.adjlist"
+                    % (optimiser_dict[st.session_state.team_allocation], rep, t)
+                )
             )
-            for t in range(1, duration + 1)
-        }
+            path = '/tmp'
+            net.save_graph(f'{path}/pyvis_graph.html')
+            html_file = open(f'{path}/pyvis_graph.html', 'r', encoding='utf-8')
+
+            st.session_state.networks[t - 1] = html_file.read()
 
         # We add ROI as this was computed and saved retrospectively (after simulations were run)
         roi = unpickle(
@@ -228,7 +238,6 @@ class TimeSeriesPlot:
 class NetworkPlot:
 
     def __init__(self, plot_name, info, timestep=0):
-
         st.subheader(plot_name)
 
         st.button(
@@ -239,25 +248,13 @@ class NetworkPlot:
         if st.session_state.display_net:
             st.write(info)
 
-            self.net = Network(height='400px', width='590px', bgcolor='#ffffff', font_color='white')
-
-            if st.session_state.networks is not None:
-                self.net.from_nx(st.session_state.networks.get(timestep, nx.Graph()))
-
-            path = '/tmp'
-            self.net.save_graph(f'{path}/pyvis_graph.html')
-            self.html_file = open(f'{path}/pyvis_graph.html', 'r', encoding='utf-8')
-            self.chart = components.html(self.html_file.read(), height=435)
+            self.chart = components.html(
+                st.session_state.networks.get(timestep, ''),
+                height=435
+            )
 
     def update(self, timestep):
-
-        if st.session_state.display_net and st.session_state.networks is not None:
-            self.net.from_nx(st.session_state.networks.get(timestep, nx.Graph()))
-
-            path = '/tmp'
-            self.net.save_graph(f'{path}/pyvis_graph.html')
-            self.html_file = open(f'{path}/pyvis_graph.html', 'r', encoding='utf-8')
-            # self.chart = components.html(html_file.read(), height=435)
+        pass
 
 
 def deactivate_preset():
@@ -481,14 +478,14 @@ def page_code():
 
             for t in range(start, 100):
 
-                net_plot.update(t)
+                # net_plot.update(t)
                 for plot in plot_list:
                     plot.update(t)
 
                 time.sleep(0.2 / st.session_state.speed)
                 st.session_state.global_time += 1
 
-                if t % 10 == 0:
+                if st.session_state.display_net and t % 10 == 0:
                     st.experimental_rerun()
 
                 if t == 99:
