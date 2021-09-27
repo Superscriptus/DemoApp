@@ -427,8 +427,8 @@ def page_code():
         st.write(get_preset_details(st.session_state.preset, detail='blurb'))
 
     else:
-        st.write("Explore the behaviour of the simulation by selecting "
-                 "your own parameter values in the sidebar (click 'Expand for full parameter control').")
+        st.write("Select a parameter preset in the sidebar (A, B, C or D), or explore the behaviour of the simulation "
+                 "by selecting your own parameter values (click 'Expand for full parameter control').")
 
     create_sidebar_controls()
 
