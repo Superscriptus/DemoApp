@@ -485,7 +485,7 @@ def page_code():
                 time.sleep(0.2 / st.session_state.speed)
                 st.session_state.global_time += 1
 
-                if st.session_state.display_net and t % 1 == 0:
+                if st.session_state.display_net and t % 10 == 0:
                     st.experimental_rerun()
 
                 if t == 99:
