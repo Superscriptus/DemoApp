@@ -216,7 +216,7 @@ class NetworkPlot:
     def __init__(self, plot_name, timestep=0):
 
         st.subheader(plot_name)
-        self.net = Network(height='465px', bgcolor='#222222', font_color='white')
+        self.net = Network(height='400px', width='590px', bgcolor='#ffffff', font_color='white')
 
         if st.session_state.networks is not None:
             self.net.from_nx(st.session_state.networks.get(timestep, nx.Graph()))
