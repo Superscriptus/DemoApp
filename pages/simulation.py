@@ -463,6 +463,9 @@ def page_code():
                 time.sleep(0.2 / st.session_state.speed)
                 st.session_state.global_time += 1
 
+                if t % 10 == 0:
+                    st.experimental_rerun()
+
                 if t == 99:
                     st.session_state.playing = False
                     #reload(rerun=False)
