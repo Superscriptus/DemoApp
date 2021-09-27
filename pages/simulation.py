@@ -9,22 +9,36 @@
 #       - pass variable descriptions to plot function (from config file)
 #       - run new simulations (check github issues first)
 #       - replace TRAIN_OFF simulation directory on github (only contains one replicate)
+#       - change font size (for infoboxes) if desired: https://discuss.streamlit.io/t/change-font-size-and-font-color/12377/3
+#       - could refactor Network and Timeseries plot to inherit shared logic from a base class
 # Note: to change button colour and style...
 # https://discuss.streamlit.io/t/how-to-change-the-backgorund-color-of-button-widget/12103/10
 
 import numpy as np
 import streamlit as st
+import streamlit.components.v1 as components
 import altair as alt
 import time
 import pickle
+import networkx as nx
+from pyvis.network import Network
 from random import choice
 
 
+@st.cache()
 def play_label(playing):
     if playing:
         return 'Stop simulation'
     else:
         return 'Play simulation'
+
+
+@st.cache()
+def social_network_label(display_net):
+    if display_net:
+        return 'Turn off social network'
+    else:
+        return 'Turn on social network'
 
 
 def reload(remove_preset=False, rerun=True):
@@ -58,6 +72,10 @@ def handle_play_click():
         reload()
 
 
+def handle_network_click():
+    st.session_state.display_net = ~st.session_state.display_net
+
+
 def unpickle(file_path, data_type='df', silent=False):
     try:
         with open(file_path, 'rb') as ifile:
@@ -78,8 +96,10 @@ def unpickle(file_path, data_type='df', silent=False):
         return None
 
 
-def load_data(project_count, dept_workload, budget_func, skill_decay, train_load, rep):
-
+def load_data(
+        project_count, dept_workload, budget_func,
+        skill_decay, train_load, rep, duration=100
+):
     optimiser_dict = dict(zip(
         ['Random', 'Optimised', 'Flexible start time'],
         ['Random', 'Basin', 'Basin_w_flex']
@@ -100,6 +120,25 @@ def load_data(project_count, dept_workload, budget_func, skill_decay, train_load
         "data/" + sub_dir + "/%s/model_vars_rep_%d.pickle" % (optimiser_dict[st.session_state.team_allocation], rep)
     )
     if st.session_state.data is not None:
+        # We load the networks for each timestep up to 'duration' and convert them to an html string that
+        # can be read by PyVis.
+        st.session_state.networks = {}
+
+        for t in range(1, duration + 1):
+            #net = Network(height='400px', width='590px', bgcolor='#ffffff', font_color='white')
+            net = Network(height='400px', width='85%', bgcolor='#ffffff', font_color='white')
+            net.from_nx(
+                nx.read_multiline_adjlist(
+                    "data/" + sub_dir + "/%s/network_rep_%d_timestep_%d.adjlist"
+                    % (optimiser_dict[st.session_state.team_allocation], rep, t)
+                )
+            )
+            path = '/tmp'
+            net.save_graph(f'{path}/pyvis_graph.html')
+            html_file = open(f'{path}/pyvis_graph.html', 'r', encoding='utf-8')
+
+            st.session_state.networks[t - 1] = html_file.read()
+
         # We add ROI as this was computed and saved retrospectively (after simulations were run)
         roi = unpickle(
             "data/" + sub_dir + "/%s/roi_rep_%d.pickle" % (optimiser_dict[st.session_state.team_allocation], rep),
@@ -107,30 +146,38 @@ def load_data(project_count, dept_workload, budget_func, skill_decay, train_load
             silent=True
         )
         if roi is not None:
-            st.session_state.data['roi'] = roi
+            st.session_state.data['Roi'] = moving_average(roi * 100, window_size=10)
         else:
-            st.session_state.data['roi'] = np.zeros(len(st.session_state.data))
+            st.session_state.data['Roi'] = np.zeros(len(st.session_state.data))
+
+    else:
+        st.session_state.networks = None
+
+
+@st.cache()
+def moving_average(interval, window_size):
+    window = np.ones(int(window_size)) / float(window_size)
+    return np.convolve(interval, window, 'same')
 
 
 class TimeSeriesPlot:
 
     def __init__(
             self, column_names, column_colours,
-            plot_name, y_label, allow_x_axis_scrolling=False
+            plot_name, y_label, info,
+            allow_x_axis_scrolling=False,
+            use_moving_average=False
     ):
 
         st.subheader(plot_name)
+        st.write(info)
 
         domain_colours = dict(zip(
             column_names,
             column_colours
         ))
 
-        column_selection = st.multiselect(
-            label='Select series to plot:',
-            options=list(domain_colours),
-            default=list(domain_colours)
-        )
+        column_selection = list(domain_colours)
 
         if allow_x_axis_scrolling:
             axis_scrolling = st.checkbox(
@@ -154,8 +201,8 @@ class TimeSeriesPlot:
         )
 
         chart_data = st.session_state.data.loc[
-                         0:st.session_state.global_time,
-                         self.plot_series
+                     0:st.session_state.global_time,
+                     self.plot_series
                      ].melt('time')
 
         chart_data['description'] = [
@@ -188,6 +235,28 @@ class TimeSeriesPlot:
         )
 
 
+class NetworkPlot:
+
+    def __init__(self, plot_name, info, timestep=0):
+        st.subheader(plot_name)
+
+        st.button(
+            social_network_label(st.session_state.display_net),
+            on_click=handle_network_click
+        )
+
+        if st.session_state.display_net:
+            st.write(info)
+
+            self.chart = components.html(
+                st.session_state.networks.get(timestep, ''),
+                height=435
+            )
+
+    def update(self, timestep):
+        pass
+
+
 def deactivate_preset():
     st.session_state.preset_active = False
 
@@ -205,7 +274,6 @@ def preset_label(value):
 
 
 def create_preset_button(layout_element, value):
-
     with layout_element:
         st.button(
             label=preset_label(value),
@@ -222,13 +290,13 @@ def set_preset(value):
     reload(remove_preset=False, rerun=True)
 
 
+@st.cache()
 def get_preset_details(value, detail='preset_name'):
     preset_dict = st.session_state.config.simulation_presets[value]
     return preset_dict[detail]
 
 
 def set_default_parameters():
-
     if st.session_state.preset_active:
         parameter_dict = st.session_state.config.simulation_presets[st.session_state.preset]
         for key, value in parameter_dict.items():
@@ -242,15 +310,14 @@ def set_default_parameters():
 
 
 def create_sidebar_controls():
-
     st.sidebar.subheader("Simulation parameter selection")
     speed = st.sidebar.slider(
-            "Set simulation speed:",
-            min_value=1,
-            max_value=10,
-            value=5,
-            key='speed'
-        )
+        "Set simulation speed:",
+        min_value=1,
+        max_value=10,
+        value=5,
+        key='speed'
+    )
 
     st.sidebar.write("Select parameter presets:")
     row_presets = st.sidebar.beta_columns([1, 1, 1, 1])
@@ -299,7 +366,7 @@ def create_sidebar_controls():
                 key='project_count',
                 on_change=reload,
                 args=(True, False),
-                help="Number of new projects created each time step:"
+                help="Number of new projects created each time step."
             )
 
         with row_1[-1]:
@@ -359,12 +426,14 @@ def create_sidebar_controls():
 
 
 def page_code():
-
     if 'replicate' not in st.session_state:
         st.session_state.replicate = 0
 
     if 'preset_active' not in st.session_state:
         st.session_state.preset_active = False
+
+    if 'display_net' not in st.session_state:
+        st.session_state.display_net = False
 
     st.title("Simulation")
 
@@ -378,86 +447,48 @@ def page_code():
         st.write(get_preset_details(st.session_state.preset, detail='blurb'))
 
     else:
-        st.write("Explore the behaviour of the simulation by selecting "
-                 "your own parameter values in the sidebar (click 'Expand for full parameter control').")
+        st.write("Select a parameter preset in the sidebar (A, B, C or D), or explore the behaviour of the simulation "
+                 "by selecting your own parameter values (click 'Expand for full parameter control').  \n  \n"
+                 "Click 'Play simulation' to run the agent-based model for your chosen parameter values.")
 
     create_sidebar_controls()
 
     if st.session_state.data is not None:
 
-        roi_plot = TimeSeriesPlot(
-            column_names=['roi'],
-            column_colours=['blue'],
-            plot_name='Return on Investment (ROI)',
-            y_label='ROI'
+        net_plot = NetworkPlot(
+            plot_name='Social Network',
+            timestep=st.session_state.global_time,
+            info="The network of all successful collaborations between workers."
         )
 
-        active_plot = TimeSeriesPlot(
-            column_names=['ActiveProjects'],
-            column_colours=['blue'],
-            plot_name='Active Project Count',
-            y_label='number of projects'
-        )
-
-        project_plot = TimeSeriesPlot(
-            column_names=['SuccessfulProjects', 'FailedProjects', 'NullProjects'],
-            column_colours=['green', 'red', 'orange'],
-            plot_name='Project Plot',
-            y_label='number of projects'
-        )
-
-        worker_plot = TimeSeriesPlot(
-            column_names=['WorkersOnProjects', 'WorkersWithoutProjects', 'WorkersOnTraining'],
-            column_colours=['green', 'red', 'orange'],
-            plot_name='Worker Plot',
-            y_label='Number of workers'
-        )
-
-        load_plot = TimeSeriesPlot(
-            column_names=['ProjectLoad', 'TrainingLoad', 'DeptLoad', 'Slack'],
-            column_colours=['green', 'orange', 'red', 'blue'],
-            plot_name='Load Plot',
-            y_label='Fraction of capacity'
-        )
-
-        ovr_plot = TimeSeriesPlot(
-            column_names=['AverageWorkerOvr', 'AverageTeamOvr'],
-            column_colours=['green', 'blue'],
-            plot_name='OVR Plot',
-            y_label='OVR'
-        )
-
-        success_plot = TimeSeriesPlot(
-            column_names=['RecentSuccessRate', 'AverageSuccessProbability'],
-            column_colours=['green', 'blue'],
-            plot_name='Success Plot',
-            y_label='Rate / Probability'
-        )
-
-        turnover_plot = TimeSeriesPlot(
-            column_names=['WorkerTurnover', 'ProjectsPerWorker', 'AverageTeamSize'],
-            column_colours=['red', 'green', 'blue'],
-            plot_name='Turnover Plot',
-            y_label='Count'
-        )
+        plot_list = []
+        for plot, details in st.session_state.config.simulation_plots.items():
+            plot_list.append(
+                TimeSeriesPlot(
+                    column_names=details['column_names'],
+                    column_colours=details['column_colours'],
+                    plot_name=plot,
+                    y_label=details['y_label'],
+                    info=details['info']
+                )
+            )
 
         if st.session_state.playing:
             start = st.session_state.global_time + 1
 
             for t in range(start, 100):
 
-                roi_plot.update(t)
-                active_plot.update(t)
-                project_plot.update(t)
-                worker_plot.update(t)
-                ovr_plot.update(t)
-                load_plot.update(t)
-                success_plot.update(t)
-                turnover_plot.update(t)
+                # net_plot.update(t)
+                for plot in plot_list:
+                    plot.update(t)
 
                 time.sleep(0.2 / st.session_state.speed)
                 st.session_state.global_time += 1
 
+                if st.session_state.display_net and t % 1 == 0:
+                    st.experimental_rerun()
+
                 if t == 99:
                     st.session_state.playing = False
-                    reload(rerun=False)
+                    # reload(rerun=False)
+                    st.experimental_rerun()
