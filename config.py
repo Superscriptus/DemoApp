@@ -76,13 +76,13 @@ class Config:
             'D': {
                 'preset_name': 'The Rigid Organization',
                 'blurb': 'These organizations are too inflexible. They are burdened by departmental workload and do not'
-                         ' train inactive staff.',
+                         ' train inactive staff. Project teams are allocated at random.',
                 'project_count': 2,
                 'budget_func': False,
                 'dept_workload': 0.3,
                 'skill_decay': 0.95,
                 'train_load': 0.0,
-                'team_allocation': 'Flexible start time'
+                'team_allocation': 'Random'
             }
         }
 
