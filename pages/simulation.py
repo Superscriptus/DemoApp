@@ -10,6 +10,7 @@
 #       - run new simulations (check github issues first)
 #       - replace TRAIN_OFF simulation directory on github (only contains one replicate)
 #       - change font size (for infoboxes) if desired: https://discuss.streamlit.io/t/change-font-size-and-font-color/12377/3
+#       - could refactor Network and Timeseries plot to inherit shared logic from a base class
 # Note: to change button colour and style...
 # https://discuss.streamlit.io/t/how-to-change-the-backgorund-color-of-button-widget/12103/10
 
@@ -29,6 +30,13 @@ def play_label(playing):
         return 'Stop simulation'
     else:
         return 'Play simulation'
+
+
+def social_network_label(display_net):
+    if display_net:
+        return 'Turn off social network'
+    else:
+        return 'Turn on social network'
 
 
 def reload(remove_preset=False, rerun=True):
@@ -60,6 +68,10 @@ def handle_play_click():
 
     if st.session_state.global_time == 99:
         reload()
+
+
+def handle_network_click():
+    st.session_state.display_net = ~st.session_state.display_net
 
 
 def unpickle(file_path, data_type='df', silent=False):
@@ -213,28 +225,37 @@ class TimeSeriesPlot:
 
 class NetworkPlot:
 
-    def __init__(self, plot_name, timestep=0):
+    def __init__(self, plot_name, info, timestep=0):
 
         st.subheader(plot_name)
-        self.net = Network(height='400px', width='590px', bgcolor='#ffffff', font_color='white')
 
-        if st.session_state.networks is not None:
-            self.net.from_nx(st.session_state.networks.get(timestep, nx.Graph()))
+        st.button(
+            social_network_label(st.session_state.display_net),
+            on_click=handle_network_click
+        )
 
-        path = '/tmp'
-        self.net.save_graph(f'{path}/pyvis_graph.html')
-        self.html_file = open(f'{path}/pyvis_graph.html', 'r', encoding='utf-8')
-        self.chart = components.html(self.html_file.read(), height=435)
+        if st.session_state.display_net:
+            st.write(info)
+
+            self.net = Network(height='400px', width='590px', bgcolor='#ffffff', font_color='white')
+
+            if st.session_state.networks is not None:
+                self.net.from_nx(st.session_state.networks.get(timestep, nx.Graph()))
+
+            path = '/tmp'
+            self.net.save_graph(f'{path}/pyvis_graph.html')
+            self.html_file = open(f'{path}/pyvis_graph.html', 'r', encoding='utf-8')
+            self.chart = components.html(self.html_file.read(), height=435)
 
     def update(self, timestep):
 
-        if st.session_state.networks is not None:
+        if st.session_state.display_net and st.session_state.networks is not None:
             self.net.from_nx(st.session_state.networks.get(timestep, nx.Graph()))
 
-        path = '/tmp'
-        self.net.save_graph(f'{path}/pyvis_graph.html')
-        self.html_file = open(f'{path}/pyvis_graph.html', 'r', encoding='utf-8')
-        #self.chart = components.html(html_file.read(), height=435)
+            path = '/tmp'
+            self.net.save_graph(f'{path}/pyvis_graph.html')
+            self.html_file = open(f'{path}/pyvis_graph.html', 'r', encoding='utf-8')
+            #self.chart = components.html(html_file.read(), height=435)
 
 
 def deactivate_preset():
@@ -415,6 +436,9 @@ def page_code():
     if 'preset_active' not in st.session_state:
         st.session_state.preset_active = False
 
+    if 'display_net' not in st.session_state:
+        st.session_state.display_net = False
+
     st.title("Simulation")
 
     if st.session_state.preset_active:
@@ -437,7 +461,8 @@ def page_code():
 
         net_plot = NetworkPlot(
             plot_name='Social Network',
-            timestep=st.session_state.global_time
+            timestep=st.session_state.global_time,
+            info="The network of all successful collaborations between workers."
         )
 
         plot_list = []
