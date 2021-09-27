@@ -428,7 +428,8 @@ def page_code():
 
     else:
         st.write("Select a parameter preset in the sidebar (A, B, C or D), or explore the behaviour of the simulation "
-                 "by selecting your own parameter values (click 'Expand for full parameter control').")
+                 "by selecting your own parameter values (click 'Expand for full parameter control').  \n  \n"
+                 "Click 'Play simulation' to run the agent-based model for your chosen parameter values.")
 
     create_sidebar_controls()
 
