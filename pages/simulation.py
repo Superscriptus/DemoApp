@@ -146,7 +146,7 @@ def load_data(
             silent=True
         )
         if roi is not None:
-            st.session_state.data['Roi'] = moving_average(roi * 100, window_size=10)
+            st.session_state.data['Roi'] = moving_average(roi, window_size=10)
         else:
             st.session_state.data['Roi'] = np.zeros(len(st.session_state.data))
 
