@@ -65,11 +65,25 @@ def reload(remove_preset=False, rerun=True):
 
 
 def handle_play_click():
-    if st.session_state.data is not None:
-        st.session_state.playing = not st.session_state.playing
 
-    if st.session_state.global_time == 99:
-        reload()
+    if st.session_state.data_load_complete:
+
+        if st.session_state.data is not None:
+            st.session_state.playing = not st.session_state.playing
+
+        if st.session_state.global_time == 99:
+            reload()
+
+    else:
+        st.error("Attempted to play simulation while model still loading! "
+                 "Please select another Preset and wait for data load to complete.")
+
+
+def handle_speed_slider():
+
+    if not st.session_state.data_load_complete:
+        st.error("Attempted to change simulation speed while model still loading! "
+                 "Please select another Preset and wait for data load to complete.")
 
 
 def handle_network_click():
@@ -100,6 +114,8 @@ def load_data(
         project_count, dept_workload, budget_func,
         skill_decay, train_load, rep, duration=100
 ):
+    st.session_state.data_load_complete = False
+
     optimiser_dict = dict(zip(
         ['Random', 'Optimised', 'Flexible start time'],
         ['Random', 'Basin', 'Basin_w_flex']
@@ -152,6 +168,8 @@ def load_data(
 
     else:
         st.session_state.networks = None
+
+    st.session_state.data_load_complete = True
 
 
 @st.cache()
@@ -318,14 +336,6 @@ def set_default_parameters():
 
 
 def create_sidebar_controls():
-    st.sidebar.subheader("Simulation parameter selection")
-    speed = st.sidebar.slider(
-        "Set simulation speed:",
-        min_value=1,
-        max_value=10,
-        value=5,
-        key='speed'
-    )
 
     st.sidebar.write("Select parameter presets:")
     row_presets = st.sidebar.beta_columns([1, 1, 1, 1])
@@ -427,10 +437,22 @@ def create_sidebar_controls():
     if 'global_time' not in st.session_state:
         st.session_state.global_time = 0
 
-    play = st.sidebar.button(
-        play_label(st.session_state.playing),
-        on_click=handle_play_click
-    )
+    if st.session_state.data_load_complete:
+
+        st.sidebar.subheader("Simulation parameter selection")
+        speed = st.sidebar.slider(
+            "Set simulation speed:",
+            min_value=1,
+            max_value=10,
+            value=5,
+            key='speed',
+            on_change=handle_speed_slider
+        )
+
+        play = st.sidebar.button(
+            play_label(st.session_state.playing),
+            on_click=handle_play_click
+        )
 
 
 def page_code():
@@ -442,6 +464,9 @@ def page_code():
 
     if 'display_net' not in st.session_state:
         st.session_state.display_net = False
+
+    if 'data_load_complete' not in st.session_state:
+        st.session_state.data_load_complete = False
 
     st.title("Simulation")
 
