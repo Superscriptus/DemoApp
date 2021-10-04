@@ -56,14 +56,23 @@ def page_code():
     st.subheader("Bar chart test:")
 
     bar_data = pd.DataFrame({
-        preset: [
+        'preset': domain,
+        'terminal ROI': [
             np.mean(st.session_state.comparison_data[preset]['model_vars'].loc[-25:]['Roi'])
-            if d == preset
-            else 0
-            for d in domain
+            for preset in domain
         ]
-        for preset in domain
-    }, index=domain)
-
-    st.bar_chart(bar_data)
+    })
+    bar_chart = alt.Chart(bar_data).mark_bar().encode(
+        x='preset',
+        y='terminal ROI',
+        color=alt.Color(
+            'preset', scale=alt.Scale(
+                domain=domain,
+                range=colours
+            )
+        )
+    ).properties(title="Mean ROI over final 25 timesteps")
+    st.altair_chart(bar_chart, use_container_width=True)
+    #
+    # st.bar_chart(bar_data)
 
