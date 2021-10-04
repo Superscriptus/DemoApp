@@ -1,7 +1,5 @@
 import streamlit as st
 
-from .simulation import load_data, set_default_parameters
-
 
 def page_code():
 
