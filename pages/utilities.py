@@ -50,12 +50,21 @@ def create_session_state_variables():
     if 'preset_active' not in st.session_state:
         st.session_state.preset_active = False
 
+    if 'data' not in st.session_state:
+        st.session_state.data = {
+            'model_vars': None,
+            'networks': None
+        }
 
+
+@st.cache()
 def load_data(
         project_count, dept_workload, budget_func,
-        skill_decay, train_load, rep, duration=100
+        skill_decay, train_load, rep,
+        team_allocation, duration=100
 ):
     st.session_state.data_load_complete = False
+    return_data = {}
 
     optimiser_dict = dict(zip(
         ['Random', 'Optimised', 'Flexible start time'],
@@ -73,13 +82,13 @@ def load_data(
             )
     )
 
-    st.session_state.data = unpickle(
-        "data/" + sub_dir + "/%s/model_vars_rep_%d.pickle" % (optimiser_dict[st.session_state.team_allocation], rep)
+    return_data['model_vars'] = unpickle(
+        "data/" + sub_dir + "/%s/model_vars_rep_%d.pickle" % (optimiser_dict[team_allocation], rep)
     )
-    if st.session_state.data is not None:
+    if return_data['model_vars'] is not None:
         # We load the networks for each timestep up to 'duration' and convert them to an html string that
         # can be read by PyVis.
-        st.session_state.networks = {}
+        return_data['networks'] = {}
 
         for t in range(1, duration + 1):
             #net = Network(height='400px', width='590px', bgcolor='#ffffff', font_color='white')
@@ -87,27 +96,29 @@ def load_data(
             net.from_nx(
                 nx.read_multiline_adjlist(
                     "data/" + sub_dir + "/%s/network_rep_%d_timestep_%d.adjlist"
-                    % (optimiser_dict[st.session_state.team_allocation], rep, t)
+                    % (optimiser_dict[team_allocation], rep, t)
                 )
             )
             path = '/tmp'
             net.save_graph(f'{path}/pyvis_graph.html')
             html_file = open(f'{path}/pyvis_graph.html', 'r', encoding='utf-8')
 
-            st.session_state.networks[t - 1] = html_file.read()
+            return_data['networks'][t - 1] = html_file.read()
 
         # We add ROI as this was computed and saved retrospectively (after simulations were run)
         roi = unpickle(
-            "data/" + sub_dir + "/%s/roi_rep_%d.pickle" % (optimiser_dict[st.session_state.team_allocation], rep),
+            "data/" + sub_dir + "/%s/roi_rep_%d.pickle" % (optimiser_dict[team_allocation], rep),
             data_type='list',
             silent=True
         )
         if roi is not None:
-            st.session_state.data['Roi'] = moving_average(roi, window_size=10)
+            return_data['model_vars']['Roi'] = moving_average(roi, window_size=10)
         else:
-            st.session_state.data['Roi'] = np.zeros(len(st.session_state.data))
+            return_data['model_vars']['Roi'] = np.zeros(len(st.session_state.data))
 
     else:
-        st.session_state.networks = None
+        return_data['networks'] = None
 
     st.session_state.data_load_complete = True
+
+    return return_data

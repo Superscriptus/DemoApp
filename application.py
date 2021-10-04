@@ -24,13 +24,14 @@ class Application:
 
         create_session_state_variables()
         set_default_parameters()
-        load_data(
-            st.session_state.project_count,
-            st.session_state.dept_workload,
-            st.session_state.budget_func,
-            st.session_state.skill_decay,
-            st.session_state.train_load,
-            st.session_state.replicate
+        st.session_state.data = load_data(
+            project_count=st.session_state.project_count,
+            dept_workload=st.session_state.dept_workload,
+            budget_func=st.session_state.budget_func,
+            train_load=st.session_state.train_load,
+            skill_decay=st.session_state.skill_decay,
+            rep=st.session_state.replicate,
+            team_allocation=st.session_state.team_allocation
         )
 
         st.sidebar.image('images/logo.png', use_column_width=True)

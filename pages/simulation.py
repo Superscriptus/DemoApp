@@ -51,13 +51,14 @@ def reload(remove_preset=False, rerun=True):
         del st.session_state['data']
         st.experimental_rerun()
     else:
-        load_data(
-            st.session_state.project_count,
-            st.session_state.dept_workload,
-            st.session_state.budget_func,
-            st.session_state.skill_decay,
-            st.session_state.train_load,
-            st.session_state.replicate
+        st.session_state.data = load_data(
+            project_count=st.session_state.project_count,
+            dept_workload=st.session_state.dept_workload,
+            budget_func=st.session_state.budget_func,
+            train_load=st.session_state.train_load,
+            skill_decay=st.session_state.skill_decay,
+            rep=st.session_state.replicate,
+            team_allocation=st.session_state.team_allocation
         )
 
 
@@ -65,7 +66,7 @@ def handle_play_click():
 
     if st.session_state.data_load_complete:
 
-        if st.session_state.data is not None:
+        if st.session_state.data['model_vars'] is not None:
             st.session_state.playing = not st.session_state.playing
 
         if st.session_state.global_time == 99:
@@ -127,7 +128,7 @@ class TimeSeriesPlot:
             alt.X('time', axis=alt.Axis(title='timestep'), scale=alt.Scale(domain=[0, 100]))
         )
 
-        chart_data = st.session_state.data.loc[
+        chart_data = st.session_state.data['model_vars'].loc[
                      0:st.session_state.global_time,
                      self.plot_series
                      ].melt('time')
@@ -151,7 +152,7 @@ class TimeSeriesPlot:
 
     def update(self, timestep):
 
-        chart_data = st.session_state.data.loc[timestep:timestep, self.plot_series].melt('time')
+        chart_data = st.session_state.data['model_vars'].loc[timestep:timestep, self.plot_series].melt('time')
 
         chart_data['description'] = [
             st.session_state.config.simulation_variables.get(v, '(undefined)')
@@ -323,13 +324,14 @@ def create_sidebar_controls():
         )
 
     if 'data' not in st.session_state:
-        load_data(
+        st.session_state.data = load_data(
             project_count=st.session_state.project_count,
             dept_workload=st.session_state.dept_workload,
             budget_func=st.session_state.budget_func,
             train_load=st.session_state.train_load,
             skill_decay=st.session_state.skill_decay,
-            rep=st.session_state.replicate
+            rep=st.session_state.replicate,
+            team_allocation=st.session_state.team_allocation
         )
 
     if 'playing' not in st.session_state:
@@ -387,7 +389,7 @@ def page_code():
 
     create_sidebar_controls()
 
-    if st.session_state.data is not None:
+    if st.session_state.data['model_vars'] is not None:
 
         net_plot = NetworkPlot(
             plot_name='Social Network',
