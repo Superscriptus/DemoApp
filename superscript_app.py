@@ -16,7 +16,7 @@ Resources:
  """
 
 from application import Application
-from pages import hypotheses, simulation, comparison, about
+from pages import simulation, comparison, about
 
 app = Application()
 app.create_page("About", about)
