@@ -155,9 +155,17 @@ def load_data(
 
 
 @st.cache()
-def moving_average(interval, window_size):
+def moving_average(interval, window_size, append_to_len=True, look_back=2):
     window = np.ones(int(window_size)) / float(window_size)
-    return np.convolve(interval, window, 'same')
+
+    filtered = np.convolve(interval, window, 'valid')
+
+    if append_to_len:
+        filtered = list(filtered)
+        for i in range(len(filtered), len(interval)):
+            filtered.append(np.mean(interval[i - look_back:]))
+
+    return filtered
 
 
 class TimeSeriesPlot:
