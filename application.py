@@ -1,5 +1,8 @@
 import streamlit as st
 
+from pages.utilities import create_session_state_variables
+from pages.simulation import load_models, set_default_parameters
+
 
 class Application:
 
@@ -28,3 +31,21 @@ class Application:
         )
 
         self.pages[selected_page].page_code()
+
+        create_session_state_variables()
+        set_default_parameters()
+        st.session_state.comparison_data = {}
+
+        for preset, parameters in st.session_state.config.simulation_presets.items():
+            parameter_dict = parameters
+
+            st.session_state.comparison_data[preset] = load_models(
+                project_count=parameter_dict['project_count'],
+                dept_workload=parameter_dict['dept_workload'],
+                budget_func=parameter_dict['budget_func'],
+                train_load=parameter_dict['train_load'],
+                skill_decay=parameter_dict['skill_decay'],
+                rep=st.session_state.replicate,
+                team_allocation=parameter_dict['team_allocation']
+            )
+

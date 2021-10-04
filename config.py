@@ -78,7 +78,7 @@ class Config:
                 'blurb': 'These organizations are too inflexible. They are burdened by departmental workload and do not'
                          ' train inactive staff. Project teams are allocated at random.',
                 'project_count': 2,
-                'budget_func': False,
+                'budget_func': True,
                 'dept_workload': 0.3,
                 'skill_decay': 0.95,
                 'train_load': 0.0,
