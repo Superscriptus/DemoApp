@@ -74,7 +74,7 @@ def handle_play_click():
 
     else:
         st.error("Attempted to play simulation while model still loading! "
-                 "Please select another Preset and wait for data load to complete.")
+                 "Please select another parameter combination and wait for model loading to complete.")
 
 
 def handle_speed_slider():
