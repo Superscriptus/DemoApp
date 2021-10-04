@@ -19,7 +19,7 @@ import streamlit as st
 import streamlit.components.v1 as components
 import altair as alt
 import time
-from .utilities import load_data
+from .utilities import load_models
 
 
 @st.cache()
@@ -51,7 +51,7 @@ def reload(remove_preset=False, rerun=True):
         del st.session_state['data']
         st.experimental_rerun()
     else:
-        st.session_state.data = load_data(
+        st.session_state.data = load_models(
             project_count=st.session_state.project_count,
             dept_workload=st.session_state.dept_workload,
             budget_func=st.session_state.budget_func,
@@ -324,7 +324,7 @@ def create_sidebar_controls():
         )
 
     if 'data' not in st.session_state:
-        st.session_state.data = load_data(
+        st.session_state.data = load_models(
             project_count=st.session_state.project_count,
             dept_workload=st.session_state.dept_workload,
             budget_func=st.session_state.budget_func,

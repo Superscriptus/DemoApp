@@ -40,6 +40,9 @@ def moving_average(interval, window_size, append_to_len=True, look_back=2):
 
 
 def create_session_state_variables():
+    if 'config' not in st.session_state:
+        from config import Config
+        st.session_state.config = Config()
 
     if 'team_allocation' not in st.session_state:
         st.session_state.team_allocation = "Random"
@@ -58,7 +61,7 @@ def create_session_state_variables():
 
 
 @st.cache()
-def load_data(
+def load_models(
         project_count, dept_workload, budget_func,
         skill_decay, train_load, rep,
         team_allocation, duration=100
