@@ -18,7 +18,12 @@ def page_code():
 
     st.title("Comparison")
 
-    st.write("Here we compare the presets...(more details to follow).")
+    st.write("Here we compare the performance of the model when simulated using the "
+             "following parameter presets:")
+
+    for preset, preset_details in st.session_state.config.simulation_presets.items():
+        with st.beta_expander(preset + ": " + preset_details['preset_name']):
+            st.write(preset_details['blurb'])
 
     chart_data = None
     for preset in st.session_state.config.simulation_presets:
