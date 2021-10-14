@@ -9,23 +9,10 @@ import numpy as np
 import altair as alt
 
 
-def page_code():
-
-    comparison_data = {}
-
-    domain = list(st.session_state.config.simulation_presets.keys())
-    colours = ['blue', 'orange', 'green', 'red']
-
-    st.title("Comparison")
-
-    st.write("Here we compare the performance of the model when simulated using the "
-             "following parameter presets:")
-
-    for preset, preset_details in st.session_state.config.simulation_presets.items():
-        with st.beta_expander(preset + ": " + preset_details['preset_name']):
-            st.write(preset_details['blurb'])
+def time_series_plot(domain, colours, title):
 
     chart_data = None
+
     for preset in st.session_state.config.simulation_presets:
 
         if chart_data is None:
@@ -54,9 +41,28 @@ def page_code():
                 range=colours
             )
         ),
-    ).properties(title="ROI Comparison")
+    ).properties(title=title)
 
     st.altair_chart(chart, use_container_width=True)
+
+
+def page_code():
+
+    comparison_data = {}
+
+    domain = list(st.session_state.config.simulation_presets.keys())
+    colours = ['blue', 'orange', 'green', 'red']
+
+    st.title("Comparison")
+
+    st.write("Here we compare the performance of the model when simulated using the "
+             "following parameter presets:")
+
+    for preset, preset_details in st.session_state.config.simulation_presets.items():
+        with st.beta_expander(preset + ": " + preset_details['preset_name']):
+            st.write(preset_details['blurb'])
+
+    time_series_plot(domain, colours, "ROI Comparison")
 
     st.subheader("Bar chart test:")
 
@@ -78,6 +84,26 @@ def page_code():
         )
     ).properties(title="Mean ROI over final 25 timesteps")
     st.altair_chart(bar_chart, use_container_width=True)
-    #
-    # st.bar_chart(bar_data)
+
+
+    st.subheader("Bar chart test 2:")
+
+    bar_data = pd.DataFrame({
+        'preset': domain,
+        'terminal ROI': [
+            np.mean(st.session_state.comparison_data[preset]['model_vars'].loc[-25:]['Roi'])
+            for preset in domain
+        ]
+    })
+    bar_chart = alt.Chart(bar_data).mark_bar().encode(
+        x='preset',
+        y='terminal ROI',
+        color=alt.Color(
+            'preset', scale=alt.Scale(
+                domain=domain,
+                range=colours
+            )
+        )
+    ).properties(title="Mean ROI over final 25 timesteps")
+    st.altair_chart(bar_chart, use_container_width=True)
 
