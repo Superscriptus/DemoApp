@@ -1,7 +1,10 @@
 """
 TODO:
 - refactor timeseries plot (use class from simulation?)
--
+- add other time series plots requested
+- add OVR and success plots
+- fix bug on simultaion pafe (see issue)
+- fix error message (no data on comparison page for pps 10)
 """
 import pandas as pd
 import streamlit as st
@@ -62,7 +65,7 @@ def bar_chart_wrapper(element, bar_data, x, y, title, domain, colours,
                 )
             ),
             column=column
-        ).properties(title=title)
+        ).properties(title=title).configure_legend(orient='bottom')
     else:
         bar_chart = alt.Chart(bar_data).mark_bar().encode(
             x=x,
@@ -141,7 +144,8 @@ def page_code():
         use_container_width=True, column=None
     )
 
-    st.subheader("Comparing skill decays:")
+    col3, col4 = st.beta_columns([1, 1])
+    col3.subheader("Comparing skill decays:")
 
     all_skill_decays = [0.95, 0.99, 0.995]
     all_skill_decay_data = {}
@@ -174,13 +178,52 @@ def page_code():
     bar_data['terminal ROI'] = terminal_roi_column
 
     bar_chart_wrapper(
-        st, bar_data, x='skill_decay:N', y='terminal ROI',
+        col3, bar_data, x='skill_decay:N', y='terminal ROI',
         title="Mean ROI over final 25 timesteps",
         domain=domain, colours=colours,
         colour_var='preset',
         use_container_width=False, column='preset'
     )
 
+    col4.subheader("Comparing training loads:")
+
+    all_train_loads = [0.0, 0.1, 0.3, 2.0]
+    all_train_load_data = {}
+
+    bar_data = pd.DataFrame()
+    bar_data['preset'] = [p for p in domain for s in all_train_loads]
+    bar_data['train_load'] = [s if s != 2.0 else 'boost' for s in all_train_loads] * len(domain)
+
+    terminal_roi_column = []
+    for preset, parameters in st.session_state.config.simulation_presets.items():
+        parameter_dict = parameters
+
+        for train_load in all_train_loads:
+
+            all_train_load_data[(preset, train_load)] = load_models(
+                project_count=parameter_dict['project_count'],
+                dept_workload=parameter_dict['dept_workload'],
+                budget_func=parameter_dict['budget_func'],
+                train_load=train_load,
+                skill_decay=parameter_dict['skill_decay'],
+                rep=st.session_state.replicate,
+                team_allocation=parameter_dict['team_allocation'],
+                load_networks=False
+            )
+            terminal_roi_column.append(
+                np.mean(all_train_load_data[(preset, train_load)]['model_vars'].loc[-25:]['Roi'])
+                if all_train_load_data[(preset, train_load)]['model_vars'] is not None
+                else None
+            )
+    bar_data['terminal ROI'] = terminal_roi_column
+
+    bar_chart_wrapper(
+        col4, bar_data, x='train_load:N', y='terminal ROI',
+        title="Mean ROI over final 25 timesteps",
+        domain=domain, colours=colours,
+        colour_var='preset',
+        use_container_width=False, column='preset'
+    )
 
 
 
