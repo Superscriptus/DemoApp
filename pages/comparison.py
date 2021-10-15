@@ -48,6 +48,35 @@ def time_series_plot(domain, colours, title):
     st.altair_chart(chart, use_container_width=True)
 
 
+def bar_chart_wrapper(bar_data, x, y, title, domain, colours, colour_var, use_width=True, column=None):
+
+    if column is not None:
+        bar_chart = alt.Chart(bar_data).mark_bar().encode(
+            x=x,
+            y=y,
+            color=alt.Color(
+                colour_var, scale=alt.Scale(
+                    domain=domain,
+                    range=colours
+                )
+            ),
+            column=column
+        ).properties(title=title)
+    else:
+        bar_chart = alt.Chart(bar_data).mark_bar().encode(
+            x=x,
+            y=y,
+            color=alt.Color(
+                colour_var, scale=alt.Scale(
+                    domain=domain,
+                    range=colours
+                )
+            )
+        ).properties(title=title)
+
+    st.altair_chart(bar_chart, use_container_width=use_width)
+
+
 def page_code():
 
     comparison_data = {}
@@ -75,18 +104,13 @@ def page_code():
             for preset in domain
         ]
     })
-    bar_chart = alt.Chart(bar_data).mark_bar().encode(
-        x='preset',
-        y='terminal ROI',
-        color=alt.Color(
-            'preset', scale=alt.Scale(
-                domain=domain,
-                range=colours
-            )
-        )
-    ).properties(title="Mean ROI over final 25 timesteps")
-    st.altair_chart(bar_chart, use_container_width=True)
-
+    bar_chart_wrapper(
+        bar_data, x='preset', y='terminal ROI',
+        title="Mean ROI over final 25 timesteps",
+        domain=domain, colours=colours,
+        colour_var='preset',
+        use_width=True, column=None
+    )
 
     st.subheader("Bar chart test 2:")
 
@@ -120,16 +144,41 @@ def page_code():
             )
     bar_data['terminal ROI'] = terminal_roi_column
 
-    bar_chart = alt.Chart(bar_data).mark_bar().encode(
-        x='skill_decay:N',
-        y='terminal ROI',
-        color=alt.Color(
-            'preset', scale=alt.Scale(
-                domain=domain,
-                range=colours
+    bar_chart_wrapper(
+        bar_data, x='skill_decay:N', y='terminal ROI',
+        title="Mean ROI over final 25 timesteps",
+        domain=domain, colours=colours,
+        colour_var='preset',
+        use_width=False, column='preset'
+    )
+
+    st.subheader("Bar chart test 4:")
+
+    load_types = ['ProjectLoad', 'Slack', 'TrainingLoad', 'DeptLoad']
+
+    bar_data = pd.DataFrame()
+    bar_data['preset'] = [p for p in domain for s in load_types]
+    bar_data['Load Type'] = [s for s in load_types] * len(domain)
+
+    load_column = []
+    for preset, parameters in st.session_state.config.simulation_presets.items():
+        parameter_dict = parameters
+
+        for lt in load_types:
+            load_column.append(
+                np.mean(st.session_state.comparison_data[preset]['model_vars'].loc[-25:][lt])
             )
-        ),
-        column='preset'
-    ).properties(title="Mean ROI over final 25 timesteps")
-    st.altair_chart(bar_chart, use_container_width=False)
+
+    bar_data['Load'] = load_column
+
+    bar_chart_wrapper(
+        bar_data, x='preset', y='Load',
+        title="Mean Load over final 25 timesteps",
+        domain=load_types, colours=colours,
+        colour_var='Load Type',
+        use_width=True, column=None
+    )
+
+
+
 
