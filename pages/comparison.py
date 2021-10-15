@@ -8,6 +8,8 @@ import streamlit as st
 import numpy as np
 import altair as alt
 
+from .utilities import load_models
+
 
 def time_series_plot(domain, colours, title):
 
@@ -88,22 +90,46 @@ def page_code():
 
     st.subheader("Bar chart test 2:")
 
-    bar_data = pd.DataFrame({
-        'preset': domain,
-        'terminal ROI': [
-            np.mean(st.session_state.comparison_data[preset]['model_vars'].loc[-25:]['Roi'])
-            for preset in domain
-        ]
-    })
+    all_skill_decays = [0.95, 0.99, 0.995]
+    all_skill_decay_data = {}
+
+    bar_data = pd.DataFrame()
+    bar_data['preset'] = [p for p in domain for s in all_skill_decays]
+    bar_data['skill_decay'] = [s for s in all_skill_decays] * len(domain)
+
+    terminal_roi_column = []
+    for preset, parameters in st.session_state.config.simulation_presets.items():
+        parameter_dict = parameters
+
+        for skill_decay in all_skill_decays:
+
+            all_skill_decay_data[(preset, skill_decay)] = load_models(
+                project_count=parameter_dict['project_count'],
+                dept_workload=parameter_dict['dept_workload'],
+                budget_func=parameter_dict['budget_func'],
+                train_load=parameter_dict['train_load'],
+                skill_decay=skill_decay,
+                rep=st.session_state.replicate,
+                team_allocation=parameter_dict['team_allocation'],
+                load_networks=False
+            )
+            terminal_roi_column.append(
+                np.mean(all_skill_decay_data[(preset, skill_decay)]['model_vars'].loc[-25:]['Roi'])
+                if all_skill_decay_data[(preset, skill_decay)]['model_vars'] is not None
+                else None
+            )
+    bar_data['terminal ROI'] = terminal_roi_column
+
     bar_chart = alt.Chart(bar_data).mark_bar().encode(
-        x='preset',
+        x='skill_decay:N',
         y='terminal ROI',
         color=alt.Color(
             'preset', scale=alt.Scale(
                 domain=domain,
                 range=colours
             )
-        )
+        ),
+        column='preset'
     ).properties(title="Mean ROI over final 25 timesteps")
-    st.altair_chart(bar_chart, use_container_width=True)
+    st.altair_chart(bar_chart, use_container_width=False)
 

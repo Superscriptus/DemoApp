@@ -64,7 +64,8 @@ def create_session_state_variables():
 def load_models(
         project_count, dept_workload, budget_func,
         skill_decay, train_load, rep,
-        team_allocation, duration=100
+        team_allocation, duration=100,
+        load_networks=True
 ):
     st.session_state.data_load_complete = False
     return_data = {}
@@ -88,7 +89,7 @@ def load_models(
     return_data['model_vars'] = unpickle(
         "data/" + sub_dir + "/%s/model_vars_rep_%d.pickle" % (optimiser_dict[team_allocation], rep)
     )
-    if return_data['model_vars'] is not None:
+    if return_data['model_vars'] is not None and load_networks:
         # We load the networks for each timestep up to 'duration' and convert them to an html string that
         # can be read by PyVis.
         return_data['networks'] = {}
@@ -108,6 +109,10 @@ def load_models(
 
             return_data['networks'][t - 1] = html_file.read()
 
+    else:
+        return_data['networks'] = None
+
+    if return_data['model_vars'] is not None:
         # We add ROI as this was computed and saved retrospectively (after simulations were run)
         roi = unpickle(
             "data/" + sub_dir + "/%s/roi_rep_%d.pickle" % (optimiser_dict[team_allocation], rep),
@@ -117,10 +122,7 @@ def load_models(
         if roi is not None:
             return_data['model_vars']['Roi'] = moving_average(roi, window_size=10)
         else:
-            return_data['model_vars']['Roi'] = np.zeros(len(st.session_state.data))
-
-    else:
-        return_data['networks'] = None
+            return_data['model_vars']['Roi'] = np.zeros(len(return_data['model_vars']))
 
     st.session_state.data_load_complete = True
 
