@@ -30,10 +30,10 @@ class Application:
             help="Select page to view."
         )
 
-        self.pages[selected_page].page_code()
-
         create_session_state_variables()
         set_default_parameters()
+        self.pages[selected_page].page_code()
+
         st.session_state.comparison_data = {}
 
         for preset, parameters in st.session_state.config.simulation_presets.items():

@@ -3,7 +3,6 @@ TODO:
 - refactor timeseries plot (use class from simulation?)
 - add other time series plots requested
 - add OVR and success plots
-- fix bug on simultaion pafe (see issue)
 - fix error message (no data on comparison page for pps 10)
 """
 import pandas as pd
@@ -12,6 +11,7 @@ import numpy as np
 import altair as alt
 
 from .utilities import load_models
+from .simulation import set_default_parameters
 
 
 def time_series_plot(domain, colours, title):
@@ -83,6 +83,7 @@ def bar_chart_wrapper(element, bar_data, x, y, title, domain, colours,
 
 def page_code():
 
+    set_default_parameters()
     comparison_data = {}
 
     domain = list(st.session_state.config.simulation_presets.keys())

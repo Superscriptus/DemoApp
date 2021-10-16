@@ -19,7 +19,7 @@ import streamlit as st
 import streamlit.components.v1 as components
 import altair as alt
 import time
-from .utilities import load_models
+from .utilities import load_models, create_session_state_variables
 
 
 @st.cache()
@@ -323,7 +323,7 @@ def create_sidebar_controls():
                  "_Note: this cannot always be met if their is insufficient slack._"
         )
 
-    if 'data' not in st.session_state:
+    if 'data' not in st.session_state or st.session_state.data['model_vars'] is None:
         st.session_state.data = load_models(
             project_count=st.session_state.project_count,
             dept_workload=st.session_state.dept_workload,
@@ -359,17 +359,18 @@ def create_sidebar_controls():
 
 
 def page_code():
-    if 'replicate' not in st.session_state:
-        st.session_state.replicate = 0
 
-    if 'preset_active' not in st.session_state:
-        st.session_state.preset_active = False
-
-    if 'display_net' not in st.session_state:
-        st.session_state.display_net = False
-
-    if 'data_load_complete' not in st.session_state:
-        st.session_state.data_load_complete = False
+    # if 'replicate' not in st.session_state:
+    #     st.session_state.replicate = 0
+    #
+    # if 'preset_active' not in st.session_state:
+    #     st.session_state.preset_active = False
+    #
+    # if 'display_net' not in st.session_state:
+    #     st.session_state.display_net = False
+    #
+    # if 'data_load_complete' not in st.session_state:
+    #     st.session_state.data_load_complete = False
 
     st.title("Simulation")
 
