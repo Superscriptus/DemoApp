@@ -2,7 +2,6 @@
 TODO:
 - check get new data AGAIN
 - refactor timeseries plot (use class from simulation?)
-- add moving average filter to OVR timeseries plot
 - make grouped bar charts prettier: https://stackoverflow.com/questions/43797379/how-to-create-a-grouped-bar-chart-in-altair
 """
 import pandas as pd
@@ -332,13 +331,14 @@ def page_code():
                 .copy().rename(columns={'AverageTeamOvr': 'value'})
             )
             chart_data['variable'] = [preset for i in range(len(chart_data))]
-
+            chart_data['value'] = moving_average(chart_data['value'], window_size=10)
         else:
             temp_data = (
                 st.session_state.comparison_data[preset]['model_vars'][['time', 'AverageTeamOvr']]
                 .copy().rename(columns={'AverageTeamOvr': 'value'})
             )
             temp_data['variable'] = [preset for i in range(len(temp_data))]
+            temp_data['value'] = moving_average(temp_data['value'], window_size=10)
             chart_data = chart_data.append(temp_data)
 
     time_series_plot(chart_data, domain, colours, "Team OVR Comparison", ylabel="OVR")
