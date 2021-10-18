@@ -1,10 +1,9 @@
 """
 TODO:
-- requested scatter plot
+- check get new data AGAIN
 - refactor timeseries plot (use class from simulation?)
 - add moving average filter to OVR timeseries plot
-- add OVR and success plots
-- get new data (with roi + nets)
+- make grouped bar charts prettier: https://stackoverflow.com/questions/43797379/how-to-create-a-grouped-bar-chart-in-altair
 """
 import pandas as pd
 import streamlit as st
@@ -15,13 +14,13 @@ from .utilities import load_models, moving_average
 from .simulation import set_default_parameters
 
 
-def time_series_plot(chart_data, domain, colours, title):
+def time_series_plot(chart_data, domain, colours, title, ylabel):
 
     _x = alt.X('time', axis=alt.Axis(title='timestep'))
 
     chart = alt.Chart(chart_data).mark_line().encode(
         x=_x,
-        y=alt.Y('value', axis=alt.Axis(title='ROI')),
+        y=alt.Y('value', axis=alt.Axis(title=ylabel)),
         color=alt.Color(
             'variable', scale=alt.Scale(
                 domain=domain,
@@ -82,9 +81,11 @@ def page_code():
         with st.beta_expander(preset + ": " + preset_details['preset_name']):
             st.write(preset_details['blurb'])
 #########################################################################################
-    col1, col2 = st.beta_columns([1, 1])
-    col1.subheader("Bar chart test:")
+    st.write("The following charts show metric values averaged over the final 25 timesteps of a simulation.")
 
+    col1, col2 = st.beta_columns([1, 1])
+
+    col1.subheader("")
     bar_data = pd.DataFrame({
         'preset': domain,
         'terminal ROI': [
@@ -94,13 +95,13 @@ def page_code():
     })
     bar_chart_wrapper(
         col1, bar_data, x='preset', y='terminal ROI',
-        title="Mean ROI over final 25 timesteps",
+        title="Return on investment (ROI)",
         domain=domain, colours=colours,
         colour_var='preset',
         use_container_width=True, column=None
     )
 
-    col2.subheader("Bar chart test 4:")
+    col2.subheader("")
 
     load_types = ['ProjectLoad', 'Slack', 'TrainingLoad', 'DeptLoad']
 
@@ -121,14 +122,14 @@ def page_code():
 
     bar_chart_wrapper(
         col2, bar_data, x='preset', y='Load',
-        title="Mean Load over final 25 timesteps",
+        title="Workload",
         domain=load_types, colours=colours,
         colour_var='Load Type',
         use_container_width=True, column=None
     )
 #########################################################################################
     col3, col4 = st.beta_columns([1, 1])
-    col3.subheader("Bar chart test:")
+    col3.subheader("")
 
     bar_data = pd.DataFrame({
         'preset': domain,
@@ -139,13 +140,13 @@ def page_code():
     })
     bar_chart_wrapper(
         col3, bar_data, x='preset', y='AverageWorkerOvr',
-        title="Mean worker OVR over final 25 timesteps",
+        title="Worker OVR",
         domain=domain, colours=colours,
         colour_var='preset',
         use_container_width=True, column=None
     )
 
-    col4.subheader("Bar chart test 4:")
+    col4.subheader("")
 
     bar_data = pd.DataFrame({
         'preset': domain,
@@ -156,14 +157,18 @@ def page_code():
     })
     bar_chart_wrapper(
         col4, bar_data, x='preset', y='AverageSuccessProbability',
-        title="Mean success probability over final 25 timesteps",
+        title="Project Success Probability",
         domain=domain, colours=colours,
         colour_var='preset',
         use_container_width=True, column=None
     )
 #########################################################################################
+    st.subheader("Return on investment (ROI)")
+    st.write("The following charts show the effect on the presets A-D of varying the skill decay (left) "
+             "or training load (right) parameters.")
+
     col5, col6 = st.beta_columns([1, 1])
-    col5.subheader("Comparing skill decays:")
+    col5.subheader("")
 
     all_skill_decays = [0.95, 0.99, 0.995]
     all_skill_decay_data = {}
@@ -196,13 +201,13 @@ def page_code():
 
     bar_chart_wrapper(
         col5, bar_data, x='skill_decay:N', y='terminal ROI',
-        title="Mean ROI over final 25 timesteps",
+        title="",
         domain=domain, colours=colours,
         colour_var='preset',
         use_container_width=False, column='preset'
     )
 
-    col6.subheader("Comparing training loads:")
+    col6.subheader("")
 
     all_train_loads = [0.0, 0.1, 0.3, 2.0]
     all_train_load_data = {}
@@ -235,14 +240,50 @@ def page_code():
 
     bar_chart_wrapper(
         col6, bar_data, x='train_load:N', y='terminal ROI',
-        title="Mean ROI over final 25 timesteps",
+        title="",
         domain=domain, colours=colours,
         colour_var='preset',
         use_container_width=False, column='preset'
     )
 #########################################################################################
+
+    st.write("This scatter plot shows how ROI varies with worker OVR across the presets A-D.")
     chart_data = None
-    print(st.session_state.comparison_data['A']['model_vars'].columns)
+    for preset in st.session_state.config.simulation_presets:
+
+        if chart_data is None:
+            chart_data = (
+                st.session_state.comparison_data[preset]['model_vars'][['AverageWorkerOvr', 'Roi']]
+                .copy().rename(columns={'Roi': 'ROI'})
+            )
+            chart_data['preset'] = [preset for i in range(len(chart_data))]
+
+        else:
+            temp_data = (
+                st.session_state.comparison_data[preset]['model_vars'][['AverageWorkerOvr', 'Roi']]
+                .copy().rename(columns={'Roi': 'ROI'})
+            )
+            temp_data['preset'] = [preset for i in range(len(temp_data))]
+            chart_data = chart_data.append(temp_data)
+
+    chart = alt.Chart(chart_data).mark_circle(size=60).encode(
+        x=alt.X('AverageWorkerOvr', axis=alt.Axis(title='AverageWorkerOvr'), scale=alt.Scale(domain=[30, 70])),
+        y='ROI',
+        color=alt.Color(
+            'preset', scale=alt.Scale(
+                domain=domain,
+                range=colours
+            )
+        ),
+    ).properties(title="")
+
+    st.altair_chart(chart, use_container_width=True)
+#########################################################################################
+
+    st.subheader("Timeseries plots")
+    st.write("The following timeseries plots show how the key metrics (ROI, worker OVR, team OVR) change over the "
+             "course of a simulation, and compares this across the presets A-D.")
+    chart_data = None
     for preset in st.session_state.config.simulation_presets:
 
         if chart_data is None:
@@ -260,7 +301,7 @@ def page_code():
             temp_data['variable'] = [preset for i in range(len(temp_data))]
             chart_data = chart_data.append(temp_data)
 
-    time_series_plot(chart_data, domain, colours, "ROI Comparison")
+    time_series_plot(chart_data, domain, colours, "ROI Comparison", ylabel="ROI")
 
     chart_data = None
     for preset in st.session_state.config.simulation_presets:
@@ -280,7 +321,7 @@ def page_code():
             temp_data['variable'] = [preset for i in range(len(temp_data))]
             chart_data = chart_data.append(temp_data)
 
-    time_series_plot(chart_data, domain, colours, "Worker OVR Comparison")
+    time_series_plot(chart_data, domain, colours, "Worker OVR Comparison", ylabel="OVR")
 
     chart_data = None
     for preset in st.session_state.config.simulation_presets:
@@ -300,7 +341,5 @@ def page_code():
             temp_data['variable'] = [preset for i in range(len(temp_data))]
             chart_data = chart_data.append(temp_data)
 
-    time_series_plot(chart_data, domain, colours, "Team OVR Comparison")
-
-
+    time_series_plot(chart_data, domain, colours, "Team OVR Comparison", ylabel="OVR")
 
