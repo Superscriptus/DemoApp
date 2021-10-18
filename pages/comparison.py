@@ -1,6 +1,5 @@
 """
 TODO:
-- check get new data AGAIN
 - refactor timeseries plot (use class from simulation?)
 - make grouped bar charts prettier: https://stackoverflow.com/questions/43797379/how-to-create-a-grouped-bar-chart-in-altair
 """
