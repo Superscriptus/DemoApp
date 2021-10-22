@@ -30,6 +30,11 @@ def data_not_found(path):
 
 def strip_unwanted(path, max_reps=True):
 
+    names = ['Niter0', 'Basic']
+    for name in names:
+        for f in glob.glob(to_path + "/%s" % name):
+            shutil.rmtree(f)
+
     names = ['agents', 'project', 'network_timestep']
     for name in names:
         for f in glob.glob(to_path + "/*/%s*" % name):

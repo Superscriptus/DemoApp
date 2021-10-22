@@ -177,7 +177,7 @@ class NetworkPlot:
             st.write(info)
 
             self.chart = components.html(
-                st.session_state.networks.get(timestep, ''),
+                st.session_state.data['networks'].get(timestep, ''),
                 height=435
             )
 
