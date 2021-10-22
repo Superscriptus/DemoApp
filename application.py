@@ -48,4 +48,3 @@ class Application:
                 rep=st.session_state.replicate,
                 team_allocation=parameter_dict['team_allocation']
             )
-

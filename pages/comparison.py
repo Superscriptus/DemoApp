@@ -1,8 +1,15 @@
 """
 TODO:
-- check get new data AGAIN
 - refactor timeseries plot (use class from simulation?)
 - make grouped bar charts prettier: https://stackoverflow.com/questions/43797379/how-to-create-a-grouped-bar-chart-in-altair
+- introduce replicates: run retrospective analysis, and random choice from available replicates (load all initially?)
+- add preset E: new data files from agents_vars.pickle -> 'WorkersOnProjects',
+       'WorkersWithoutProjects', 'WorkersOnTraining', 'AverageWorkerOvr', 'WorkerTurnover', 'ProjectLoad',
+       'TrainingLoad', 'DeptLoad', 'Slack', 'ProjectsPerWorker', AND:
+       IF SLACK ALREADY <10%, NO WORKERS REMOVED AND ALL METRICS UNCHANGED.
+       OTHERWISE RANDOM SELECTION OF WORKERS REMOVED
+
+       NEED TO CHECK: are load metrics computed UNIT-wise, or worker-wise? **************
 """
 import pandas as pd
 import streamlit as st
