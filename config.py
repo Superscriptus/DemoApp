@@ -83,6 +83,18 @@ class Config:
                 'skill_decay': 0.95,
                 'train_load': 0.0,
                 'team_allocation': 'Random'
+            },
+            'E': {
+                'preset_name': 'The Adaptive Organization',
+                'blurb': 'This organizations has the same parameters as C: The Emergent Organization, but uses a '
+                         'flexible workforce with reduced slack. Instead workers are hired from an external pool as'
+                         'and when they are needed for project work.',
+                'project_count': 3,
+                'budget_func': True,
+                'dept_workload': 0.1,
+                'skill_decay': 0.995,
+                'train_load': 0.1,
+                'team_allocation': 'Flexible start time'
             }
         }
 
