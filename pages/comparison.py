@@ -2,6 +2,14 @@
 TODO:
 - refactor timeseries plot (use class from simulation?)
 - make grouped bar charts prettier: https://stackoverflow.com/questions/43797379/how-to-create-a-grouped-bar-chart-in-altair
+- introduce replicates: run retrospective analysis, and random choice from available replicates (load all initially?)
+- add preset E: new data files from agents_vars.pickle -> 'WorkersOnProjects',
+       'WorkersWithoutProjects', 'WorkersOnTraining', 'AverageWorkerOvr', 'WorkerTurnover', 'ProjectLoad',
+       'TrainingLoad', 'DeptLoad', 'Slack', 'ProjectsPerWorker', AND:
+       IF SLACK ALREADY <10%, NO WORKERS REMOVED AND ALL METRICS UNCHANGED.
+       OTHERWISE RANDOM SELECTION OF WORKERS REMOVED
+
+       NEED TO CHECK: are load metrics computed UNIT-wise, or worker-wise? **************
 """
 import pandas as pd
 import streamlit as st
@@ -31,11 +39,11 @@ def time_series_plot(chart_data, domain, colours, title, ylabel):
 
 
 def bar_chart_wrapper(element, bar_data, x, y, title, domain, colours,
-                      colour_var, use_container_width=True, column=None):
+                      colour_var, use_container_width=True, column=None, rotation=-90):
 
     if column is not None:
         bar_chart = alt.Chart(bar_data).mark_bar().encode(
-            x=x,
+            x=alt.X(x, axis=alt.Axis(labelAngle=rotation)),
             y=y,
             color=alt.Color(
                 colour_var, scale=alt.Scale(
@@ -48,7 +56,7 @@ def bar_chart_wrapper(element, bar_data, x, y, title, domain, colours,
         ).properties(title=title).configure_legend(orient='bottom')
     else:
         bar_chart = alt.Chart(bar_data).mark_bar().encode(
-            x=x,
+            x=alt.X(x, axis=alt.Axis(labelAngle=rotation)),
             y=y,
             color=alt.Color(
                 colour_var, scale=alt.Scale(
@@ -68,7 +76,7 @@ def page_code():
     comparison_data = {}
 
     domain = list(st.session_state.config.simulation_presets.keys())
-    colours = ['blue', 'orange', 'green', 'red']
+    colours = ['blue', 'orange', 'green', 'red', 'cyan']
 
     st.title("Comparison")
 
@@ -96,7 +104,7 @@ def page_code():
         title="Return on investment (ROI)",
         domain=domain, colours=colours,
         colour_var='preset',
-        use_container_width=True, column=None
+        use_container_width=True, column=None, rotation=0
     )
 
     col2.subheader("")
@@ -117,13 +125,15 @@ def page_code():
             )
 
     bar_data['Load'] = load_column
+    concise_load_types = ['Project', 'Slack', 'Training', 'Dept']
+    bar_data['Load Type'] = [s for s in concise_load_types] * len(domain)
 
     bar_chart_wrapper(
         col2, bar_data, x='preset', y='Load',
         title="Workload",
-        domain=load_types, colours=colours,
+        domain=concise_load_types, colours=colours,
         colour_var='Load Type',
-        use_container_width=True, column=None
+        use_container_width=True, column=None, rotation=0
     )
 #########################################################################################
     col3, col4 = st.beta_columns([1, 1])
@@ -141,7 +151,7 @@ def page_code():
         title="Worker OVR",
         domain=domain, colours=colours,
         colour_var='preset',
-        use_container_width=True, column=None
+        use_container_width=True, column=None, rotation=0
     )
 
     col4.subheader("")
@@ -158,7 +168,7 @@ def page_code():
         title="Project Success Probability",
         domain=domain, colours=colours,
         colour_var='preset',
-        use_container_width=True, column=None
+        use_container_width=True, column=None, rotation=0
     )
 #########################################################################################
     st.subheader("Return on investment (ROI)")
@@ -177,6 +187,8 @@ def page_code():
 
     terminal_roi_column = []
     for preset, parameters in st.session_state.config.simulation_presets.items():
+
+        preset_e_flag = True if preset == 'E' else False
         parameter_dict = parameters
 
         for skill_decay in all_skill_decays:
@@ -188,7 +200,8 @@ def page_code():
                 skill_decay=skill_decay,
                 rep=st.session_state.replicate,
                 team_allocation=parameter_dict['team_allocation'],
-                load_networks=False
+                load_networks=False,
+                preset_e=preset_e_flag
             )
             terminal_roi_column.append(
                 np.mean(all_skill_decay_data[(preset, skill_decay)]['model_vars'].loc[-25:]['Roi'])
@@ -216,6 +229,8 @@ def page_code():
 
     terminal_roi_column = []
     for preset, parameters in st.session_state.config.simulation_presets.items():
+
+        preset_e_flag = True if preset == 'E' else False
         parameter_dict = parameters
 
         for train_load in all_train_loads:
@@ -227,7 +242,8 @@ def page_code():
                 skill_decay=parameter_dict['skill_decay'],
                 rep=st.session_state.replicate,
                 team_allocation=parameter_dict['team_allocation'],
-                load_networks=False
+                load_networks=False,
+                preset_e=preset_e_flag
             )
             terminal_roi_column.append(
                 np.mean(all_train_load_data[(preset, train_load)]['model_vars'].loc[-25:]['Roi'])

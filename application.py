@@ -17,6 +17,9 @@ class Application:
         Function sets up the sidebar and adds dropdown for page select. Then runs the
         page_code for the selected page.
         """
+        if 'comparison_data' not in st.session_state:
+            st.session_state.presets_loaded = False
+            st.session_state.comparison_data = {}
 
         if 'config' not in st.session_state:
             from config import Config
@@ -24,28 +27,37 @@ class Application:
 
         st.sidebar.image('images/logo.png', use_column_width=True)
         st.sidebar.header('Simulation engine for a social teamwork game.')
-        selected_page = st.sidebar.selectbox(
-            'App Navigation',
-            [*self.pages.keys()],
-            help="Select page to view."
-        )
+
+        if st.session_state.presets_loaded:
+            selected_page = st.sidebar.selectbox(
+                'App Navigation',
+                [*self.pages.keys()],
+                help="Select page to view."
+            )
+        else:
+            selected_page = "About"
+            st.sidebar.markdown("_Please wait while we load the simulations in the background._")
 
         create_session_state_variables()
         set_default_parameters()
         self.pages[selected_page].page_code()
 
-        st.session_state.comparison_data = {}
+        if not st.session_state.presets_loaded:
 
-        for preset, parameters in st.session_state.config.simulation_presets.items():
-            parameter_dict = parameters
+            for preset, parameters in st.session_state.config.simulation_presets.items():
 
-            st.session_state.comparison_data[preset] = load_models(
-                project_count=parameter_dict['project_count'],
-                dept_workload=parameter_dict['dept_workload'],
-                budget_func=parameter_dict['budget_func'],
-                train_load=parameter_dict['train_load'],
-                skill_decay=parameter_dict['skill_decay'],
-                rep=st.session_state.replicate,
-                team_allocation=parameter_dict['team_allocation']
-            )
+                preset_e_flag = True if preset == 'E' else False
+                parameter_dict = parameters
 
+                st.session_state.comparison_data[preset] = load_models(
+                    project_count=parameter_dict['project_count'],
+                    dept_workload=parameter_dict['dept_workload'],
+                    budget_func=parameter_dict['budget_func'],
+                    train_load=parameter_dict['train_load'],
+                    skill_decay=parameter_dict['skill_decay'],
+                    rep=st.session_state.replicate,
+                    team_allocation=parameter_dict['team_allocation'],
+                    preset_e=preset_e_flag
+                )
+            st.session_state.presets_loaded = True
+            st.experimental_rerun()
