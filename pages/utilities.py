@@ -71,7 +71,7 @@ def load_models(
         project_count, dept_workload, budget_func,
         skill_decay, train_load, rep,
         team_allocation, duration=100,
-        load_networks=True
+        load_networks=True, preset_e=False
 ):
     st.session_state.data_load_complete = False
     return_data = {}
@@ -84,13 +84,20 @@ def load_models(
     training_load = 0.1 if train_load == 2.0 else train_load
     training_boost = True if train_load == 2.0 else False
     training_flag = False if train_load == 0.0 else True
-    sub_dir = (
-            'pps_%d_sd_%.3f_dw_%.1f_tl_%.1f_tf_%d_tb_%d_bf_%d_010921_v1.1'
-            % (
-                project_count, skill_decay, dept_workload,
-                training_load, training_flag, training_boost, budget_func
-            )
-    )
+
+    if preset_e:
+        sub_dir = (
+                'preset_E_sd_%.3f_tl_%.1f_tf_%d_tb_%d_251021_v1.1'
+                % (skill_decay, training_load, training_flag, training_boost)
+        )
+    else:
+        sub_dir = (
+                'pps_%d_sd_%.3f_dw_%.1f_tl_%.1f_tf_%d_tb_%d_bf_%d_010921_v1.1'
+                % (
+                    project_count, skill_decay, dept_workload,
+                    training_load, training_flag, training_boost, budget_func
+                )
+        )
 
     return_data['model_vars'] = unpickle(
         "data/" + sub_dir + "/%s/model_vars_rep_%d.pickle" % (optimiser_dict[team_allocation], rep)

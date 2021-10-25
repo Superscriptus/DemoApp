@@ -37,6 +37,8 @@ class Application:
         st.session_state.comparison_data = {}
 
         for preset, parameters in st.session_state.config.simulation_presets.items():
+
+            preset_e_flag = True if preset == 'E' else False
             parameter_dict = parameters
 
             st.session_state.comparison_data[preset] = load_models(
@@ -46,5 +48,6 @@ class Application:
                 train_load=parameter_dict['train_load'],
                 skill_decay=parameter_dict['skill_decay'],
                 rep=st.session_state.replicate,
-                team_allocation=parameter_dict['team_allocation']
+                team_allocation=parameter_dict['team_allocation'],
+                preset_e=preset_e_flag
             )
