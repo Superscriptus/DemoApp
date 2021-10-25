@@ -39,11 +39,11 @@ def time_series_plot(chart_data, domain, colours, title, ylabel):
 
 
 def bar_chart_wrapper(element, bar_data, x, y, title, domain, colours,
-                      colour_var, use_container_width=True, column=None):
+                      colour_var, use_container_width=True, column=None, rotation=-90):
 
     if column is not None:
         bar_chart = alt.Chart(bar_data).mark_bar().encode(
-            x=x,
+            x=alt.X(x, axis=alt.Axis(labelAngle=rotation)),
             y=y,
             color=alt.Color(
                 colour_var, scale=alt.Scale(
@@ -56,7 +56,7 @@ def bar_chart_wrapper(element, bar_data, x, y, title, domain, colours,
         ).properties(title=title).configure_legend(orient='bottom')
     else:
         bar_chart = alt.Chart(bar_data).mark_bar().encode(
-            x=x,
+            x=alt.X(x, axis=alt.Axis(labelAngle=rotation)),
             y=y,
             color=alt.Color(
                 colour_var, scale=alt.Scale(
@@ -76,7 +76,7 @@ def page_code():
     comparison_data = {}
 
     domain = list(st.session_state.config.simulation_presets.keys())
-    colours = ['blue', 'orange', 'green', 'red']
+    colours = ['blue', 'orange', 'green', 'red', 'cyan']
 
     st.title("Comparison")
 
@@ -104,7 +104,7 @@ def page_code():
         title="Return on investment (ROI)",
         domain=domain, colours=colours,
         colour_var='preset',
-        use_container_width=True, column=None
+        use_container_width=True, column=None, rotation=0
     )
 
     col2.subheader("")
@@ -125,13 +125,15 @@ def page_code():
             )
 
     bar_data['Load'] = load_column
+    concise_load_types = ['Project', 'Slack', 'Training', 'Dept']
+    bar_data['Load Type'] = [s for s in concise_load_types] * len(domain)
 
     bar_chart_wrapper(
         col2, bar_data, x='preset', y='Load',
         title="Workload",
-        domain=load_types, colours=colours,
+        domain=concise_load_types, colours=colours,
         colour_var='Load Type',
-        use_container_width=True, column=None
+        use_container_width=True, column=None, rotation=0
     )
 #########################################################################################
     col3, col4 = st.beta_columns([1, 1])
@@ -149,7 +151,7 @@ def page_code():
         title="Worker OVR",
         domain=domain, colours=colours,
         colour_var='preset',
-        use_container_width=True, column=None
+        use_container_width=True, column=None, rotation=0
     )
 
     col4.subheader("")
@@ -166,7 +168,7 @@ def page_code():
         title="Project Success Probability",
         domain=domain, colours=colours,
         colour_var='preset',
-        use_container_width=True, column=None
+        use_container_width=True, column=None, rotation=0
     )
 #########################################################################################
     st.subheader("Return on investment (ROI)")

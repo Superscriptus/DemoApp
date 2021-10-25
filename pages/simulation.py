@@ -240,11 +240,12 @@ def set_default_parameters():
 def create_sidebar_controls():
 
     st.sidebar.write("Select parameter presets:")
-    row_presets = st.sidebar.beta_columns([1, 1, 1, 1])
+    row_presets = st.sidebar.beta_columns([1, 1, 1, 1, 1])
     create_preset_button(row_presets[0], "A")
     create_preset_button(row_presets[1], "B")
     create_preset_button(row_presets[2], "C")
     create_preset_button(row_presets[3], "D")
+    create_preset_button(row_presets[4], "E")
 
     st.sidebar.write("Set value for all parameters:")
     with st.sidebar.beta_expander("Expand for full parameter control"):
