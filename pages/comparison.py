@@ -185,6 +185,8 @@ def page_code():
 
     terminal_roi_column = []
     for preset, parameters in st.session_state.config.simulation_presets.items():
+
+        preset_e_flag = True if preset == 'E' else False
         parameter_dict = parameters
 
         for skill_decay in all_skill_decays:
@@ -196,7 +198,8 @@ def page_code():
                 skill_decay=skill_decay,
                 rep=st.session_state.replicate,
                 team_allocation=parameter_dict['team_allocation'],
-                load_networks=False
+                load_networks=False,
+                preset_e=preset_e_flag
             )
             terminal_roi_column.append(
                 np.mean(all_skill_decay_data[(preset, skill_decay)]['model_vars'].loc[-25:]['Roi'])
@@ -224,6 +227,8 @@ def page_code():
 
     terminal_roi_column = []
     for preset, parameters in st.session_state.config.simulation_presets.items():
+
+        preset_e_flag = True if preset == 'E' else False
         parameter_dict = parameters
 
         for train_load in all_train_loads:
@@ -235,7 +240,8 @@ def page_code():
                 skill_decay=parameter_dict['skill_decay'],
                 rep=st.session_state.replicate,
                 team_allocation=parameter_dict['team_allocation'],
-                load_networks=False
+                load_networks=False,
+                preset_e=preset_e_flag
             )
             terminal_roi_column.append(
                 np.mean(all_train_load_data[(preset, train_load)]['model_vars'].loc[-25:]['Roi'])
