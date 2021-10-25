@@ -90,3 +90,32 @@ for parameters in combinations:
     to_path = 'data/' + batch_name
     copy_data(from_path, to_path, overwrite=True)
 
+## Now run Preset E transfer:
+combinations = [
+        [3, 0.95, 0.1, 0.1, 1],
+        [3, 0.99, 0.1, 0.1, 1],
+        [3, 0.995, 0.1, 0.1, 1],
+        [3, 0.995, 0.1, 0.0, 1],
+        [3, 0.995, 0.1, 0.3, 1],
+        [3, 0.995, 0.1, 2.0, 1]
+    ]
+
+for parameters in combinations:
+
+    new_projects = parameters[0]
+    skill_decay = parameters[1]
+    departmental_workload = parameters[2]
+    training_load = 0.1 if parameters[3] == 2.0 else parameters[3]
+    training_boost = True if parameters[3] == 2.0 else False
+    training_flag = False if training_load == 0.0 else True
+    budget_functionality = parameters[4]
+
+    batch_name = (
+            'preset_E_sd_%.3f_tl_%.1f_tf_%d_tb_%d_251021_v1.1'
+            % (skill_decay, training_load, training_flag, training_boost)
+    )
+
+    from_path = sim_path + batch_name
+    to_path = 'data/' + batch_name
+    copy_data(from_path, to_path, overwrite=True)
+
