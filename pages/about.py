@@ -16,11 +16,12 @@ def page_code():
         "workers is quantified by their 'Overall Rating' (OVR)."
     )
 
-    st.markdown(
-        "You can find the simulation code on <a href='https://github.com/Superscriptus/SuperScript'>GitHub</a> "
+    st.write(
+        "You can find the simulation code on [GitHub](https://github.com/Superscriptus/SuperScript) "
         "along with a "
-        "<a href='https://github.com/Superscriptus/SuperScript/blob/master/documentation/model_specification.pdf'>"
-        "full specification</a> of the model.",
+        "[full specification]"
+        "(https://github.com/Superscriptus/SuperScript/blob/master/documentation/model_specification.pdf)"
+        " of the model.",
         unsafe_allow_html=True
     )
 
