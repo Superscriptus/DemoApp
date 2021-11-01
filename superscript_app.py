@@ -14,24 +14,17 @@ Resources:
 - framework for multi-page apps: https://discuss.streamlit.io/t/multi-page-apps/266/15
 - session variables...?
  """
-
 from application import Application
 from pages import simulation, comparison, about
+from streamlit import secrets
+import streamlit_analytics
 
 app = Application()
 app.create_page("About", about)
 app.create_page("Simulation", simulation)
 # app.create_page("Hypotheses", hypotheses)
 app.create_page("Comparison", comparison)
-app.execute()
+with streamlit_analytics.track(unsafe_password=secrets["ANALYTICS_PASSWORD"]):
+    app.execute()
 
-# col1, col2, col3 = st.beta_columns([1,5,1])
-#
-# with col1:
-#     st.write("")
-# with col2:
-#     st.image('images/logo.png', use_column_width=True)#, width=400)
-# with col3:
-#     st.write("")
-#
 

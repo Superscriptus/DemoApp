@@ -1,3 +1,4 @@
+.streamlit
 
 # Pre-commit config (https://pre-commit.com/)
 .pre-commit-config.yaml
