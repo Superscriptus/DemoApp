@@ -1,117 +1,91 @@
 #network_reconstruction.py
-# GMT Mon Oct 25 11:21:38 2021
+# GMT Tue Nov 16 17:24:03 2021
 # 
-0 5
-5 {'width': 2}
-12 {'width': 1}
-1 {'width': 1}
+0 6
+11 {'width': 1}
+16 {'width': 1}
 2 {'width': 1}
-4 {'width': 1}
+6 {'width': 1}
+8 {'width': 1}
+15 {'width': 1}
 2 3
-1 {'width': 1}
-4 {'width': 1}
-5 {'width': 1}
-5 4
-12 {'width': 1}
-1 {'width': 1}
-4 {'width': 1}
-64 {'width': 1}
-12 5
+15 {'width': 2}
+6 {'width': 1}
+8 {'width': 1}
+11 9
+16 {'width': 1}
+17 {'width': 1}
+26 {'width': 1}
+35 {'width': 1}
+29 {'width': 1}
+36 {'width': 1}
+57 {'width': 1}
+70 {'width': 1}
+90 {'width': 1}
+16 1
+15 {'width': 1}
+15 3
+6 {'width': 1}
+8 {'width': 1}
+43 {'width': 1}
+8 5
 3 {'width': 1}
-60 {'width': 1}
+17 {'width': 1}
+23 {'width': 1}
+26 {'width': 1}
 6 {'width': 1}
-40 {'width': 1}
-78 {'width': 1}
-64 7
-20 {'width': 1}
-58 {'width': 1}
-1 {'width': 1}
-40 {'width': 1}
-42 {'width': 1}
-109 {'width': 1}
-120 {'width': 1}
-1 5
-4 {'width': 1}
-40 {'width': 1}
-42 {'width': 1}
-109 {'width': 1}
-120 {'width': 1}
-3 1
+3 3
+17 {'width': 1}
+23 {'width': 1}
+26 {'width': 1}
+17 3
+23 {'width': 1}
+26 {'width': 2}
+35 {'width': 1}
+23 1
+26 {'width': 1}
+26 1
+35 {'width': 1}
+6 2
+25 {'width': 1}
 60 {'width': 1}
-4 8
-20 {'width': 1}
-42 {'width': 1}
-6 {'width': 1}
-7 {'width': 1}
-8 {'width': 1}
-9 {'width': 1}
-10 {'width': 1}
-85 {'width': 1}
-37 0
-60 0
-6 7
-40 {'width': 1}
-78 {'width': 1}
-7 {'width': 1}
-8 {'width': 1}
-9 {'width': 1}
-10 {'width': 1}
-85 {'width': 1}
-20 2
-42 {'width': 1}
-58 {'width': 1}
-28 0
-42 6
-34 {'width': 1}
-35 {'width': 1}
-52 {'width': 1}
-40 {'width': 1}
-109 {'width': 1}
-120 {'width': 1}
-34 2
-52 {'width': 2}
-35 {'width': 1}
-8 4
-7 {'width': 1}
-9 {'width': 1}
-10 {'width': 1}
-85 {'width': 1}
-40 3
-78 {'width': 1}
-109 {'width': 1}
-120 {'width': 1}
-78 0
-35 1
-52 {'width': 1}
-58 0
-85 3
-7 {'width': 1}
-9 {'width': 1}
-10 {'width': 1}
-105 0
-48 0
-108 0
-124 0
-138 0
-18 0
-26 0
+60 1
+25 {'width': 1}
+35 0
+47 0
 43 0
-44 0
-96 0
-110 0
-119 0
-127 0
-129 0
+51 0
+70 4
+29 {'width': 1}
+36 {'width': 1}
+57 {'width': 1}
+90 {'width': 1}
+9 0
+107 0
+25 0
+58 0
+94 0
+112 0
+126 0
+4 0
+7 0
+30 0
+42 0
+128 0
+131 0
 52 0
-122 0
-106 0
-130 0
-7 2
-9 {'width': 1}
-10 {'width': 1}
-9 1
-10 {'width': 1}
-10 0
-109 1
-120 {'width': 1}
-120 0
+95 0
+127 0
+27 0
+92 0
+118 0
+29 3
+36 {'width': 1}
+57 {'width': 1}
+90 {'width': 1}
+36 2
+57 {'width': 1}
+90 {'width': 1}
+57 1
+90 {'width': 1}
+90 0
