@@ -281,7 +281,7 @@ def page_code():
             chart_data = chart_data.append(temp_data)
 
     chart = alt.Chart(chart_data).mark_circle(size=60).encode(
-        x=alt.X('AverageWorkerOvr', axis=alt.Axis(title='AverageWorkerOvr'), scale=alt.Scale(domain=[30, 70])),
+        x=alt.X('AverageWorkerOvr', axis=alt.Axis(title='AverageWorkerOvr'), scale=alt.Scale(domain=[30, 80])),
         y='ROI',
         color=alt.Color(
             'preset', scale=alt.Scale(

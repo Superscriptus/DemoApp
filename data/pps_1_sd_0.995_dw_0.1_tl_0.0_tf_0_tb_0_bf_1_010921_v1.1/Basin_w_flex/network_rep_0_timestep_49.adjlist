@@ -1,146 +1,139 @@
 #network_reconstruction.py
-# GMT Tue Nov 16 17:19:37 2021
+# GMT Thu Dec  2 13:28:22 2021
 # 
-3 12
+1 12
+5 {'width': 7}
+3 {'width': 6}
+4 {'width': 4}
+29 {'width': 1}
+50 {'width': 2}
+9 {'width': 2}
+26 {'width': 3}
+161 {'width': 1}
+213 {'width': 1}
+218 {'width': 3}
+268 {'width': 1}
+318 {'width': 1}
+3 18
+4 {'width': 4}
+5 {'width': 7}
+29 {'width': 2}
+9 {'width': 3}
+26 {'width': 3}
+50 {'width': 2}
+161 {'width': 2}
+13 {'width': 2}
+213 {'width': 1}
+218 {'width': 3}
+280 {'width': 1}
+245 {'width': 2}
+266 {'width': 1}
+171 {'width': 1}
+299 {'width': 1}
+320 {'width': 1}
+268 {'width': 1}
+318 {'width': 1}
+4 8
+5 {'width': 6}
+9 {'width': 2}
+26 {'width': 4}
 6 {'width': 2}
-12 {'width': 1}
-54 {'width': 3}
-20 {'width': 1}
-217 {'width': 2}
+213 {'width': 1}
+218 {'width': 3}
+268 {'width': 1}
+318 {'width': 1}
+5 11
+9 {'width': 3}
+26 {'width': 5}
+50 {'width': 1}
+161 {'width': 1}
+13 {'width': 1}
+213 {'width': 1}
+218 {'width': 3}
+171 {'width': 1}
+225 {'width': 1}
+268 {'width': 1}
+318 {'width': 1}
+6 2
+213 {'width': 1}
+260 {'width': 1}
+9 11
+26 {'width': 3}
+50 {'width': 2}
+161 {'width': 1}
+29 {'width': 2}
+171 {'width': 1}
+253 {'width': 1}
 259 {'width': 1}
-14 {'width': 1}
-137 {'width': 1}
-265 {'width': 1}
-17 {'width': 1}
+270 {'width': 1}
 245 {'width': 1}
-254 {'width': 1}
-6 12
-54 {'width': 3}
-14 {'width': 2}
-12 {'width': 4}
-17 {'width': 2}
-51 {'width': 2}
-8 {'width': 2}
-16 {'width': 3}
-149 {'width': 1}
-30 {'width': 2}
-20 {'width': 1}
-217 {'width': 1}
-259 {'width': 1}
-8 8
-12 {'width': 2}
-16 {'width': 2}
-51 {'width': 2}
-149 {'width': 1}
-17 {'width': 1}
-217 {'width': 1}
-238 {'width': 1}
-259 {'width': 1}
-12 11
-16 {'width': 4}
-20 {'width': 1}
-51 {'width': 5}
-54 {'width': 2}
-17 {'width': 1}
-149 {'width': 2}
-14 {'width': 1}
-30 {'width': 1}
-252 {'width': 1}
-181 {'width': 1}
-183 {'width': 1}
-14 7
-16 {'width': 1}
-30 {'width': 1}
-120 {'width': 1}
-259 {'width': 1}
-137 {'width': 1}
-217 {'width': 1}
-265 {'width': 1}
-16 10
-20 {'width': 1}
-51 {'width': 2}
-149 {'width': 1}
-30 {'width': 1}
-54 {'width': 1}
-252 {'width': 1}
-181 {'width': 1}
-281 {'width': 1}
-294 {'width': 1}
-327 {'width': 1}
-17 8
-51 {'width': 1}
-30 {'width': 1}
-217 {'width': 1}
-238 {'width': 1}
-259 {'width': 1}
-54 {'width': 1}
+266 {'width': 1}
+218 {'width': 1}
+13 5
+29 {'width': 1}
+171 {'width': 1}
 245 {'width': 1}
-254 {'width': 1}
-20 4
-51 {'width': 1}
-54 {'width': 1}
-217 {'width': 1}
-259 {'width': 1}
-30 0
-51 3
-149 {'width': 2}
-181 {'width': 1}
-183 {'width': 1}
-54 5
-252 {'width': 1}
-217 {'width': 1}
-259 {'width': 1}
+299 {'width': 1}
+320 {'width': 1}
+26 6
+50 {'width': 1}
+161 {'width': 2}
+213 {'width': 1}
+218 {'width': 2}
+193 {'width': 1}
+262 {'width': 1}
+29 3
+50 {'width': 2}
 245 {'width': 1}
-254 {'width': 1}
-120 1
+266 {'width': 1}
+50 3
+161 {'width': 1}
+245 {'width': 1}
+266 {'width': 1}
+161 3
+193 {'width': 1}
+262 {'width': 1}
+280 {'width': 1}
+171 7
+225 {'width': 1}
+253 {'width': 1}
 259 {'width': 1}
-137 2
-217 {'width': 1}
-265 {'width': 1}
-149 2
-181 {'width': 1}
-183 {'width': 1}
-181 4
-183 {'width': 1}
-281 {'width': 1}
-294 {'width': 1}
-327 {'width': 1}
-183 0
-217 3
-238 {'width': 1}
-259 {'width': 2}
-265 {'width': 1}
-238 1
+270 {'width': 1}
+245 {'width': 1}
+299 {'width': 1}
+320 {'width': 1}
+193 1
+262 {'width': 1}
+213 2
+218 {'width': 1}
+260 {'width': 1}
+218 2
+268 {'width': 1}
+318 {'width': 1}
+225 0
+245 3
+266 {'width': 1}
+299 {'width': 1}
+320 {'width': 1}
+253 2
 259 {'width': 1}
-245 1
-254 {'width': 1}
-252 0
+270 {'width': 1}
 254 0
-258 0
-259 0
-265 0
+259 1
+270 {'width': 1}
+260 0
+262 0
+266 0
+268 1
+318 {'width': 1}
+269 0
+270 0
 280 0
-281 2
-294 {'width': 1}
-327 {'width': 1}
-284 0
-287 0
-293 0
-294 1
-327 {'width': 1}
-295 0
-298 0
-299 0
+294 0
+297 0
+299 1
+320 {'width': 1}
 300 0
-301 0
-302 0
-303 0
-304 0
-305 0
-306 0
-307 0
-308 0
-309 0
 310 0
 311 0
 312 0
@@ -198,3 +191,15 @@
 364 0
 365 0
 366 0
+367 0
+368 0
+369 0
+370 0
+371 0
+372 0
+373 0
+374 0
+375 0
+376 0
+377 0
+378 0
