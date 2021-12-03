@@ -24,6 +24,19 @@ def time_series_plot(chart_data, domain, colours, title, ylabel):
 
     _x = alt.X('time', axis=alt.Axis(title='timestep'))
 
+    if title == "Team OVR Comparison":
+        dash_condition = alt.condition(
+            alt.datum.variable == 'E',
+            alt.value([5, 5]),
+            alt.value([0])
+        )
+    else:
+        dash_condition = alt.condition(
+            alt.datum.variable == 'E',
+            alt.value([0]),
+            alt.value([0])
+        )
+
     chart = alt.Chart(chart_data).mark_line().encode(
         x=_x,
         y=alt.Y('value', axis=alt.Axis(title=ylabel)),
@@ -33,6 +46,7 @@ def time_series_plot(chart_data, domain, colours, title, ylabel):
                 range=colours
             )
         ),
+        strokeDash=dash_condition
     ).properties(title=title)
 
     st.altair_chart(chart, use_container_width=True)
