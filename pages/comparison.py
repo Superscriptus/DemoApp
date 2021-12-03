@@ -42,7 +42,7 @@ def bar_chart_wrapper(element, bar_data, x, y, title, domain, colours,
                       colour_var, use_container_width=True, column=None, rotation=-90):
 
     if column is not None:
-        bar_chart = alt.Chart(bar_data).mark_bar().encode(
+        bar_chart = alt.Chart(bar_data, width=105).mark_bar().encode(
             x=alt.X(x, axis=alt.Axis(labelAngle=rotation)),
             y=y,
             color=alt.Color(
@@ -172,10 +172,10 @@ def page_code():
     )
 #########################################################################################
     st.subheader("Return on investment (ROI)")
-    st.write("The following charts show the effect on the presets A-D of varying the skill decay (left) "
-             "or training load (right) parameters.")
+    st.write("The following chart shows the effect of varying the skill decay on the ROI, for on the presets A-E.")
 
-    col5, col6 = st.beta_columns([1, 1])
+    #col5, col6 = st.beta_columns([1, 1])
+    col5, = st.beta_columns([1])
     col5.subheader("")
 
     all_skill_decays = [0.95, 0.99, 0.995]
@@ -218,6 +218,8 @@ def page_code():
         use_container_width=False, column='preset'
     )
 
+    st.write("And below, we see the effect of varying the skill decay on the ROI, for on the presets A-E.")
+    col6, = st.beta_columns([1])
     col6.subheader("")
 
     all_train_loads = [0.0, 0.1, 0.3, 2.0]
@@ -261,7 +263,7 @@ def page_code():
     )
 #########################################################################################
 
-    st.write("This scatter plot shows how ROI varies with worker OVR across the presets A-D.")
+    st.write("This scatter plot shows how ROI varies with worker OVR across the presets A-E.")
     chart_data = None
     for preset in st.session_state.config.simulation_presets:
 
@@ -296,7 +298,7 @@ def page_code():
 
     st.subheader("Timeseries plots")
     st.write("The following timeseries plots show how the key metrics (ROI, worker OVR, team OVR) change over the "
-             "course of a simulation, and compares this across the presets A-D.")
+             "course of a simulation, and compares this across the presets A-E.")
     chart_data = None
     for preset in st.session_state.config.simulation_presets:
 
