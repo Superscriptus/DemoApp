@@ -99,11 +99,12 @@ class Config:
         }
 
         self.default_simulation_parameters = {
-            'project_count': 2,
+            'project_count': 10,
             'budget_func': True,
-            'dept_workload': 0.1,
-            'skill_decay': 0.99,
-            'train_load': 0.1
+            'dept_workload': 0.3,
+            'skill_decay': 0.95,
+            'train_load': 0.3,
+            'team_allocation': 'Flexible start time'
         }
 
         self.simulation_plots = {
