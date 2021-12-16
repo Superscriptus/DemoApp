@@ -63,7 +63,7 @@ def create_session_state_variables():
         st.session_state.display_net = False
 
     if 'data_load_complete' not in st.session_state:
-        st.session_state.data_load_complete = False
+        st.session_state.data_load_complete = True
 
 
 @st.cache()
