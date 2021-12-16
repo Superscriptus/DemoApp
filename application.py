@@ -59,5 +59,6 @@ class Application:
                     team_allocation=parameter_dict['team_allocation'],
                     preset_e=preset_e_flag
                 )
+            st.session_state.simulation_data = st.session_state.comparison_data['A']
             st.session_state.presets_loaded = True
             st.experimental_rerun()

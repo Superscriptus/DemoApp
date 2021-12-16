@@ -48,10 +48,10 @@ def reload(remove_preset=False, rerun=True):
     st.session_state.global_time = 0
     st.session_state.replicate = 0  # choice([i for i in range(10) if i != st.session_state.replicate])
     if rerun:
-        del st.session_state['data']
+        del st.session_state['simulation_data']
         st.experimental_rerun()
     else:
-        st.session_state.data = load_models(
+        st.session_state.simulation_data = load_models(
             project_count=st.session_state.project_count,
             dept_workload=st.session_state.dept_workload,
             budget_func=st.session_state.budget_func,
@@ -66,7 +66,7 @@ def handle_play_click():
 
     if st.session_state.data_load_complete:
 
-        if st.session_state.data['model_vars'] is not None:
+        if st.session_state.simulation_data['model_vars'] is not None:
             st.session_state.playing = not st.session_state.playing
 
         if st.session_state.global_time == 99:
@@ -128,7 +128,7 @@ class TimeSeriesPlot:
             alt.X('time', axis=alt.Axis(title='timestep'), scale=alt.Scale(domain=[0, 100]))
         )
 
-        chart_data = st.session_state.data['model_vars'].loc[
+        chart_data = st.session_state.simulation_data['model_vars'].loc[
                      0:st.session_state.global_time,
                      self.plot_series
                      ].melt('time')
@@ -152,7 +152,7 @@ class TimeSeriesPlot:
 
     def update(self, timestep):
 
-        chart_data = st.session_state.data['model_vars'].loc[timestep:timestep, self.plot_series].melt('time')
+        chart_data = st.session_state.simulation_data['model_vars'].loc[timestep:timestep, self.plot_series].melt('time')
 
         chart_data['description'] = [
             st.session_state.config.simulation_variables.get(v, '(undefined)')
@@ -177,7 +177,7 @@ class NetworkPlot:
             st.write(info)
 
             self.chart = components.html(
-                st.session_state.data['networks'].get(timestep, ''),
+                st.session_state.simulation_data['networks'].get(timestep, ''),
                 height=435
             )
 
@@ -324,8 +324,8 @@ def create_sidebar_controls():
                  "_Note: this cannot always be met if their is insufficient slack._"
         )
 
-    if 'data' not in st.session_state or st.session_state.data['model_vars'] is None:
-        st.session_state.data = load_models(
+    if 'simulation_data' not in st.session_state or st.session_state.simulation_data['model_vars'] is None:
+        st.session_state.simulation_data = load_models(
             project_count=st.session_state.project_count,
             dept_workload=st.session_state.dept_workload,
             budget_func=st.session_state.budget_func,
@@ -391,7 +391,7 @@ def page_code():
 
     create_sidebar_controls()
 
-    if st.session_state.data['model_vars'] is not None:
+    if st.session_state.simulation_data['model_vars'] is not None:
 
         net_plot = NetworkPlot(
             plot_name='Social Network',

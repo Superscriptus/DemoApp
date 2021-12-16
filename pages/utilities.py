@@ -53,8 +53,8 @@ def create_session_state_variables():
     if 'preset_active' not in st.session_state:
         st.session_state.preset_active = False
 
-    if 'data' not in st.session_state:
-        st.session_state.data = {
+    if 'simulation_data' not in st.session_state:
+        st.session_state.simulation_data = {
             'model_vars': None,
             'networks': None
         }
