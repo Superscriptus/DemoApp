@@ -1,5 +1,5 @@
 #network_reconstruction.py
-# GMT Thu Dec  2 13:28:54 2021
+# GMT Thu Dec 16 20:41:06 2021
 # 
 0 0
 1 0
@@ -15,7 +15,8 @@
 11 0
 12 0
 13 0
-14 0
+14 1
+29 {'width': 1}
 15 0
 16 0
 17 0
