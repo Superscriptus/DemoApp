@@ -1,0 +1,570 @@
+#network_reconstruction.py
+# GMT Thu Dec 16 20:56:29 2021
+# 
+0 44
+1 {'width': 14}
+2 {'width': 14}
+8 {'width': 7}
+20 {'width': 1}
+30 {'width': 6}
+16 {'width': 11}
+24 {'width': 6}
+84 {'width': 1}
+3 {'width': 9}
+4 {'width': 11}
+17 {'width': 2}
+61 {'width': 1}
+97 {'width': 5}
+121 {'width': 2}
+38 {'width': 7}
+101 {'width': 3}
+117 {'width': 3}
+149 {'width': 2}
+158 {'width': 2}
+176 {'width': 1}
+190 {'width': 4}
+125 {'width': 3}
+57 {'width': 1}
+202 {'width': 2}
+163 {'width': 3}
+122 {'width': 2}
+198 {'width': 1}
+224 {'width': 2}
+186 {'width': 1}
+28 {'width': 1}
+123 {'width': 2}
+206 {'width': 1}
+223 {'width': 2}
+233 {'width': 1}
+237 {'width': 1}
+230 {'width': 1}
+140 {'width': 1}
+247 {'width': 1}
+211 {'width': 1}
+235 {'width': 1}
+245 {'width': 1}
+167 {'width': 1}
+197 {'width': 1}
+260 {'width': 1}
+1 39
+2 {'width': 15}
+8 {'width': 6}
+20 {'width': 1}
+30 {'width': 4}
+3 {'width': 9}
+4 {'width': 7}
+16 {'width': 11}
+61 {'width': 1}
+17 {'width': 5}
+24 {'width': 8}
+97 {'width': 4}
+121 {'width': 2}
+38 {'width': 5}
+125 {'width': 2}
+117 {'width': 1}
+149 {'width': 1}
+176 {'width': 4}
+190 {'width': 1}
+84 {'width': 1}
+101 {'width': 2}
+104 {'width': 2}
+123 {'width': 2}
+140 {'width': 1}
+167 {'width': 2}
+22 {'width': 1}
+57 {'width': 2}
+198 {'width': 2}
+122 {'width': 2}
+239 {'width': 1}
+195 {'width': 1}
+197 {'width': 1}
+158 {'width': 1}
+245 {'width': 1}
+202 {'width': 1}
+211 {'width': 1}
+235 {'width': 1}
+223 {'width': 1}
+116 {'width': 1}
+206 {'width': 1}
+2 34
+8 {'width': 4}
+20 {'width': 1}
+30 {'width': 5}
+16 {'width': 13}
+24 {'width': 6}
+84 {'width': 2}
+3 {'width': 9}
+4 {'width': 8}
+61 {'width': 1}
+17 {'width': 4}
+101 {'width': 3}
+103 {'width': 1}
+121 {'width': 2}
+123 {'width': 3}
+125 {'width': 2}
+38 {'width': 3}
+167 {'width': 2}
+140 {'width': 1}
+97 {'width': 4}
+27 {'width': 1}
+57 {'width': 2}
+28 {'width': 1}
+198 {'width': 2}
+122 {'width': 4}
+186 {'width': 1}
+190 {'width': 2}
+239 {'width': 1}
+176 {'width': 1}
+195 {'width': 2}
+197 {'width': 1}
+245 {'width': 3}
+117 {'width': 1}
+267 {'width': 1}
+223 {'width': 1}
+3 32
+16 {'width': 5}
+30 {'width': 3}
+61 {'width': 1}
+4 {'width': 4}
+38 {'width': 8}
+57 {'width': 2}
+8 {'width': 4}
+84 {'width': 1}
+97 {'width': 5}
+123 {'width': 2}
+149 {'width': 2}
+104 {'width': 1}
+116 {'width': 1}
+17 {'width': 3}
+24 {'width': 4}
+121 {'width': 2}
+103 {'width': 1}
+125 {'width': 2}
+167 {'width': 1}
+28 {'width': 2}
+140 {'width': 2}
+27 {'width': 2}
+122 {'width': 1}
+101 {'width': 1}
+186 {'width': 1}
+190 {'width': 1}
+158 {'width': 1}
+224 {'width': 1}
+237 {'width': 1}
+163 {'width': 1}
+247 {'width': 1}
+267 {'width': 1}
+4 33
+16 {'width': 9}
+97 {'width': 1}
+8 {'width': 5}
+17 {'width': 2}
+30 {'width': 2}
+61 {'width': 1}
+27 {'width': 4}
+28 {'width': 1}
+101 {'width': 1}
+38 {'width': 6}
+125 {'width': 4}
+57 {'width': 3}
+117 {'width': 2}
+202 {'width': 1}
+122 {'width': 2}
+149 {'width': 3}
+198 {'width': 1}
+121 {'width': 1}
+224 {'width': 1}
+245 {'width': 1}
+123 {'width': 1}
+190 {'width': 1}
+223 {'width': 1}
+230 {'width': 1}
+104 {'width': 1}
+239 {'width': 1}
+248 {'width': 1}
+249 {'width': 1}
+116 {'width': 1}
+206 {'width': 1}
+22 {'width': 1}
+229 {'width': 1}
+267 {'width': 1}
+8 28
+20 {'width': 1}
+30 {'width': 4}
+24 {'width': 6}
+57 {'width': 3}
+16 {'width': 6}
+84 {'width': 1}
+17 {'width': 3}
+38 {'width': 4}
+97 {'width': 3}
+117 {'width': 2}
+149 {'width': 1}
+158 {'width': 2}
+28 {'width': 1}
+176 {'width': 1}
+202 {'width': 1}
+101 {'width': 1}
+239 {'width': 1}
+186 {'width': 1}
+223 {'width': 1}
+224 {'width': 1}
+227 {'width': 1}
+245 {'width': 1}
+140 {'width': 1}
+163 {'width': 1}
+247 {'width': 1}
+22 {'width': 1}
+27 {'width': 1}
+229 {'width': 1}
+16 32
+17 {'width': 4}
+30 {'width': 7}
+61 {'width': 2}
+24 {'width': 4}
+84 {'width': 3}
+103 {'width': 1}
+121 {'width': 1}
+104 {'width': 1}
+116 {'width': 3}
+28 {'width': 4}
+38 {'width': 5}
+27 {'width': 1}
+57 {'width': 2}
+163 {'width': 2}
+125 {'width': 3}
+176 {'width': 1}
+123 {'width': 2}
+140 {'width': 1}
+167 {'width': 1}
+117 {'width': 1}
+202 {'width': 2}
+122 {'width': 4}
+149 {'width': 1}
+97 {'width': 3}
+101 {'width': 3}
+186 {'width': 1}
+206 {'width': 2}
+223 {'width': 2}
+233 {'width': 1}
+245 {'width': 2}
+211 {'width': 1}
+235 {'width': 1}
+17 12
+30 {'width': 1}
+24 {'width': 3}
+38 {'width': 3}
+167 {'width': 1}
+84 {'width': 1}
+101 {'width': 2}
+104 {'width': 1}
+176 {'width': 1}
+97 {'width': 2}
+158 {'width': 1}
+116 {'width': 1}
+206 {'width': 1}
+20 1
+30 {'width': 1}
+22 4
+24 {'width': 1}
+57 {'width': 1}
+27 {'width': 1}
+229 {'width': 1}
+24 18
+84 {'width': 1}
+28 {'width': 2}
+57 {'width': 4}
+101 {'width': 1}
+104 {'width': 2}
+116 {'width': 1}
+97 {'width': 4}
+121 {'width': 1}
+38 {'width': 2}
+158 {'width': 3}
+30 {'width': 1}
+176 {'width': 2}
+123 {'width': 2}
+140 {'width': 1}
+167 {'width': 2}
+186 {'width': 1}
+190 {'width': 1}
+239 {'width': 1}
+27 5
+28 {'width': 1}
+57 {'width': 1}
+229 {'width': 1}
+149 {'width': 1}
+267 {'width': 1}
+28 10
+57 {'width': 2}
+97 {'width': 1}
+30 {'width': 3}
+38 {'width': 1}
+176 {'width': 1}
+140 {'width': 1}
+123 {'width': 1}
+206 {'width': 1}
+223 {'width': 1}
+233 {'width': 1}
+30 17
+61 {'width': 2}
+84 {'width': 1}
+38 {'width': 3}
+125 {'width': 2}
+57 {'width': 1}
+163 {'width': 2}
+101 {'width': 1}
+97 {'width': 2}
+117 {'width': 1}
+149 {'width': 1}
+176 {'width': 1}
+140 {'width': 1}
+158 {'width': 1}
+186 {'width': 1}
+223 {'width': 1}
+224 {'width': 1}
+227 {'width': 1}
+38 27
+57 {'width': 2}
+125 {'width': 5}
+123 {'width': 2}
+149 {'width': 2}
+167 {'width': 2}
+158 {'width': 2}
+163 {'width': 2}
+97 {'width': 2}
+101 {'width': 3}
+116 {'width': 2}
+186 {'width': 1}
+117 {'width': 1}
+121 {'width': 1}
+224 {'width': 1}
+122 {'width': 2}
+190 {'width': 2}
+223 {'width': 1}
+230 {'width': 1}
+104 {'width': 1}
+239 {'width': 1}
+248 {'width': 1}
+249 {'width': 1}
+140 {'width': 1}
+247 {'width': 1}
+206 {'width': 1}
+197 {'width': 1}
+260 {'width': 1}
+57 8
+97 {'width': 1}
+163 {'width': 1}
+117 {'width': 1}
+202 {'width': 1}
+239 {'width': 2}
+104 {'width': 1}
+248 {'width': 1}
+249 {'width': 1}
+61 0
+65 0
+84 3
+101 {'width': 1}
+104 {'width': 1}
+176 {'width': 1}
+97 10
+121 {'width': 1}
+117 {'width': 1}
+149 {'width': 1}
+125 {'width': 2}
+101 {'width': 2}
+116 {'width': 1}
+186 {'width': 2}
+190 {'width': 1}
+158 {'width': 1}
+245 {'width': 1}
+101 10
+104 {'width': 2}
+116 {'width': 2}
+176 {'width': 1}
+125 {'width': 1}
+186 {'width': 1}
+245 {'width': 1}
+167 {'width': 1}
+190 {'width': 1}
+197 {'width': 1}
+260 {'width': 1}
+103 3
+121 {'width': 2}
+123 {'width': 1}
+125 {'width': 1}
+104 9
+116 {'width': 2}
+176 {'width': 2}
+149 {'width': 1}
+123 {'width': 1}
+158 {'width': 1}
+167 {'width': 1}
+239 {'width': 1}
+248 {'width': 1}
+249 {'width': 1}
+116 3
+125 {'width': 1}
+186 {'width': 1}
+206 {'width': 1}
+117 9
+149 {'width': 1}
+202 {'width': 1}
+121 {'width': 1}
+125 {'width': 1}
+224 {'width': 1}
+122 {'width': 1}
+195 {'width': 1}
+245 {'width': 1}
+267 {'width': 1}
+121 7
+123 {'width': 1}
+125 {'width': 2}
+224 {'width': 1}
+176 {'width': 1}
+195 {'width': 1}
+197 {'width': 1}
+198 {'width': 1}
+122 9
+125 {'width': 1}
+149 {'width': 1}
+163 {'width': 1}
+123 {'width': 1}
+190 {'width': 1}
+195 {'width': 1}
+245 {'width': 1}
+267 {'width': 1}
+223 {'width': 1}
+123 10
+149 {'width': 1}
+125 {'width': 1}
+140 {'width': 1}
+167 {'width': 2}
+206 {'width': 1}
+223 {'width': 1}
+233 {'width': 1}
+158 {'width': 1}
+176 {'width': 1}
+190 {'width': 1}
+125 5
+149 {'width': 2}
+186 {'width': 1}
+224 {'width': 1}
+223 {'width': 1}
+230 {'width': 1}
+140 3
+167 {'width': 1}
+163 {'width': 1}
+247 {'width': 1}
+149 3
+223 {'width': 1}
+230 {'width': 1}
+267 {'width': 1}
+158 3
+163 {'width': 1}
+167 {'width': 1}
+176 {'width': 1}
+163 1
+247 {'width': 1}
+167 4
+176 {'width': 1}
+190 {'width': 1}
+197 {'width': 1}
+260 {'width': 1}
+176 4
+190 {'width': 1}
+195 {'width': 1}
+197 {'width': 1}
+198 {'width': 1}
+184 0
+186 4
+190 {'width': 1}
+223 {'width': 1}
+224 {'width': 1}
+227 {'width': 1}
+190 2
+197 {'width': 1}
+260 {'width': 1}
+195 4
+197 {'width': 1}
+198 {'width': 1}
+245 {'width': 1}
+267 {'width': 1}
+197 2
+198 {'width': 1}
+260 {'width': 1}
+198 0
+202 2
+211 {'width': 1}
+235 {'width': 1}
+206 2
+223 {'width': 1}
+233 {'width': 1}
+211 1
+235 {'width': 1}
+219 0
+220 0
+223 4
+224 {'width': 1}
+227 {'width': 1}
+233 {'width': 1}
+230 {'width': 1}
+224 2
+227 {'width': 1}
+237 {'width': 1}
+227 0
+229 0
+230 0
+233 0
+235 0
+237 0
+239 2
+248 {'width': 1}
+249 {'width': 1}
+244 0
+245 1
+267 {'width': 1}
+247 0
+248 1
+249 {'width': 1}
+249 0
+250 0
+252 0
+256 0
+258 0
+259 0
+260 0
+261 0
+263 0
+264 0
+265 0
+266 0
+267 0
+268 0
+269 0
+270 0
+271 0
+272 0
+273 0
+274 0
+275 0
+276 0
+277 0
+278 0
+279 0
+280 0
+281 0
+282 0
+283 0
+284 0
+285 0
+286 0
+287 0
+288 0
+289 0
+290 0
+291 0
+292 0
+293 0
+294 0
+295 0

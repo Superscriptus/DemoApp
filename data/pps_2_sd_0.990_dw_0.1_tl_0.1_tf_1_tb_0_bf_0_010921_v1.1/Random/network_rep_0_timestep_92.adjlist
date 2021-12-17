@@ -1,0 +1,387 @@
+#network_reconstruction.py
+# GMT Thu Dec 16 20:57:20 2021
+# 
+20 9
+226 {'width': 1}
+260 {'width': 1}
+158 {'width': 1}
+195 {'width': 1}
+238 {'width': 1}
+277 {'width': 1}
+190 {'width': 1}
+198 {'width': 1}
+324 {'width': 1}
+119 7
+148 {'width': 1}
+280 {'width': 1}
+239 {'width': 1}
+285 {'width': 1}
+330 {'width': 1}
+332 {'width': 1}
+342 {'width': 1}
+121 13
+156 {'width': 1}
+200 {'width': 1}
+190 {'width': 1}
+193 {'width': 1}
+253 {'width': 2}
+185 {'width': 1}
+131 {'width': 1}
+217 {'width': 1}
+288 {'width': 1}
+290 {'width': 1}
+148 {'width': 1}
+158 {'width': 1}
+291 {'width': 1}
+131 6
+133 {'width': 1}
+227 {'width': 1}
+288 {'width': 2}
+217 {'width': 1}
+290 {'width': 1}
+280 {'width': 1}
+133 10
+158 {'width': 1}
+226 {'width': 1}
+239 {'width': 1}
+292 {'width': 1}
+198 {'width': 1}
+217 {'width': 1}
+253 {'width': 1}
+284 {'width': 1}
+328 {'width': 1}
+355 {'width': 1}
+148 13
+158 {'width': 2}
+156 {'width': 2}
+250 {'width': 1}
+277 {'width': 1}
+195 {'width': 1}
+303 {'width': 1}
+296 {'width': 1}
+346 {'width': 1}
+291 {'width': 1}
+200 {'width': 1}
+276 {'width': 1}
+284 {'width': 1}
+328 {'width': 1}
+156 16
+253 {'width': 1}
+288 {'width': 2}
+250 {'width': 1}
+277 {'width': 1}
+217 {'width': 1}
+283 {'width': 1}
+312 {'width': 1}
+158 {'width': 1}
+190 {'width': 1}
+239 {'width': 1}
+300 {'width': 1}
+332 {'width': 1}
+200 {'width': 1}
+276 {'width': 1}
+284 {'width': 1}
+328 {'width': 1}
+158 14
+246 {'width': 1}
+185 {'width': 1}
+198 {'width': 1}
+195 {'width': 1}
+238 {'width': 1}
+277 {'width': 1}
+337 {'width': 1}
+341 {'width': 1}
+190 {'width': 1}
+239 {'width': 1}
+288 {'width': 1}
+300 {'width': 1}
+332 {'width': 1}
+291 {'width': 1}
+185 10
+198 {'width': 2}
+253 {'width': 1}
+195 {'width': 1}
+200 {'width': 1}
+284 {'width': 1}
+227 {'width': 1}
+263 {'width': 1}
+291 {'width': 1}
+300 {'width': 1}
+317 {'width': 1}
+190 11
+198 {'width': 2}
+193 {'width': 1}
+253 {'width': 1}
+217 {'width': 1}
+260 {'width': 1}
+296 {'width': 1}
+324 {'width': 1}
+239 {'width': 1}
+288 {'width': 1}
+300 {'width': 1}
+332 {'width': 1}
+193 8
+195 {'width': 1}
+217 {'width': 1}
+238 {'width': 1}
+253 {'width': 1}
+287 {'width': 1}
+292 {'width': 1}
+303 {'width': 1}
+355 {'width': 1}
+195 12
+217 {'width': 1}
+238 {'width': 2}
+198 {'width': 1}
+200 {'width': 1}
+284 {'width': 1}
+277 {'width': 1}
+303 {'width': 1}
+253 {'width': 1}
+260 {'width': 1}
+291 {'width': 1}
+333 {'width': 1}
+341 {'width': 1}
+198 11
+200 {'width': 1}
+284 {'width': 1}
+292 {'width': 1}
+304 {'width': 2}
+288 {'width': 1}
+303 {'width': 1}
+329 {'width': 1}
+324 {'width': 1}
+234 {'width': 1}
+326 {'width': 1}
+362 {'width': 1}
+200 3
+284 {'width': 2}
+276 {'width': 1}
+328 {'width': 1}
+217 11
+238 {'width': 1}
+260 {'width': 1}
+296 {'width': 1}
+288 {'width': 1}
+290 {'width': 1}
+283 {'width': 1}
+312 {'width': 1}
+253 {'width': 1}
+284 {'width': 1}
+328 {'width': 1}
+355 {'width': 1}
+226 2
+239 {'width': 1}
+292 {'width': 1}
+227 7
+284 {'width': 1}
+296 {'width': 1}
+288 {'width': 1}
+263 {'width': 1}
+291 {'width': 1}
+300 {'width': 1}
+317 {'width': 1}
+234 6
+246 {'width': 1}
+285 {'width': 1}
+287 {'width': 1}
+304 {'width': 1}
+326 {'width': 1}
+362 {'width': 1}
+238 2
+239 {'width': 1}
+277 {'width': 1}
+239 12
+250 {'width': 1}
+285 {'width': 2}
+292 {'width': 1}
+330 {'width': 2}
+332 {'width': 2}
+342 {'width': 1}
+288 {'width': 1}
+300 {'width': 1}
+317 {'width': 1}
+324 {'width': 1}
+326 {'width': 1}
+331 {'width': 1}
+246 7
+285 {'width': 1}
+287 {'width': 1}
+250 {'width': 1}
+312 {'width': 1}
+342 {'width': 1}
+343 {'width': 1}
+351 {'width': 1}
+250 6
+285 {'width': 1}
+277 {'width': 1}
+312 {'width': 1}
+342 {'width': 1}
+343 {'width': 1}
+351 {'width': 1}
+253 8
+288 {'width': 1}
+260 {'width': 1}
+291 {'width': 1}
+333 {'width': 1}
+341 {'width': 1}
+284 {'width': 1}
+328 {'width': 1}
+355 {'width': 1}
+260 4
+296 {'width': 1}
+291 {'width': 1}
+333 {'width': 1}
+341 {'width': 1}
+263 3
+291 {'width': 1}
+300 {'width': 1}
+317 {'width': 1}
+276 2
+284 {'width': 1}
+328 {'width': 1}
+277 2
+287 {'width': 1}
+288 {'width': 1}
+280 0
+283 1
+312 {'width': 1}
+284 3
+296 {'width': 1}
+328 {'width': 2}
+355 {'width': 1}
+285 4
+287 {'width': 1}
+330 {'width': 1}
+332 {'width': 1}
+342 {'width': 1}
+287 4
+288 {'width': 1}
+292 {'width': 1}
+303 {'width': 1}
+355 {'width': 1}
+288 8
+290 {'width': 1}
+303 {'width': 1}
+329 {'width': 1}
+300 {'width': 1}
+332 {'width': 1}
+308 {'width': 1}
+343 {'width': 1}
+361 {'width': 1}
+290 0
+291 8
+300 {'width': 1}
+317 {'width': 1}
+333 {'width': 1}
+341 {'width': 1}
+304 {'width': 1}
+338 {'width': 1}
+343 {'width': 1}
+361 {'width': 1}
+292 3
+304 {'width': 1}
+303 {'width': 1}
+355 {'width': 1}
+296 1
+346 {'width': 1}
+300 2
+317 {'width': 1}
+332 {'width': 1}
+301 0
+303 2
+329 {'width': 1}
+355 {'width': 1}
+304 5
+338 {'width': 1}
+343 {'width': 1}
+361 {'width': 1}
+326 {'width': 1}
+362 {'width': 1}
+308 2
+343 {'width': 1}
+361 {'width': 1}
+312 3
+342 {'width': 1}
+343 {'width': 1}
+351 {'width': 1}
+317 4
+324 {'width': 1}
+326 {'width': 1}
+330 {'width': 1}
+331 {'width': 1}
+318 0
+322 0
+323 0
+324 3
+326 {'width': 1}
+330 {'width': 1}
+331 {'width': 1}
+326 3
+362 {'width': 1}
+330 {'width': 1}
+331 {'width': 1}
+328 1
+355 {'width': 1}
+329 0
+330 3
+332 {'width': 1}
+342 {'width': 1}
+331 {'width': 1}
+331 0
+332 1
+342 {'width': 1}
+333 1
+341 {'width': 1}
+334 0
+335 0
+337 1
+341 {'width': 1}
+338 2
+343 {'width': 1}
+361 {'width': 1}
+339 0
+341 0
+342 2
+343 {'width': 1}
+351 {'width': 1}
+343 2
+351 {'width': 1}
+361 {'width': 2}
+345 0
+346 0
+347 0
+350 0
+351 0
+352 0
+353 0
+354 0
+355 0
+356 0
+357 0
+358 0
+359 0
+360 0
+361 0
+362 0
+363 0
+364 0
+365 0
+366 0
+367 0
+368 0
+369 0
+370 0
+371 0
+372 0
+373 0
+374 0
+375 0
+376 0
+377 0
+378 0
+379 0
+380 0
+381 0
+382 0
+383 0
