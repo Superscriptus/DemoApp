@@ -13,6 +13,8 @@
 #       - could refactor Network and Timeseries plot to inherit shared logic from a base class
 # Note: to change button colour and style...
 # https://discuss.streamlit.io/t/how-to-change-the-backgorund-color-of-button-widget/12103/10
+# Note: to change pyplot width, convert to image:
+#  https://discuss.streamlit.io/t/cannot-change-matplotlib-figure-size/10295/8
 
 import streamlit as st
 import streamlit.components.v1 as components
@@ -171,7 +173,8 @@ class NetworkPlot:
     def __init__(self, plot_name, info, timestep=0):
         st.subheader(plot_name)
 
-        self.G = nx.karate_club_graph()
+        # self.G = nx.karate_club_graph()
+        self.G = st.session_state.simulation_data['networks'].get(timestep, '')
         # self.g4 = Network(height='400px', width='85%', bgcolor='#ffffff', font_color='white')
 
         # st.button(
@@ -181,7 +184,7 @@ class NetworkPlot:
 
         # if st.session_state.display_net:
         st.write(info)
-        self.fig = plt.figure(figsize=(10, 6))
+        self.fig = plt.figure(figsize=(8, 6))
         self.placeholder = st.empty()
         self.placeholder.pyplot(self.fig)
         self.draw_graph()
@@ -196,7 +199,6 @@ class NetworkPlot:
             # )
 
     def draw_graph(self):
-
         self.fig.clear()
         nx.draw_networkx(self.G, ax=self.fig.gca())
         self.placeholder.pyplot(self.fig)
@@ -214,8 +216,9 @@ class NetworkPlot:
             # )
 
     def update(self, timestep):
-        self.G.add_node(timestep*100)
-        self.G.add_edge(0, timestep*100)
+        self.G = st.session_state.simulation_data['networks'].get(timestep, '')
+        # self.G.add_node(timestep*100)
+        # self.G.add_edge(0, timestep*100)
         self.draw_graph()
         pass
 
