@@ -13,12 +13,17 @@
 #       - could refactor Network and Timeseries plot to inherit shared logic from a base class
 # Note: to change button colour and style...
 # https://discuss.streamlit.io/t/how-to-change-the-backgorund-color-of-button-widget/12103/10
+# Note: to change pyplot width, convert to image:
+#  https://discuss.streamlit.io/t/cannot-change-matplotlib-figure-size/10295/8
 
-import numpy as np
 import streamlit as st
 import streamlit.components.v1 as components
 import altair as alt
 import time
+import networkx as nx
+from pyvis.network import Network
+import matplotlib.pyplot as plt
+
 from .utilities import load_models, create_session_state_variables
 
 
@@ -168,20 +173,53 @@ class NetworkPlot:
     def __init__(self, plot_name, info, timestep=0):
         st.subheader(plot_name)
 
-        st.button(
-            social_network_label(st.session_state.display_net),
-            on_click=handle_network_click
-        )
+        # self.G = nx.karate_club_graph()
+        self.G = st.session_state.simulation_data['networks'].get(timestep, '')
+        # self.g4 = Network(height='400px', width='85%', bgcolor='#ffffff', font_color='white')
 
-        if st.session_state.display_net:
-            st.write(info)
+        # st.button(
+        #     social_network_label(st.session_state.display_net),
+        #     on_click=handle_network_click
+        # )
 
-            self.chart = components.html(
-                st.session_state.simulation_data['networks'].get(timestep, ''),
-                height=435
-            )
+        # if st.session_state.display_net:
+        st.write(info)
+        self.fig = plt.figure(figsize=(20, 15))
+        self.placeholder = st.empty()
+        self.placeholder.pyplot(self.fig)
+        self.draw_graph()
+            # path = '/tmp'
+            # self.g4.save_graph(f'{path}/pyvis_graph.html')
+            # html_file = open(f'{path}/pyvis_graph.html', 'r', encoding='utf-8')
+            #
+            # self.chart = components.html(
+            #     #st.session_state.simulation_data['networks'].get(timestep, ''),
+            #     html_file.read(),
+            #     height=435
+            # )
+
+    def draw_graph(self):
+        self.fig.clear()
+        nx.draw_networkx(self.G, ax=self.fig.gca(), pos=nx.circular_layout(self.G))
+        self.placeholder.pyplot(self.fig)
+        # self.g4.from_nx(self.G)
+        # path = '/tmp'
+        # self.g4.save_graph(f'{path}/pyvis_graph.html')
+        # html_file = open(f'{path}/pyvis_graph.html', 'r', encoding='utf-8')
+
+        # with st.empty():
+
+            # self.chart = components.html(
+            #     # st.session_state.simulation_data['networks'].get(timestep, ''),
+            #     html_file.read(),
+            #     height=435
+            # )
 
     def update(self, timestep):
+        self.G = st.session_state.simulation_data['networks'].get(timestep, '')
+        # self.G.add_node(timestep*100)
+        # self.G.add_edge(0, timestep*100)
+        self.draw_graph()
         pass
 
 
@@ -393,12 +431,6 @@ def page_code():
 
     if st.session_state.simulation_data['model_vars'] is not None:
 
-        net_plot = NetworkPlot(
-            plot_name='Social Network',
-            timestep=st.session_state.global_time,
-            info="The network of all successful collaborations between workers."
-        )
-
         plot_list = []
         for plot, details in st.session_state.config.simulation_plots.items():
             plot_list.append(
@@ -411,20 +443,26 @@ def page_code():
                 )
             )
 
+        net_plot = NetworkPlot(
+            plot_name='Social Network',
+            timestep=st.session_state.global_time,
+            info="The network of all successful collaborations between workers."
+        )
+
         if st.session_state.playing:
             start = st.session_state.global_time + 1
 
             for t in range(start, 100):
 
-                # net_plot.update(t)
+                net_plot.update(t)
                 for plot in plot_list:
                     plot.update(t)
 
                 time.sleep(0.2 / st.session_state.speed)
                 st.session_state.global_time += 1
 
-                if st.session_state.display_net and t % 10 == 0:
-                    st.experimental_rerun()
+                # if st.session_state.display_net and t % 10 == 0:
+                #     st.experimental_rerun()
 
                 if t == 99:
                     st.session_state.playing = False

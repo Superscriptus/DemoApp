@@ -118,19 +118,22 @@ def load_models(
             return_data['networks'] = {}
 
             for t in range(1, duration + 1):
-                #net = Network(height='400px', width='590px', bgcolor='#ffffff', font_color='white')
-                net = Network(height='400px', width='85%', bgcolor='#ffffff', font_color='white')
-                net.from_nx(
-                    nx.read_multiline_adjlist(
+                # net = Network(height='400px', width='85%', bgcolor='#ffffff', font_color='white')
+                # net.from_nx(
+                #     nx.read_multiline_adjlist(
+                #         "data/" + sub_dir + "/%s/network_rep_%d_timestep_%d.adjlist"
+                #         % (optimiser_dict[team_allocation], rep, t)
+                #     )
+                # )
+                # path = '/tmp'
+                # net.save_graph(f'{path}/pyvis_graph.html')
+                # html_file = open(f'{path}/pyvis_graph.html', 'r', encoding='utf-8')
+
+                return_data['networks'][t - 1] = nx.read_multiline_adjlist(
                         "data/" + sub_dir + "/%s/network_rep_%d_timestep_%d.adjlist"
                         % (optimiser_dict[team_allocation], rep, t)
                     )
-                )
-                path = '/tmp'
-                net.save_graph(f'{path}/pyvis_graph.html')
-                html_file = open(f'{path}/pyvis_graph.html', 'r', encoding='utf-8')
-
-                return_data['networks'][t - 1] = html_file.read()
+                #html_file.read()
 
         else:
             return_data['networks'] = None
