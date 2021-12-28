@@ -184,7 +184,7 @@ class NetworkPlot:
 
         # if st.session_state.display_net:
         st.write(info)
-        self.fig = plt.figure(figsize=(8, 6))
+        self.fig = plt.figure(figsize=(20, 15))
         self.placeholder = st.empty()
         self.placeholder.pyplot(self.fig)
         self.draw_graph()
@@ -200,7 +200,7 @@ class NetworkPlot:
 
     def draw_graph(self):
         self.fig.clear()
-        nx.draw_networkx(self.G, ax=self.fig.gca())
+        nx.draw_networkx(self.G, ax=self.fig.gca(), pos=nx.circular_layout(self.G))
         self.placeholder.pyplot(self.fig)
         # self.g4.from_nx(self.G)
         # path = '/tmp'
