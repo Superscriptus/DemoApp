@@ -1,4 +1,6 @@
 import streamlit as st
+import streamlit_analytics
+from streamlit import secrets
 
 from pages.utilities import create_session_state_variables
 from pages.simulation import load_models, set_default_parameters
@@ -28,15 +30,21 @@ class Application:
         st.sidebar.image('images/logo.png', use_column_width=True)
         st.sidebar.header('Simulation engine for a social teamwork game.')
 
-        if st.session_state.presets_loaded:
-            selected_page = st.sidebar.selectbox(
-                'App Navigation',
-                [*self.pages.keys()],
-                help="Select page to view."
-            )
-        else:
-            selected_page = "About"
-            st.sidebar.markdown("_Please wait while we load the simulations in the background._")
+        with streamlit_analytics.track(
+            unsafe_password=secrets["ANALYTICS_PASSWORD"],
+            firestore_key_file=secrets["FIRESTORE_KEY_FILE"],
+            firestore_collection_name=secrets["FIRESTORE_COLLECTION"]
+        ):
+            if st.session_state.presets_loaded:
+                selected_page = st.sidebar.selectbox(
+                    'App Navigation',
+                    [*self.pages.keys()],
+                    help="Select page to view.",
+                    key="nav1"
+                )
+            else:
+                selected_page = "About"
+                st.sidebar.markdown("_Please wait while we load the simulations in the background._")
 
         create_session_state_variables()
         set_default_parameters()

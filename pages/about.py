@@ -2,6 +2,7 @@ import streamlit as st
 
 
 def page_code():
+
     st.title("About")
 
     col1, col2 = st.beta_columns([1, 9])
