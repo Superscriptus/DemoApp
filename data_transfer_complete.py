@@ -40,15 +40,23 @@ def strip_unwanted(path, max_reps=True):
         for f in glob.glob(to_path + "/*/%s*" % name):
             os.remove(f)
 
+    for f in glob.glob(to_path + "/*/network_rep_*_timestep_*"):
+        _t = f.split('_')[4].split('.')[0]
+        if _t > 1:
+            os.remove(f)
+
     if max_reps:
         for f in glob.glob(to_path + "/*/*"):
             file_name = f.split('/')[-1]
             if 'rep' in file_name:
-                if 'network' in file_name:
-                    if int(file_name.split('_')[2]) > MAX_REP:
-                        os.remove(f)
-                elif int(file_name.split('.')[0].split('rep_')[1]) > MAX_REP:
+                rep_num = file_name.split('rep')[1].split('_')[1]
+                if rep_num > MAX_REP:
                     os.remove(f)
+                # if 'network' in file_name:
+                #     if int(file_name.split('_')[2]) > MAX_REP:
+                #         os.remove(f)
+                # elif int(file_name.split('.')[0].split('rep_')[1]) > MAX_REP:
+                #     os.remove(f)
 
 
 def copy_data(src, dst, overwrite=False):
