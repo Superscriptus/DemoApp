@@ -174,18 +174,31 @@ def update_network(g, timestep):
     and returns the updated state at t = timestep
     """
     diff = st.session_state.simulation_data['networks'].get('diff', '')
-    d = diff[timestep]
+    d = diff[str(timestep + 1)]
 
     for n in d['nodes_to_remove']:
-        g.remove_node(n)
+        try:
+            g.remove_node(n)
+        except:
+            print("Cannot remove node %d" % n)
     for n in d['nodes_to_add']:
-        g.add_node(n)
+        try:
+            g.add_node(n)
+        except:
+            print("Cannot add node %d" % n)
     for e in d['edges_to_add']:
-        g.add_edge(*e)
+        try:
+            g.add_edge(*e)
+        except:
+            print("Cannot add edge " + str(e))
+
     for e in d['edges_to_increment']:
         edge = e[0]
         increment = e[1]
-        g[edge[0]][edge[1]]['width'] += increment
+        try:
+            g[edge[0]][edge[1]]['width'] += increment
+        except:
+            g.add_edge(edge[0], edge[1], width=increment)
 
     return g
 
