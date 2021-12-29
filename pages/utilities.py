@@ -2,7 +2,7 @@ import pickle
 import numpy as np
 import streamlit as st
 import networkx as nx
-from pyvis.network import Network
+import json
 
 
 def unpickle(file_path, data_type='df', silent=False):
@@ -113,11 +113,22 @@ def load_models(
             "data/" + sub_dir + "/%s/model_vars_rep_%d.pickle" % (optimiser_dict[team_allocation], rep)
         )
         if return_data['model_vars'] is not None and load_networks:
-            # We load the networks for each timestep up to 'duration' and convert them to an html string that
-            # can be read by PyVis.
+            # We load the network for the first timestep and the 'network difference' json file, which is used to
+            # update the network on each timestep.
             return_data['networks'] = {}
+            t = 1
+            return_data['networks']['init'] = nx.read_multiline_adjlist(
+                "data/" + sub_dir + "/%s/network_rep_%d_timestep_%d.adjlist"
+                % (optimiser_dict[team_allocation], rep, t)
+            )
+            with open(
+                "data/" + sub_dir + "/%s/network_dfference_rep_%d.json"
+                % (optimiser_dict[team_allocation], rep),
+                'r'
+            ) as in_file:
+                return_data['networks']['diff'] = json.load(in_file)
 
-            for t in range(1, duration + 1):
+            # for t in range(1, duration + 1):
                 # net = Network(height='400px', width='85%', bgcolor='#ffffff', font_color='white')
                 # net.from_nx(
                 #     nx.read_multiline_adjlist(
@@ -129,10 +140,7 @@ def load_models(
                 # net.save_graph(f'{path}/pyvis_graph.html')
                 # html_file = open(f'{path}/pyvis_graph.html', 'r', encoding='utf-8')
 
-                return_data['networks'][t - 1] = nx.read_multiline_adjlist(
-                        "data/" + sub_dir + "/%s/network_rep_%d_timestep_%d.adjlist"
-                        % (optimiser_dict[team_allocation], rep, t)
-                    )
+
                 #html_file.read()
 
         else:
