@@ -168,13 +168,48 @@ class TimeSeriesPlot:
         )
 
 
+def update_network(g, timestep):
+    """
+    This method assumes that g is in the correct network state for t = timestep-1
+    and returns the updated state at t = timestep
+    """
+    diff = st.session_state.simulation_data['networks'].get('diff', '')
+    d = diff[timestep]
+
+    for n in d['nodes_to_remove']:
+        g.remove_node(n)
+    for n in d['nodes_to_add']:
+        g.add_node(n)
+    for e in d['edges_to_add']:
+        g.add_edge(*e)
+    for e in d['edges_to_increment']:
+        edge = e[0]
+        increment = e[1]
+        g[edge[0]][edge[1]]['width'] += increment
+
+    return g
+
+
+def get_network_at_t(timestep):
+
+    g = st.session_state.simulation_data['networks'].get('init', '')
+    if timestep == 0:
+        return g
+
+    else:
+        for t in range(1, timestep + 1):
+            g = update_network(g, t)
+
+        return g
+
+
 class NetworkPlot:
 
     def __init__(self, plot_name, info, timestep=0):
         st.subheader(plot_name)
 
         # self.G = nx.karate_club_graph()
-        self.G = st.session_state.simulation_data['networks'].get(timestep, '')
+        self.G = get_network_at_t(timestep)
         # self.g4 = Network(height='400px', width='85%', bgcolor='#ffffff', font_color='white')
 
         # st.button(
@@ -216,7 +251,8 @@ class NetworkPlot:
             # )
 
     def update(self, timestep):
-        self.G = st.session_state.simulation_data['networks'].get(timestep, '')
+        self.G = update_network(self.G, timestep)
+        # self.G = st.session_state.simulation_data['networks'].get(timestep, '')
         # self.G.add_node(timestep*100)
         # self.G.add_edge(0, timestep*100)
         self.draw_graph()
