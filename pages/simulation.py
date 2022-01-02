@@ -243,11 +243,13 @@ class NetworkPlot:
     def __init__(
             self, info,
             timestep=0, placeholder=None,
-            edge_scale=20, circle_scale=0.2
+            edge_scale=20, circle_scale=0.2,
+            node_scale=2
     ):
 
         self.edge_scale = edge_scale
         self.circle_scale = circle_scale
+        self.node_scale = node_scale
         self.G = get_network_at_t(timestep)
         self.max_node_count = max(
             max(value["nodes_to_add"])
@@ -275,10 +277,13 @@ class NetworkPlot:
         }
         self.fig.clear()
         cc = self.G.subgraph(max(nx.connected_components(self.G), key=len))
+
         nx.draw_networkx(
             cc, ax=self.fig.gca(),
             pos=pos, with_labels=False,
-            width=[e[2]['width'] / self.edge_scale for e in self.G.edges(data=True)]
+            width=[e[2]['width'] / self.edge_scale for e in self.G.edges(data=True)],
+            #node_size=[10 + self.node_scale * self.G.degree[n] for n in cc.nodes()]
+            node_size=[10 + self.node_scale * self.G.degree[n] for n in cc.nodes()]
         )
 
         circle_size = 1 + self.circle_scale * (self.max_node_count / 100) + 0.1
