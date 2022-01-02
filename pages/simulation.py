@@ -48,6 +48,13 @@ def social_network_label(display_net):
         return 'Turn on social network'
 
 
+def preset_e_selected():
+    if "preset" in st.session_state and st.session_state.preset == "E":
+        return True
+    else:
+        return False
+
+
 def reload(remove_preset=False, rerun=True):
     """
     Note: rerun re-draws plots and widgets. Needs to run before reloading data in order to activate presets.
@@ -68,7 +75,8 @@ def reload(remove_preset=False, rerun=True):
             train_load=st.session_state.train_load,
             skill_decay=st.session_state.skill_decay,
             rep=st.session_state.replicate,
-            team_allocation=st.session_state.team_allocation
+            team_allocation=st.session_state.team_allocation,
+            preset_e=preset_e_selected()
         )
 
 
@@ -162,7 +170,10 @@ class TimeSeriesPlot:
 
     def update(self, timestep):
 
-        chart_data = st.session_state.simulation_data['model_vars'].loc[timestep:timestep, self.plot_series].melt('time')
+        chart_data = (
+            st.session_state.simulation_data['model_vars']
+              .loc[timestep:timestep, self.plot_series].melt('time')
+        )
 
         chart_data['description'] = [
             st.session_state.config.simulation_variables.get(v, '(undefined)')
@@ -449,7 +460,8 @@ def create_sidebar_controls():
             train_load=st.session_state.train_load,
             skill_decay=st.session_state.skill_decay,
             rep=st.session_state.replicate,
-            team_allocation=st.session_state.team_allocation
+            team_allocation=st.session_state.team_allocation,
+            preset_e=preset_e_selected()
         )
 
     if 'playing' not in st.session_state:
