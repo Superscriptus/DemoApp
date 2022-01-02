@@ -204,7 +204,7 @@ def update_network(g, timestep):
             print("Cannot add node %d" % n)
     for e in d['edges_to_add']:
         try:
-            g.add_edge(*e)
+            g.add_edge(*e, width=1)
         except:
             print("Cannot add edge " + str(e))
 
@@ -232,21 +232,22 @@ def get_network_at_t(timestep):
         return g
 
 
-def circle_x_y(n):
+def circle_x_y(n, grow_circle=0.2):
     theta = n * np.pi / 50
-    multiplier = 1 + (np.floor((n - 1) / 100) * 0.1)
+    multiplier = 1 + (np.floor(n / 100) * grow_circle)
     return multiplier * np.cos(theta), multiplier * np.sin(theta)
 
 
 class NetworkPlot:
 
-    def __init__(self, plot_name, info, timestep=0, placeholder=None):
+    def __init__(self, plot_name, info, timestep=0, placeholder=None, edge_scale=20):
         st.subheader(plot_name)
 
         self.all_pos = {
             i: circle_x_y(i)
             for i in range(500)
         }
+        self.edge_scale = edge_scale
         # self.H = nx.karate_club_graph()
         self.G = get_network_at_t(timestep)
         # self.g4 = Network(height='400px', width='85%', bgcolor='#ffffff', font_color='white')
@@ -281,10 +282,16 @@ class NetworkPlot:
         self.fig.clear()
         # nx.draw_networkx(self.G, ax=self.fig.gca(), pos=nx.circular_layout(self.G))
         cc = self.G.subgraph(max(nx.connected_components(self.G), key=len))
-        nx.draw_networkx(cc, ax=self.fig.gca(), pos=pos)
+        nx.draw_networkx(
+            cc, ax=self.fig.gca(),
+            pos=pos, with_labels=False,
+            width=[e[2]['width'] / self.edge_scale for e in self.G.edges(data=True)]
+        )
         # nx.draw_networkx(self.G, ax=self.fig.gca(), pos=pos)
         # plt.plot([1, 2, 3], [1, 2, 3])
         # nx.draw_networkx(self.H)
+        plt.xlim([-1.5, 1.5])
+        plt.ylim([-1.5, 1.5])
         plt.tight_layout()
         buf = BytesIO()
         self.fig.savefig(buf, format="png")
