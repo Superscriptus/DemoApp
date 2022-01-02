@@ -240,17 +240,30 @@ def circle_x_y(n, grow_circle=0.2):
 
 class NetworkPlot:
 
-    def __init__(self, plot_name, info, timestep=0, placeholder=None, edge_scale=20):
+    def __init__(
+            self, plot_name, info,
+            timestep=0, placeholder=None,
+            edge_scale=20, circle_scale=0.2
+    ):
+
         st.subheader(plot_name)
 
-        self.all_pos = {
-            i: circle_x_y(i)
-            for i in range(500)
-        }
         self.edge_scale = edge_scale
-        # self.H = nx.karate_club_graph()
+        self.circle_scale = circle_scale
         self.G = get_network_at_t(timestep)
+        self.max_node_count = max(
+            max(value["nodes_to_add"])
+            if value["nodes_to_add"]
+            else 0
+            for value in st.session_state.simulation_data['networks']['diff'].values()
+        )
+        print(self.max_node_count)
         # self.g4 = Network(height='400px', width='85%', bgcolor='#ffffff', font_color='white')
+
+        self.all_pos = {
+            i: circle_x_y(i, self.circle_scale)
+            for i in range(self.max_node_count + 1)
+        }
 
         st.button(
             social_network_label(st.session_state.display_net),
@@ -290,8 +303,9 @@ class NetworkPlot:
         # nx.draw_networkx(self.G, ax=self.fig.gca(), pos=pos)
         # plt.plot([1, 2, 3], [1, 2, 3])
         # nx.draw_networkx(self.H)
-        plt.xlim([-1.5, 1.5])
-        plt.ylim([-1.5, 1.5])
+        circle_size = 1 + self.circle_scale * (self.max_node_count / 100) + 0.1
+        plt.xlim([-circle_size, circle_size])
+        plt.ylim([-circle_size, circle_size])
         plt.tight_layout()
         buf = BytesIO()
         self.fig.savefig(buf, format="png")
