@@ -79,7 +79,6 @@ def load_models(
     if ('preset_active' in st.session_state
             and 'preset' in st.session_state
             and st.session_state.preset_active):
-
         return_data = st.session_state.comparison_data[st.session_state.preset]
     else:
 
