@@ -41,12 +41,14 @@ class Application:
             firestore_key_file=secrets["FIRESTORE_KEY_FILE"],
             firestore_collection_name=secrets["FIRESTORE_COLLECTION"]
         ):
+
             if st.session_state.presets_loaded:
                 selected_page = st.sidebar.selectbox(
-                    'App Navigation',
-                    [*self.pages.keys()],
+                    label="App Navigation",
+                    options=[*self.pages.keys()],
                     help="Select page to view.",
-                    key="nav1"
+                    key="nav1",
+                    index=0
                 )
             else:
                 selected_page = "About"
