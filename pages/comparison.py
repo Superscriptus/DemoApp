@@ -109,7 +109,7 @@ def page_code():
     bar_data = pd.DataFrame({
         'preset': domain,
         'terminal ROI': [
-            np.mean(st.session_state.comparison_data[preset]['model_vars'].loc[-25:]['Roi'])
+            np.mean(st.session_state.comparison_data[preset][st.session_state.replicate]['model_vars'].loc[-25:]['Roi'])
             for preset in domain
         ]
     })
@@ -135,7 +135,7 @@ def page_code():
 
         for lt in load_types:
             load_column.append(
-                np.mean(st.session_state.comparison_data[preset]['model_vars'].loc[-25:][lt])
+                np.mean(st.session_state.comparison_data[preset][st.session_state.replicate]['model_vars'].loc[-25:][lt])
             )
 
     bar_data['Load'] = load_column
@@ -156,7 +156,7 @@ def page_code():
     bar_data = pd.DataFrame({
         'preset': domain,
         'AverageWorkerOvr': [
-            np.mean(st.session_state.comparison_data[preset]['model_vars'].loc[-25:]['AverageWorkerOvr'])
+            np.mean(st.session_state.comparison_data[preset][st.session_state.replicate]['model_vars'].loc[-25:]['AverageWorkerOvr'])
             for preset in domain
         ]
     })
@@ -173,7 +173,7 @@ def page_code():
     bar_data = pd.DataFrame({
         'preset': domain,
         'AverageSuccessProbability': [
-            np.mean(st.session_state.comparison_data[preset]['model_vars'].loc[-25:]['AverageSuccessProbability'])
+            np.mean(st.session_state.comparison_data[preset][st.session_state.replicate]['model_vars'].loc[-25:]['AverageSuccessProbability'])
             for preset in domain
         ]
     })
@@ -283,14 +283,14 @@ def page_code():
 
         if chart_data is None:
             chart_data = (
-                st.session_state.comparison_data[preset]['model_vars'][['AverageWorkerOvr', 'Roi']]
+                st.session_state.comparison_data[preset][st.session_state.replicate]['model_vars'][['AverageWorkerOvr', 'Roi']]
                 .copy().rename(columns={'Roi': 'ROI'})
             )
             chart_data['preset'] = [preset for i in range(len(chart_data))]
 
         else:
             temp_data = (
-                st.session_state.comparison_data[preset]['model_vars'][['AverageWorkerOvr', 'Roi']]
+                st.session_state.comparison_data[preset][st.session_state.replicate]['model_vars'][['AverageWorkerOvr', 'Roi']]
                 .copy().rename(columns={'Roi': 'ROI'})
             )
             temp_data['preset'] = [preset for i in range(len(temp_data))]
@@ -318,14 +318,14 @@ def page_code():
 
         if chart_data is None:
             chart_data = (
-                st.session_state.comparison_data[preset]['model_vars'][['time', 'Roi']]
+                st.session_state.comparison_data[preset][st.session_state.replicate]['model_vars'][['time', 'Roi']]
                 .copy().rename(columns={'Roi': 'value'})
             )
             chart_data['variable'] = [preset for i in range(len(chart_data))]
 
         else:
             temp_data = (
-                st.session_state.comparison_data[preset]['model_vars'][['time', 'Roi']]
+                st.session_state.comparison_data[preset][st.session_state.replicate]['model_vars'][['time', 'Roi']]
                 .copy().rename(columns={'Roi': 'value'})
             )
             temp_data['variable'] = [preset for i in range(len(temp_data))]
@@ -338,14 +338,14 @@ def page_code():
 
         if chart_data is None:
             chart_data = (
-                st.session_state.comparison_data[preset]['model_vars'][['time', 'AverageWorkerOvr']]
+                st.session_state.comparison_data[preset][st.session_state.replicate]['model_vars'][['time', 'AverageWorkerOvr']]
                     .copy().rename(columns={'AverageWorkerOvr': 'value'})
             )
             chart_data['variable'] = [preset for i in range(len(chart_data))]
 
         else:
             temp_data = (
-                st.session_state.comparison_data[preset]['model_vars'][['time', 'AverageWorkerOvr']]
+                st.session_state.comparison_data[preset][st.session_state.replicate]['model_vars'][['time', 'AverageWorkerOvr']]
                     .copy().rename(columns={'AverageWorkerOvr': 'value'})
             )
             temp_data['variable'] = [preset for i in range(len(temp_data))]
@@ -358,14 +358,14 @@ def page_code():
 
         if chart_data is None:
             chart_data = (
-                st.session_state.comparison_data[preset]['model_vars'][['time', 'AverageTeamOvr']]
+                st.session_state.comparison_data[preset][st.session_state.replicate]['model_vars'][['time', 'AverageTeamOvr']]
                 .copy().rename(columns={'AverageTeamOvr': 'value'})
             )
             chart_data['variable'] = [preset for i in range(len(chart_data))]
             chart_data['value'] = moving_average(chart_data['value'], window_size=10)
         else:
             temp_data = (
-                st.session_state.comparison_data[preset]['model_vars'][['time', 'AverageTeamOvr']]
+                st.session_state.comparison_data[preset][st.session_state.replicate]['model_vars'][['time', 'AverageTeamOvr']]
                 .copy().rename(columns={'AverageTeamOvr': 'value'})
             )
             temp_data['variable'] = [preset for i in range(len(temp_data))]

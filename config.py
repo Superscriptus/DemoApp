@@ -13,6 +13,10 @@ class Config:
 
     def __init__(self):
 
+        self.config_params = {
+            'max_replicates': 1 #5
+        }
+
         self.simulation_variables = {
             'Roi': 'Return on investment as %.',
             'ActiveProjects': 'Number of currently active projects.',
