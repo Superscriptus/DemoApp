@@ -204,7 +204,7 @@ def update_network(g, timestep):
             print("Cannot add node %d" % n)
     for e in d['edges_to_add']:
         try:
-            g.add_edge(*e)
+            g.add_edge(*e, width=1)
         except:
             print("Cannot add edge " + str(e))
 
@@ -232,45 +232,42 @@ def get_network_at_t(timestep):
         return g
 
 
-def circle_x_y(n):
+def circle_x_y(n, grow_circle=0.2):
     theta = n * np.pi / 50
-    multiplier = 1 + (np.floor((n - 1) / 100) * 0.1)
+    multiplier = 1 + (np.floor(n / 100) * grow_circle)
     return multiplier * np.cos(theta), multiplier * np.sin(theta)
 
 
 class NetworkPlot:
 
-    def __init__(self, plot_name, info, timestep=0, placeholder=None):
-        st.subheader(plot_name)
+    def __init__(
+            self, info,
+            timestep=0, placeholder=None,
+            edge_scale=20, circle_scale=0.2,
+            node_scale=2
+    ):
+
+        self.edge_scale = edge_scale
+        self.circle_scale = circle_scale
+        self.node_scale = node_scale
+        self.G = get_network_at_t(timestep)
+        self.max_node_count = max(
+            max(value["nodes_to_add"])
+            if value["nodes_to_add"]
+            else 0
+            for value in st.session_state.simulation_data['networks']['diff'].values()
+        )
 
         self.all_pos = {
-            i: circle_x_y(i)
-            for i in range(500)
+            i: circle_x_y(i, self.circle_scale)
+            for i in range(self.max_node_count + 1)
         }
-        # self.H = nx.karate_club_graph()
-        self.G = get_network_at_t(timestep)
-        # self.g4 = Network(height='400px', width='85%', bgcolor='#ffffff', font_color='white')
-
-        st.button(
-            social_network_label(st.session_state.display_net),
-            on_click=handle_network_click
-        )
 
         if st.session_state.display_net:
             st.write(info)
             self.fig = plt.figure(figsize=(10, 10))
             self.placeholder = placeholder
-            #self.placeholder.pyplot(self.fig)
             self.draw_graph()
-            # path = '/tmp'
-            # self.g4.save_graph(f'{path}/pyvis_graph.html')
-            # html_file = open(f'{path}/pyvis_graph.html', 'r', encoding='utf-8')
-            #
-            # self.chart = components.html(
-            #     #st.session_state.simulation_data['networks'].get(timestep, ''),
-            #     html_file.read(),
-            #     height=435
-            # )
 
     def draw_graph(self):
 
@@ -279,36 +276,26 @@ class NetworkPlot:
             for n in self.G.nodes()
         }
         self.fig.clear()
-        # nx.draw_networkx(self.G, ax=self.fig.gca(), pos=nx.circular_layout(self.G))
         cc = self.G.subgraph(max(nx.connected_components(self.G), key=len))
-        nx.draw_networkx(cc, ax=self.fig.gca(), pos=pos)
-        # nx.draw_networkx(self.G, ax=self.fig.gca(), pos=pos)
-        # plt.plot([1, 2, 3], [1, 2, 3])
-        # nx.draw_networkx(self.H)
+
+        nx.draw_networkx(
+            cc, ax=self.fig.gca(),
+            pos=pos, with_labels=False,
+            width=[e[2]['width'] / self.edge_scale for e in self.G.edges(data=True)],
+            #node_size=[10 + self.node_scale * self.G.degree[n] for n in cc.nodes()]
+            node_size=[10 + self.node_scale * self.G.degree[n] for n in cc.nodes()]
+        )
+
+        circle_size = 1 + self.circle_scale * (self.max_node_count / 100) + 0.1
+        plt.xlim([-circle_size, circle_size])
+        plt.ylim([-circle_size, circle_size])
         plt.tight_layout()
         buf = BytesIO()
         self.fig.savefig(buf, format="png")
         self.placeholder.image(buf)
 
-        #self.placeholder.pyplot(self.fig)
-        # self.g4.from_nx(self.G)
-        # path = '/tmp'
-        # self.g4.save_graph(f'{path}/pyvis_graph.html')
-        # html_file = open(f'{path}/pyvis_graph.html', 'r', encoding='utf-8')
-
-        # with st.empty():
-
-            # self.chart = components.html(
-            #     # st.session_state.simulation_data['networks'].get(timestep, ''),
-            #     html_file.read(),
-            #     height=435
-            # )
-
     def update(self, timestep):
         self.G = update_network(self.G, timestep)
-        # self.G = st.session_state.simulation_data['networks'].get(timestep, '')
-        # self.G.add_node(timestep*100)
-        # self.G.add_edge(0, timestep*100)
         self.draw_graph()
         pass
 
@@ -534,9 +521,13 @@ def page_code():
                 )
             )
 
+        st.subheader('Social Network')
+        st.button(
+            social_network_label(st.session_state.display_net),
+            on_click=handle_network_click
+        )
         placeholder = st.empty()
         net_plot = NetworkPlot(
-            plot_name='Social Network',
             timestep=st.session_state.global_time,
             info="The network of all successful collaborations between workers.",
             placeholder=placeholder
