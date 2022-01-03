@@ -16,7 +16,7 @@ import glob
 import itertools
 
 
-MAX_REP = 9  # Will only copy up to MAX_REP replicates
+MAX_REP = 5  # Will only copy up to MAX_REP replicates
 
 if len(sys.argv) != 2:
     raise Exception("You need to input the path to simulation_io")
@@ -53,11 +53,6 @@ def strip_unwanted(path, max_reps=True):
                 rep_num = file_name.split('rep')[1].split('_')[1].split('.')[0]
                 if int(rep_num) > MAX_REP:
                     os.remove(f)
-                # if 'network' in file_name:
-                #     if int(file_name.split('_')[2]) > MAX_REP:
-                #         os.remove(f)
-                # elif int(file_name.split('.')[0].split('rep_')[1]) > MAX_REP:
-                #     os.remove(f)
 
 
 def copy_data(src, dst, overwrite=False):
