@@ -100,6 +100,15 @@ def page_code():
     for preset, preset_details in st.session_state.config.simulation_presets.items():
         with st.beta_expander(preset + ": " + preset_details['preset_name']):
             st.write(preset_details['blurb'])
+
+    #########################################################################################
+    # First we compute the source data for the charts by averaging over the replicate simulations:
+    # (Note: could add switch to allow visualistion of individual simulation runs?)
+
+    source_data = {
+        preset: st.session_state.comparison_data[preset][st.session_state.replicate]['model_vars']
+        for preset in st.session_state.config.simulation_presets.keys()
+    }
 #########################################################################################
     st.write("The following charts show metric values averaged over the final 25 timesteps of a simulation.")
 
@@ -109,7 +118,7 @@ def page_code():
     bar_data = pd.DataFrame({
         'preset': domain,
         'terminal ROI': [
-            np.mean(st.session_state.comparison_data[preset][st.session_state.replicate]['model_vars'].loc[-25:]['Roi'])
+            np.mean(source_data[preset].loc[-25:]['Roi'])
             for preset in domain
         ]
     })
@@ -135,7 +144,7 @@ def page_code():
 
         for lt in load_types:
             load_column.append(
-                np.mean(st.session_state.comparison_data[preset][st.session_state.replicate]['model_vars'].loc[-25:][lt])
+                np.mean(source_data[preset].loc[-25:][lt])
             )
 
     bar_data['Load'] = load_column
@@ -156,7 +165,7 @@ def page_code():
     bar_data = pd.DataFrame({
         'preset': domain,
         'AverageWorkerOvr': [
-            np.mean(st.session_state.comparison_data[preset][st.session_state.replicate]['model_vars'].loc[-25:]['AverageWorkerOvr'])
+            np.mean(source_data[preset].loc[-25:]['AverageWorkerOvr'])
             for preset in domain
         ]
     })
@@ -173,7 +182,7 @@ def page_code():
     bar_data = pd.DataFrame({
         'preset': domain,
         'AverageSuccessProbability': [
-            np.mean(st.session_state.comparison_data[preset][st.session_state.replicate]['model_vars'].loc[-25:]['AverageSuccessProbability'])
+            np.mean(source_data[preset].loc[-25:]['AverageSuccessProbability'])
             for preset in domain
         ]
     })
@@ -283,14 +292,14 @@ def page_code():
 
         if chart_data is None:
             chart_data = (
-                st.session_state.comparison_data[preset][st.session_state.replicate]['model_vars'][['AverageWorkerOvr', 'Roi']]
+                source_data[preset][['AverageWorkerOvr', 'Roi']]
                 .copy().rename(columns={'Roi': 'ROI'})
             )
             chart_data['preset'] = [preset for i in range(len(chart_data))]
 
         else:
             temp_data = (
-                st.session_state.comparison_data[preset][st.session_state.replicate]['model_vars'][['AverageWorkerOvr', 'Roi']]
+                source_data[preset][['AverageWorkerOvr', 'Roi']]
                 .copy().rename(columns={'Roi': 'ROI'})
             )
             temp_data['preset'] = [preset for i in range(len(temp_data))]
@@ -318,14 +327,14 @@ def page_code():
 
         if chart_data is None:
             chart_data = (
-                st.session_state.comparison_data[preset][st.session_state.replicate]['model_vars'][['time', 'Roi']]
+                source_data[preset][['time', 'Roi']]
                 .copy().rename(columns={'Roi': 'value'})
             )
             chart_data['variable'] = [preset for i in range(len(chart_data))]
 
         else:
             temp_data = (
-                st.session_state.comparison_data[preset][st.session_state.replicate]['model_vars'][['time', 'Roi']]
+                source_data[preset][['time', 'Roi']]
                 .copy().rename(columns={'Roi': 'value'})
             )
             temp_data['variable'] = [preset for i in range(len(temp_data))]
@@ -338,15 +347,15 @@ def page_code():
 
         if chart_data is None:
             chart_data = (
-                st.session_state.comparison_data[preset][st.session_state.replicate]['model_vars'][['time', 'AverageWorkerOvr']]
-                    .copy().rename(columns={'AverageWorkerOvr': 'value'})
+                source_data[preset][['time', 'AverageWorkerOvr']]
+                .copy().rename(columns={'AverageWorkerOvr': 'value'})
             )
             chart_data['variable'] = [preset for i in range(len(chart_data))]
 
         else:
             temp_data = (
-                st.session_state.comparison_data[preset][st.session_state.replicate]['model_vars'][['time', 'AverageWorkerOvr']]
-                    .copy().rename(columns={'AverageWorkerOvr': 'value'})
+                source_data[preset][['time', 'AverageWorkerOvr']]
+                .copy().rename(columns={'AverageWorkerOvr': 'value'})
             )
             temp_data['variable'] = [preset for i in range(len(temp_data))]
             chart_data = chart_data.append(temp_data)
@@ -356,20 +365,16 @@ def page_code():
     chart_data = None
     for preset in st.session_state.config.simulation_presets:
 
+        temp_data = (
+            source_data[preset][['time', 'AverageTeamOvr']]
+            .copy().rename(columns={'AverageTeamOvr': 'value'})
+        )
+        temp_data['variable'] = [preset for i in range(len(temp_data))]
+        temp_data['value'] = moving_average(temp_data['value'], window_size=10)
+
         if chart_data is None:
-            chart_data = (
-                st.session_state.comparison_data[preset][st.session_state.replicate]['model_vars'][['time', 'AverageTeamOvr']]
-                .copy().rename(columns={'AverageTeamOvr': 'value'})
-            )
-            chart_data['variable'] = [preset for i in range(len(chart_data))]
-            chart_data['value'] = moving_average(chart_data['value'], window_size=10)
+            chart_data = temp_data
         else:
-            temp_data = (
-                st.session_state.comparison_data[preset][st.session_state.replicate]['model_vars'][['time', 'AverageTeamOvr']]
-                .copy().rename(columns={'AverageTeamOvr': 'value'})
-            )
-            temp_data['variable'] = [preset for i in range(len(temp_data))]
-            temp_data['value'] = moving_average(temp_data['value'], window_size=10)
             chart_data = chart_data.append(temp_data)
 
     time_series_plot(chart_data, domain, colours, "Team OVR Comparison", ylabel="OVR")
