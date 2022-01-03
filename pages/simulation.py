@@ -440,6 +440,9 @@ def create_sidebar_controls():
         )
 
     if 'simulation_data' not in st.session_state or st.session_state.simulation_data['model_vars'] is None:
+
+        select_replicate()
+
         st.session_state.simulation_data = load_models(
             project_count=st.session_state.project_count,
             dept_workload=st.session_state.dept_workload,
@@ -473,6 +476,26 @@ def create_sidebar_controls():
             play_label(st.session_state.playing),
             on_click=handle_play_click
         )
+
+
+def select_replicate(verbose=True):
+
+    max_rep = st.session_state.config.config_params['max_replicates']
+    previous_rep = st.session_state.replicate
+
+    if st.session_state.preset_active and max_rep > 1:
+
+        st.session_state.replicate = np.random.choice(
+            [
+                i for i in range(max_rep)
+                if i != previous_rep
+            ]
+        )
+    else:
+        st.session_state.replicate = previous_rep
+
+    if verbose:
+        print("Selected replicate %d" % st.session_state.replicate)
 
 
 def page_code():
