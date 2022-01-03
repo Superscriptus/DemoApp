@@ -105,10 +105,22 @@ def page_code():
     # First we compute the source data for the charts by averaging over the replicate simulations:
     # (Note: could add switch to allow visualistion of individual simulation runs?)
 
-    source_data = {
-        preset: st.session_state.comparison_data[preset][st.session_state.replicate]['model_vars']
-        for preset in st.session_state.config.simulation_presets.keys()
-    }
+    max_rep = st.session_state.config.config_params['max_replicates']
+    if max_rep == 1:
+        source_data = {
+            preset: st.session_state.comparison_data[preset][st.session_state.replicate]['model_vars']
+            for preset in st.session_state.config.simulation_presets.keys()
+        }
+    else:
+        source_data = {}
+        for preset in st.session_state.config.simulation_presets.keys():
+            df_list = [
+                st.session_state.comparison_data[preset][rep]['model_vars']
+                for rep in range(max_rep)
+            ]
+            df_concat = pd.concat(df_list)
+            source_data[preset] = df_concat.groupby(df_concat.index).mean()
+
 #########################################################################################
     st.write("The following charts show metric values averaged over the final 25 timesteps of a simulation.")
 
@@ -197,7 +209,6 @@ def page_code():
     st.subheader("Return on investment (ROI)")
     st.write("The following chart shows the effect of varying the skill decay on the ROI, for on the presets A-E.")
 
-    #col5, col6 = st.beta_columns([1, 1])
     col5, = st.beta_columns([1])
     col5.subheader("")
 
@@ -215,20 +226,30 @@ def page_code():
         parameter_dict = parameters
 
         for skill_decay in all_skill_decays:
-            all_skill_decay_data[(preset, skill_decay)] = load_models(
-                project_count=parameter_dict['project_count'],
-                dept_workload=parameter_dict['dept_workload'],
-                budget_func=parameter_dict['budget_func'],
-                train_load=parameter_dict['train_load'],
-                skill_decay=skill_decay,
-                rep=st.session_state.replicate,
-                team_allocation=parameter_dict['team_allocation'],
-                load_networks=False,
-                preset_e=preset_e_flag
-            )
+
+            df_list = []
+            for rep in range(st.session_state.config.config_params['max_replicates']):
+
+                df_list.append(
+                    load_models(
+                        project_count=parameter_dict['project_count'],
+                        dept_workload=parameter_dict['dept_workload'],
+                        budget_func=parameter_dict['budget_func'],
+                        train_load=parameter_dict['train_load'],
+                        skill_decay=skill_decay,
+                        rep=rep,
+                        team_allocation=parameter_dict['team_allocation'],
+                        load_networks=False,
+                        preset_e=preset_e_flag
+                    )['model_vars']
+                )
+
+            df_concat = pd.concat(df_list)
+            all_skill_decay_data[(preset, skill_decay)] = df_concat.groupby(df_concat.index).mean()
+
             terminal_roi_column.append(
-                np.mean(all_skill_decay_data[(preset, skill_decay)]['model_vars'].loc[-25:]['Roi'])
-                if all_skill_decay_data[(preset, skill_decay)]['model_vars'] is not None
+                np.mean(all_skill_decay_data[(preset, skill_decay)].loc[-25:]['Roi'])
+                if all_skill_decay_data[(preset, skill_decay)] is not None
                 else None
             )
     bar_data['terminal ROI'] = terminal_roi_column
@@ -259,20 +280,29 @@ def page_code():
         parameter_dict = parameters
 
         for train_load in all_train_loads:
-            all_train_load_data[(preset, train_load)] = load_models(
-                project_count=parameter_dict['project_count'],
-                dept_workload=parameter_dict['dept_workload'],
-                budget_func=parameter_dict['budget_func'],
-                train_load=train_load,
-                skill_decay=parameter_dict['skill_decay'],
-                rep=st.session_state.replicate,
-                team_allocation=parameter_dict['team_allocation'],
-                load_networks=False,
-                preset_e=preset_e_flag
-            )
+
+            df_list = []
+            for rep in range(st.session_state.config.config_params['max_replicates']):
+                df_list.append(
+                    load_models(
+                        project_count=parameter_dict['project_count'],
+                        dept_workload=parameter_dict['dept_workload'],
+                        budget_func=parameter_dict['budget_func'],
+                        train_load=train_load,
+                        skill_decay=parameter_dict['skill_decay'],
+                        rep=rep,
+                        team_allocation=parameter_dict['team_allocation'],
+                        load_networks=False,
+                        preset_e=preset_e_flag
+                    )['model_vars']
+                )
+
+            df_concat = pd.concat(df_list)
+            all_train_load_data[(preset, train_load)] = df_concat.groupby(df_concat.index).mean()
+
             terminal_roi_column.append(
-                np.mean(all_train_load_data[(preset, train_load)]['model_vars'].loc[-25:]['Roi'])
-                if all_train_load_data[(preset, train_load)]['model_vars'] is not None
+                np.mean(all_train_load_data[(preset, train_load)].loc[-25:]['Roi'])
+                if all_train_load_data[(preset, train_load)] is not None
                 else None
             )
     bar_data['terminal ROI'] = terminal_roi_column
