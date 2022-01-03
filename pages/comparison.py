@@ -262,7 +262,7 @@ def page_code():
         use_container_width=False, column='preset'
     )
 
-    st.write("And below, we see the effect of varying the skill decay on the ROI, for on the presets A-E.")
+    st.write("And below, we see the effect of varying the training load on the ROI, for on the presets A-E.")
     col6, = st.beta_columns([1])
     col6.subheader("")
 
