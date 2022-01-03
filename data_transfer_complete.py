@@ -16,7 +16,7 @@ import glob
 import itertools
 
 
-MAX_REP = 9  # Will only copy up to MAX_REP replicates
+MAX_REP = 5  # Will only copy up to MAX_REP replicates
 
 if len(sys.argv) != 2:
     raise Exception("You need to input the path to simulation_io")
