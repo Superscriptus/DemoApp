@@ -14,7 +14,7 @@ class Config:
     def __init__(self):
 
         self.config_params = {
-            'max_replicates': 1 #5
+            'max_replicates': 5
         }
 
         self.simulation_variables = {
