@@ -189,6 +189,8 @@ def update_network(g, timestep):
     This method assumes that g is in the correct network state for t = timestep-1
     and returns the updated state at t = timestep
     """
+    # old_widths = {(e[0], e[1]): e[2]['width'] for e in g.edges(data=True)}
+
     diff = copy.deepcopy(st.session_state.simulation_data['networks'].get('diff', ''))
     d = diff[str(timestep + 1)]
 
@@ -196,7 +198,8 @@ def update_network(g, timestep):
         try:
             g.remove_node(n)
         except:
-            print("Cannot remove node %d" % n)
+            pass
+            # print("Cannot remove node %d" % n)
     for n in d['nodes_to_add']:
         try:
             g.add_node(n)
@@ -215,6 +218,11 @@ def update_network(g, timestep):
             g[edge[0]][edge[1]]['width'] += increment
         except:
             g.add_edge(edge[0], edge[1], width=increment)
+
+    # new_widths = {(e[0], e[1]): e[2]['width'] for e in g.edges(data=True)}
+    # for w in set(list(old_widths.keys())).intersection(list(new_widths.keys())):
+    #     if new_widths[w] < old_widths[w]:
+    #         print("Width decrease for edge " + str(w) + " at timestep " + str(timestep))
 
     return g
 
