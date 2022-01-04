@@ -1,4 +1,5 @@
 .streamlit
+tmp/*.json
 
 # Pre-commit config (https://pre-commit.com/)
 .pre-commit-config.yaml

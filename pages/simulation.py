@@ -1,25 +1,13 @@
-# TODO: - fix replicate choice so it choose from how ever many are present in the data dir
-#       - refactor sidebar logic into a class
-#       - refactor preset logic into a class
-#       - select presets -> change sidebar widget default values
-#       - change parameter values -> preset not active. Change page header.
-#       - bespoke preset button with conditional formatting
-#       - download main superscript repo (temporarily) and check data files size
-#       - test on ipad
-#       - pass variable descriptions to plot function (from config file)
-#       - run new simulations (check github issues first)
-#       - replace TRAIN_OFF simulation directory on github (only contains one replicate)
-#       - change font size (for infoboxes) if desired: https://discuss.streamlit.io/t/change-font-size-and-font-color/12377/3
-#       - could refactor Network and Timeseries plot to inherit shared logic from a base class
-# Note: to change button colour and style...
-# https://discuss.streamlit.io/t/how-to-change-the-backgorund-color-of-button-widget/12103/10
-
-import numpy as np
 import streamlit as st
-import streamlit.components.v1 as components
 import altair as alt
 import time
-from .utilities import load_models, create_session_state_variables
+import numpy as np
+import networkx as nx
+import matplotlib.pyplot as plt
+from io import BytesIO
+import copy
+
+from .utilities import load_models
 
 
 @st.cache()
@@ -38,6 +26,13 @@ def social_network_label(display_net):
         return 'Turn on social network'
 
 
+def preset_e_selected():
+    if "preset" in st.session_state and st.session_state.preset == "E":
+        return True
+    else:
+        return False
+
+
 def reload(remove_preset=False, rerun=True):
     """
     Note: rerun re-draws plots and widgets. Needs to run before reloading data in order to activate presets.
@@ -48,17 +43,18 @@ def reload(remove_preset=False, rerun=True):
     st.session_state.global_time = 0
     st.session_state.replicate = 0  # choice([i for i in range(10) if i != st.session_state.replicate])
     if rerun:
-        del st.session_state['data']
+        st.session_state.pop('simulation_data', None)
         st.experimental_rerun()
     else:
-        st.session_state.data = load_models(
+        st.session_state.simulation_data = load_models(
             project_count=st.session_state.project_count,
             dept_workload=st.session_state.dept_workload,
             budget_func=st.session_state.budget_func,
             train_load=st.session_state.train_load,
             skill_decay=st.session_state.skill_decay,
             rep=st.session_state.replicate,
-            team_allocation=st.session_state.team_allocation
+            team_allocation=st.session_state.team_allocation,
+            preset_e=preset_e_selected()
         )
 
 
@@ -66,7 +62,7 @@ def handle_play_click():
 
     if st.session_state.data_load_complete:
 
-        if st.session_state.data['model_vars'] is not None:
+        if st.session_state.simulation_data['model_vars'] is not None:
             st.session_state.playing = not st.session_state.playing
 
         if st.session_state.global_time == 99:
@@ -128,7 +124,7 @@ class TimeSeriesPlot:
             alt.X('time', axis=alt.Axis(title='timestep'), scale=alt.Scale(domain=[0, 100]))
         )
 
-        chart_data = st.session_state.data['model_vars'].loc[
+        chart_data = st.session_state.simulation_data['model_vars'].loc[
                      0:st.session_state.global_time,
                      self.plot_series
                      ].melt('time')
@@ -152,7 +148,10 @@ class TimeSeriesPlot:
 
     def update(self, timestep):
 
-        chart_data = st.session_state.data['model_vars'].loc[timestep:timestep, self.plot_series].melt('time')
+        chart_data = (
+            st.session_state.simulation_data['model_vars']
+              .loc[timestep:timestep, self.plot_series].melt('time')
+        )
 
         chart_data['description'] = [
             st.session_state.config.simulation_variables.get(v, '(undefined)')
@@ -163,25 +162,136 @@ class TimeSeriesPlot:
         )
 
 
+def circle_x_y(n, grow_circle=0.2):
+    theta = n * np.pi / 50
+    multiplier = 1 + (np.floor(n / 100) * grow_circle)
+    return multiplier * np.cos(theta), multiplier * np.sin(theta)
+
+
 class NetworkPlot:
 
-    def __init__(self, plot_name, info, timestep=0):
-        st.subheader(plot_name)
+    def __init__(
+            self, info,
+            timestep=0, placeholder=None,
+            edge_scale=20, circle_scale=0.2,
+            node_scale=2
+    ):
 
-        st.button(
-            social_network_label(st.session_state.display_net),
-            on_click=handle_network_click
+        self.turnover_count = 0
+
+        self.edge_scale = edge_scale
+        self.circle_scale = circle_scale
+        self.node_scale = node_scale
+        self.G = copy.deepcopy(st.session_state.simulation_data['networks'].get('init', ''))
+        self.get_network_at_t(timestep)
+        self.max_node_count = max(
+            max(value["nodes_to_add"])
+            if value["nodes_to_add"]
+            else 0
+            for value in st.session_state.simulation_data['networks']['diff'].values()
         )
+
+        self.all_pos = {
+            i: circle_x_y(i, self.circle_scale)
+            for i in range(self.max_node_count + 1)
+        }
 
         if st.session_state.display_net:
             st.write(info)
+            self.fig = plt.figure(figsize=(10, 10))
+            self.placeholder = placeholder
+            self.draw_graph()
 
-            self.chart = components.html(
-                st.session_state.data['networks'].get(timestep, ''),
-                height=435
-            )
+    def update_network(self, timestep):
+        """
+        This method assumes that g is in the correct network state for t = timestep-1
+        and returns the updated state at t = timestep
+        """
+        # old_widths = {(e[0], e[1]): e[2]['width'] for e in g.edges(data=True)}
+
+        diff = copy.deepcopy(st.session_state.simulation_data['networks'].get('diff', ''))
+        d = diff[str(timestep + 1)]
+
+        for n in d['nodes_to_add']:
+            try:
+                self.turnover_count += 1
+                self.G.add_node(n)
+            except:
+                print("Cannot add node %d" % n)
+        for n in d['nodes_to_remove']:
+            try:
+                self.G.remove_node(n)
+            except:
+                pass
+                # print("Cannot remove node %d" % n)
+        for e in d['edges_to_add']:
+            try:
+                self.G.add_edge(*e, width=1)
+            except:
+                print("Cannot add edge " + str(e))
+
+        for e in d['edges_to_increment']:
+            edge = e[0]
+            increment = e[1]
+            try:
+                self.G[edge[0]][edge[1]]['width'] += increment
+            except:
+                self.G.add_edge(edge[0], edge[1], width=increment)
+
+        # new_widths = {(e[0], e[1]): e[2]['width'] for e in g.edges(data=True)}
+        # for w in set(list(old_widths.keys())).intersection(list(new_widths.keys())):
+        #     if new_widths[w] < old_widths[w]:
+        #         print("Width decrease for edge " + str(w) + " at timestep " + str(timestep))
+
+    def get_network_at_t(self, timestep):
+
+        if timestep == 0:
+            pass
+        else:
+            for t in range(1, timestep + 1):
+                self.update_network(t)
+
+    def draw_graph(self):
+
+        pos = {
+            n: self.all_pos[int(n)]
+            for n in self.G.nodes()
+        }
+        self.fig.clear()
+        cc = self.G.subgraph(max(nx.connected_components(self.G), key=len))
+
+        nx.draw_networkx(
+            cc, ax=self.fig.gca(),
+            pos=pos, with_labels=False,
+            width=[e[2]['width'] / self.edge_scale for e in self.G.edges(data=True)],
+            node_size=[10 + self.node_scale * self.G.degree[n] for n in cc.nodes()]
+        )
+
+        circle_size = 1 + self.circle_scale * (self.max_node_count / 100) + 0.1
+
+        font = {'family': 'serif',
+                'color': 'black',
+                'weight': 'normal',
+                'size': 13,
+                }
+        net_size = len(cc)
+        isolates = 100 - net_size
+        plt.text(
+            0.62 * circle_size, .85 * circle_size,
+            "Isolates: %d \nTurnover: %d\nNetwork size: %d" % (isolates, self.turnover_count, net_size),
+            fontdict=font,
+            bbox=dict(facecolor='blue', alpha=0.2, boxstyle='round')
+        )
+        plt.xlim([-circle_size, circle_size])
+        plt.ylim([-circle_size, circle_size])
+        plt.tight_layout()
+        buf = BytesIO()
+        self.fig.savefig(buf, format="png")
+        self.placeholder.image(buf)
 
     def update(self, timestep):
+        self.update_network(timestep)
+        self.draw_graph()
         pass
 
 
@@ -324,15 +434,19 @@ def create_sidebar_controls():
                  "_Note: this cannot always be met if their is insufficient slack._"
         )
 
-    if 'data' not in st.session_state or st.session_state.data['model_vars'] is None:
-        st.session_state.data = load_models(
+    if 'simulation_data' not in st.session_state or st.session_state.simulation_data['model_vars'] is None:
+
+        select_replicate()
+
+        st.session_state.simulation_data = load_models(
             project_count=st.session_state.project_count,
             dept_workload=st.session_state.dept_workload,
             budget_func=st.session_state.budget_func,
             train_load=st.session_state.train_load,
             skill_decay=st.session_state.skill_decay,
             rep=st.session_state.replicate,
-            team_allocation=st.session_state.team_allocation
+            team_allocation=st.session_state.team_allocation,
+            preset_e=preset_e_selected()
         )
 
     if 'playing' not in st.session_state:
@@ -359,19 +473,27 @@ def create_sidebar_controls():
         )
 
 
-def page_code():
+def select_replicate(verbose=False):
 
-    # if 'replicate' not in st.session_state:
-    #     st.session_state.replicate = 0
-    #
-    # if 'preset_active' not in st.session_state:
-    #     st.session_state.preset_active = False
-    #
-    # if 'display_net' not in st.session_state:
-    #     st.session_state.display_net = False
-    #
-    # if 'data_load_complete' not in st.session_state:
-    #     st.session_state.data_load_complete = False
+    max_rep = st.session_state.config.config_params['max_replicates']
+    previous_rep = st.session_state.replicate
+
+    if st.session_state.preset_active and max_rep > 1:
+
+        st.session_state.replicate = np.random.choice(
+            [
+                i for i in range(max_rep)
+                if i != previous_rep
+            ]
+        )
+    else:
+        st.session_state.replicate = previous_rep
+
+    if verbose:
+        print("Selected replicate %d" % st.session_state.replicate)
+
+
+def page_code():
 
     st.title("Simulation")
 
@@ -385,19 +507,13 @@ def page_code():
         st.write(get_preset_details(st.session_state.preset, detail='blurb'))
 
     else:
-        st.write("Select a parameter preset in the sidebar (A, B, C or D), or explore the behaviour of the simulation "
-                 "by selecting your own parameter values (click 'Expand for full parameter control').  \n  \n"
+        st.write("Select a parameter preset in the sidebar (A, B, C, D or E), or explore the behaviour of the "
+                 "simulation by selecting your own parameter values (click 'Expand for full parameter control').  \n \n"
                  "Click 'Play simulation' to run the agent-based model for your chosen parameter values.")
 
     create_sidebar_controls()
 
-    if st.session_state.data['model_vars'] is not None:
-
-        net_plot = NetworkPlot(
-            plot_name='Social Network',
-            timestep=st.session_state.global_time,
-            info="The network of all successful collaborations between workers."
-        )
+    if st.session_state.simulation_data['model_vars'] is not None:
 
         plot_list = []
         for plot, details in st.session_state.config.simulation_plots.items():
@@ -411,22 +527,41 @@ def page_code():
                 )
             )
 
+        st.subheader('Social Network')
+        st.button(
+            social_network_label(st.session_state.display_net),
+            on_click=handle_network_click
+        )
+        if st.session_state.display_net:
+            st.write(
+                "The network of all successful collaborations between workers. Nodes represent workers and "
+                "edges represent successful collaborations. The width of each edge is determined by the number of "
+                "successful collaborations between that pair of workers, and the size of each node indicates the "
+                "degree (i.e. number of collaborations for that worker). Workers without any successful collaborations "
+                "are isolated nodes in the network and for clarity these are not depicted. When workers are replaced "
+                "due to inactivity, new workers are placed to fill concentric circles of increasing radius."
+            )
+        placeholder = st.empty()
+        net_plot = NetworkPlot(
+            timestep=st.session_state.global_time,
+            info="",
+            placeholder=placeholder
+        )
+
         if st.session_state.playing:
             start = st.session_state.global_time + 1
 
             for t in range(start, 100):
 
-                # net_plot.update(t)
                 for plot in plot_list:
                     plot.update(t)
 
                 time.sleep(0.2 / st.session_state.speed)
                 st.session_state.global_time += 1
 
-                if st.session_state.display_net and t % 10 == 0:
-                    st.experimental_rerun()
+                if st.session_state.display_net:
+                    net_plot.update(t)
 
                 if t == 99:
                     st.session_state.playing = False
-                    # reload(rerun=False)
                     st.experimental_rerun()

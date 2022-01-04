@@ -13,6 +13,10 @@ class Config:
 
     def __init__(self):
 
+        self.config_params = {
+            'max_replicates': 5
+        }
+
         self.simulation_variables = {
             'Roi': 'Return on investment as %.',
             'ActiveProjects': 'Number of currently active projects.',
@@ -87,7 +91,7 @@ class Config:
             'E': {
                 'preset_name': 'The Adaptive Organization',
                 'blurb': 'This organizations has the same parameters as C: The Emergent Organization, but uses a '
-                         'flexible workforce with reduced slack. Instead workers are hired from an external pool as'
+                         'flexible workforce with reduced slack. Instead workers are hired from an external pool as '
                          'and when they are needed for project work.',
                 'project_count': 3,
                 'budget_func': True,
@@ -99,11 +103,12 @@ class Config:
         }
 
         self.default_simulation_parameters = {
-            'project_count': 2,
+            'project_count': 10,
             'budget_func': True,
-            'dept_workload': 0.1,
-            'skill_decay': 0.99,
-            'train_load': 0.1
+            'dept_workload': 0.3,
+            'skill_decay': 0.95,
+            'train_load': 0.3,
+            'team_allocation': 'Flexible start time'
         }
 
         self.simulation_plots = {
