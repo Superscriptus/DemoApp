@@ -557,10 +557,19 @@ def page_code():
             social_network_label(st.session_state.display_net),
             on_click=handle_network_click
         )
+        if st.session_state.display_net:
+            st.write(
+                "The network of all successful collaborations between workers. Nodes represent workers and "
+                "edges represent successful collaborations. The width of each edge is determined by the number of "
+                "successful collaborations between that pair of workers, and the size of each node indicates the "
+                "degree (i.e. number of collaborations for that worker). Workers without any successful collaborations "
+                "are isolated nodes in the network and for clarity these are not depicted. When workers are replaced "
+                "due to inactivity, new workers are placed to fill concentric circles of increasing radius."
+            )
         placeholder = st.empty()
         net_plot = NetworkPlot(
             timestep=st.session_state.global_time,
-            info="The network of all successful collaborations between workers.",
+            info="",
             placeholder=placeholder
         )
 
