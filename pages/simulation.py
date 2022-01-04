@@ -1,35 +1,13 @@
-# TODO:
-#       - clean up imports
-#       - fix replicate choice so it choose from how ever many are present in the data dir
-#       - refactor sidebar logic into a class
-#       - refactor preset logic into a class
-#       - select presets -> change sidebar widget default values
-#       - change parameter values -> preset not active. Change page header.
-#       - bespoke preset button with conditional formatting
-#       - download main superscript repo (temporarily) and check data files size
-#       - test on ipad
-#       - pass variable descriptions to plot function (from config file)
-#       - run new simulations (check github issues first)
-#       - replace TRAIN_OFF simulation directory on github (only contains one replicate)
-#       - change font size (for infoboxes) if desired: https://discuss.streamlit.io/t/change-font-size-and-font-color/12377/3
-#       - could refactor Network and Timeseries plot to inherit shared logic from a base class
-# Note: to change button colour and style...
-# https://discuss.streamlit.io/t/how-to-change-the-backgorund-color-of-button-widget/12103/10
-# Note: to change pyplot width, convert to image:
-#  https://discuss.streamlit.io/t/cannot-change-matplotlib-figure-size/10295/8
-
 import streamlit as st
-import streamlit.components.v1 as components
 import altair as alt
 import time
 import numpy as np
 import networkx as nx
-from pyvis.network import Network
 import matplotlib.pyplot as plt
 from io import BytesIO
 import copy
 
-from .utilities import load_models, create_session_state_variables
+from .utilities import load_models
 
 
 @st.cache()
@@ -184,54 +162,6 @@ class TimeSeriesPlot:
         )
 
 
-def update_network(g, timestep):
-    """
-    This method assumes that g is in the correct network state for t = timestep-1
-    and returns the updated state at t = timestep
-    """
-    diff = copy.deepcopy(st.session_state.simulation_data['networks'].get('diff', ''))
-    d = diff[str(timestep + 1)]
-
-    for n in d['nodes_to_remove']:
-        try:
-            g.remove_node(n)
-        except:
-            print("Cannot remove node %d" % n)
-    for n in d['nodes_to_add']:
-        try:
-            g.add_node(n)
-        except:
-            print("Cannot add node %d" % n)
-    for e in d['edges_to_add']:
-        try:
-            g.add_edge(*e, width=1)
-        except:
-            print("Cannot add edge " + str(e))
-
-    for e in d['edges_to_increment']:
-        edge = e[0]
-        increment = e[1]
-        try:
-            g[edge[0]][edge[1]]['width'] += increment
-        except:
-            g.add_edge(edge[0], edge[1], width=increment)
-
-    return g
-
-
-def get_network_at_t(timestep):
-
-    g = copy.deepcopy(st.session_state.simulation_data['networks'].get('init', ''))
-    if timestep == 0:
-        return g
-
-    else:
-        for t in range(1, timestep + 1):
-            g = update_network(g, t)
-
-        return g
-
-
 def circle_x_y(n, grow_circle=0.2):
     theta = n * np.pi / 50
     multiplier = 1 + (np.floor(n / 100) * grow_circle)
@@ -247,10 +177,13 @@ class NetworkPlot:
             node_scale=2
     ):
 
+        self.turnover_count = 0
+
         self.edge_scale = edge_scale
         self.circle_scale = circle_scale
         self.node_scale = node_scale
-        self.G = get_network_at_t(timestep)
+        self.G = copy.deepcopy(st.session_state.simulation_data['networks'].get('init', ''))
+        self.get_network_at_t(timestep)
         self.max_node_count = max(
             max(value["nodes_to_add"])
             if value["nodes_to_add"]
@@ -269,6 +202,55 @@ class NetworkPlot:
             self.placeholder = placeholder
             self.draw_graph()
 
+    def update_network(self, timestep):
+        """
+        This method assumes that g is in the correct network state for t = timestep-1
+        and returns the updated state at t = timestep
+        """
+        # old_widths = {(e[0], e[1]): e[2]['width'] for e in g.edges(data=True)}
+
+        diff = copy.deepcopy(st.session_state.simulation_data['networks'].get('diff', ''))
+        d = diff[str(timestep + 1)]
+
+        for n in d['nodes_to_add']:
+            try:
+                self.turnover_count += 1
+                self.G.add_node(n)
+            except:
+                print("Cannot add node %d" % n)
+        for n in d['nodes_to_remove']:
+            try:
+                self.G.remove_node(n)
+            except:
+                pass
+                # print("Cannot remove node %d" % n)
+        for e in d['edges_to_add']:
+            try:
+                self.G.add_edge(*e, width=1)
+            except:
+                print("Cannot add edge " + str(e))
+
+        for e in d['edges_to_increment']:
+            edge = e[0]
+            increment = e[1]
+            try:
+                self.G[edge[0]][edge[1]]['width'] += increment
+            except:
+                self.G.add_edge(edge[0], edge[1], width=increment)
+
+        # new_widths = {(e[0], e[1]): e[2]['width'] for e in g.edges(data=True)}
+        # for w in set(list(old_widths.keys())).intersection(list(new_widths.keys())):
+        #     if new_widths[w] < old_widths[w]:
+        #         print("Width decrease for edge " + str(w) + " at timestep " + str(timestep))
+
+    def get_network_at_t(self, timestep):
+
+        if timestep == 0:
+            pass
+        else:
+            for t in range(1, timestep + 1):
+                self.update_network(t)
+
     def draw_graph(self):
 
         pos = {
@@ -282,11 +264,24 @@ class NetworkPlot:
             cc, ax=self.fig.gca(),
             pos=pos, with_labels=False,
             width=[e[2]['width'] / self.edge_scale for e in self.G.edges(data=True)],
-            #node_size=[10 + self.node_scale * self.G.degree[n] for n in cc.nodes()]
             node_size=[10 + self.node_scale * self.G.degree[n] for n in cc.nodes()]
         )
 
         circle_size = 1 + self.circle_scale * (self.max_node_count / 100) + 0.1
+
+        font = {'family': 'serif',
+                'color': 'black',
+                'weight': 'normal',
+                'size': 13,
+                }
+        net_size = len(cc)
+        isolates = 100 - net_size
+        plt.text(
+            0.62 * circle_size, .85 * circle_size,
+            "Isolates: %d \nTurnover: %d\nNetwork size: %d" % (isolates, self.turnover_count, net_size),
+            fontdict=font,
+            bbox=dict(facecolor='blue', alpha=0.2, boxstyle='round')
+        )
         plt.xlim([-circle_size, circle_size])
         plt.ylim([-circle_size, circle_size])
         plt.tight_layout()
@@ -295,7 +290,7 @@ class NetworkPlot:
         self.placeholder.image(buf)
 
     def update(self, timestep):
-        self.G = update_network(self.G, timestep)
+        self.update_network(timestep)
         self.draw_graph()
         pass
 
@@ -500,18 +495,6 @@ def select_replicate(verbose=False):
 
 def page_code():
 
-    # if 'replicate' not in st.session_state:
-    #     st.session_state.replicate = 0
-    #
-    # if 'preset_active' not in st.session_state:
-    #     st.session_state.preset_active = False
-    #
-    # if 'display_net' not in st.session_state:
-    #     st.session_state.display_net = False
-    #
-    # if 'data_load_complete' not in st.session_state:
-    #     st.session_state.data_load_complete = False
-
     st.title("Simulation")
 
     if st.session_state.preset_active:
@@ -549,10 +532,19 @@ def page_code():
             social_network_label(st.session_state.display_net),
             on_click=handle_network_click
         )
+        if st.session_state.display_net:
+            st.write(
+                "The network of all successful collaborations between workers. Nodes represent workers and "
+                "edges represent successful collaborations. The width of each edge is determined by the number of "
+                "successful collaborations between that pair of workers, and the size of each node indicates the "
+                "degree (i.e. number of collaborations for that worker). Workers without any successful collaborations "
+                "are isolated nodes in the network and for clarity these are not depicted. When workers are replaced "
+                "due to inactivity, new workers are placed to fill concentric circles of increasing radius."
+            )
         placeholder = st.empty()
         net_plot = NetworkPlot(
             timestep=st.session_state.global_time,
-            info="The network of all successful collaborations between workers.",
+            info="",
             placeholder=placeholder
         )
 
@@ -569,10 +561,7 @@ def page_code():
 
                 if st.session_state.display_net:
                     net_plot.update(t)
-                # if st.session_state.display_net and t % 10 == 0:
-                #     st.experimental_rerun()
 
                 if t == 99:
                     st.session_state.playing = False
-                    # reload(rerun=False)
                     st.experimental_rerun()

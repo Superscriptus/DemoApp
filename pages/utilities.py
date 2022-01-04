@@ -127,21 +127,6 @@ def load_models(
             ) as in_file:
                 return_data['networks']['diff'] = json.load(in_file)
 
-            # for t in range(1, duration + 1):
-                # net = Network(height='400px', width='85%', bgcolor='#ffffff', font_color='white')
-                # net.from_nx(
-                #     nx.read_multiline_adjlist(
-                #         "data/" + sub_dir + "/%s/network_rep_%d_timestep_%d.adjlist"
-                #         % (optimiser_dict[team_allocation], rep, t)
-                #     )
-                # )
-                # path = '/tmp'
-                # net.save_graph(f'{path}/pyvis_graph.html')
-                # html_file = open(f'{path}/pyvis_graph.html', 'r', encoding='utf-8')
-
-
-                #html_file.read()
-
         else:
             return_data['networks'] = None
 
