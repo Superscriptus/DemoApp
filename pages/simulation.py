@@ -1,35 +1,13 @@
-# TODO:
-#       - clean up imports
-#       - fix replicate choice so it choose from how ever many are present in the data dir
-#       - refactor sidebar logic into a class
-#       - refactor preset logic into a class
-#       - select presets -> change sidebar widget default values
-#       - change parameter values -> preset not active. Change page header.
-#       - bespoke preset button with conditional formatting
-#       - download main superscript repo (temporarily) and check data files size
-#       - test on ipad
-#       - pass variable descriptions to plot function (from config file)
-#       - run new simulations (check github issues first)
-#       - replace TRAIN_OFF simulation directory on github (only contains one replicate)
-#       - change font size (for infoboxes) if desired: https://discuss.streamlit.io/t/change-font-size-and-font-color/12377/3
-#       - could refactor Network and Timeseries plot to inherit shared logic from a base class
-# Note: to change button colour and style...
-# https://discuss.streamlit.io/t/how-to-change-the-backgorund-color-of-button-widget/12103/10
-# Note: to change pyplot width, convert to image:
-#  https://discuss.streamlit.io/t/cannot-change-matplotlib-figure-size/10295/8
-
 import streamlit as st
-import streamlit.components.v1 as components
 import altair as alt
 import time
 import numpy as np
 import networkx as nx
-from pyvis.network import Network
 import matplotlib.pyplot as plt
 from io import BytesIO
 import copy
 
-from .utilities import load_models, create_session_state_variables
+from .utilities import load_models
 
 
 @st.cache()
@@ -517,18 +495,6 @@ def select_replicate(verbose=False):
 
 def page_code():
 
-    # if 'replicate' not in st.session_state:
-    #     st.session_state.replicate = 0
-    #
-    # if 'preset_active' not in st.session_state:
-    #     st.session_state.preset_active = False
-    #
-    # if 'display_net' not in st.session_state:
-    #     st.session_state.display_net = False
-    #
-    # if 'data_load_complete' not in st.session_state:
-    #     st.session_state.data_load_complete = False
-
     st.title("Simulation")
 
     if st.session_state.preset_active:
@@ -595,10 +561,7 @@ def page_code():
 
                 if st.session_state.display_net:
                     net_plot.update(t)
-                # if st.session_state.display_net and t % 10 == 0:
-                #     st.experimental_rerun()
 
                 if t == 99:
                     st.session_state.playing = False
-                    # reload(rerun=False)
                     st.experimental_rerun()
