@@ -299,7 +299,7 @@ class NetworkPlot:
         net_size = len(cc)
         isolates = 100 - net_size
         plt.text(
-            0.6 * circle_size, .85 * circle_size,
+            0.62 * circle_size, .85 * circle_size,
             "Isolates: %d \nTurnover: %d\nNetwork size: %d" % (isolates, self.turnover_count, net_size),
             fontdict=font,
             bbox=dict(facecolor='blue', alpha=0.2, boxstyle='round')
