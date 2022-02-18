@@ -142,7 +142,7 @@ class TimeSeriesPlot:
             x=_x,
             y=alt.Y('value', axis=alt.Axis(title=y_label)),
             color=alt.Color('variable', scale=alt.Scale(domain=self.domain, range=self.range_)),
-            tooltip=['description']
+            tooltip=['description', alt.Tooltip('value', format='.2f')]
         )
         self.chart = st.altair_chart(chart, use_container_width=True)
 
