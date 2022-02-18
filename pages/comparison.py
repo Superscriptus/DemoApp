@@ -7,7 +7,7 @@ from .utilities import load_models, moving_average
 from .simulation import set_default_parameters
 
 
-def time_series_plot(chart_data, domain, colours, title, ylabel):
+def time_series_plot(chart_data, domain, colours, title, ylabel, element=None):
 
     _x = alt.X('time', axis=alt.Axis(title='timestep'))
 
@@ -36,7 +36,10 @@ def time_series_plot(chart_data, domain, colours, title, ylabel):
         strokeDash=dash_condition
     ).properties(title=title)
 
-    st.altair_chart(chart, use_container_width=True)
+    if element is None:
+        st.altair_chart(chart, use_container_width=True)
+    else:
+        element.altair_chart(chart, use_container_width=True)
 
 
 def bar_chart_wrapper(element, bar_data, x, y, title, domain, colours,
@@ -87,18 +90,54 @@ def page_code():
         with st.beta_expander(preset + ": " + preset_details['preset_name']):
             st.write(preset_details['blurb'])
 
-    #########################################################################################
+#########################################################################################
     # First we compute the source data for the charts by averaging over the replicate simulations:
     # (Note: could add switch to allow visualistion of individual simulation runs?)
-
     max_rep = st.session_state.config.config_params['max_replicates']
+    allocation_methods = ['Random', 'Optimised', 'Flexible start time']
+
+# Temporarily, we load data for the additional team allocation methods that are not loaded as presets
+#    into the comparison data. (May want to move this loading to application launch also.)
+    preset = 'C'
+    parameter_dict = st.session_state.config.simulation_presets[preset]
+    preset_e_flag = True if preset == 'E' else False
+
+    pure_comparison_data = {
+        allocator: {
+            rep: {}
+            for rep in range(max_rep)
+        }
+        for allocator in allocation_methods
+    }
+
+    for allocator in allocation_methods:
+        for rep in range(max_rep):
+
+            pure_comparison_data[allocator][rep] = load_models(
+                project_count=parameter_dict['project_count'],
+                dept_workload=parameter_dict['dept_workload'],
+                budget_func=parameter_dict['budget_func'],
+                train_load=parameter_dict['train_load'],
+                skill_decay=parameter_dict['skill_decay'],
+                rep=rep,
+                team_allocation=allocator,
+                preset_e=preset_e_flag
+            )
+
     if max_rep == 1:
         source_data = {
             preset: st.session_state.comparison_data[preset][st.session_state.replicate]['model_vars']
             for preset in st.session_state.config.simulation_presets.keys()
         }
+
+        aggregated_pure_comparison_data = {
+            allocator: pure_comparison_data[allocator][st.session_state.replicate]['model_vars']
+            for allocator in allocation_methods
+        }
     else:
         source_data = {}
+        aggregated_pure_comparison_data = {}
+
         for preset in st.session_state.config.simulation_presets.keys():
             df_list = [
                 st.session_state.comparison_data[preset][rep]['model_vars']
@@ -107,7 +146,87 @@ def page_code():
             df_concat = pd.concat(df_list)
             source_data[preset] = df_concat.groupby(df_concat.index).mean()
 
+        for allocator in allocation_methods:
+            df_list_pure = [
+                pure_comparison_data[allocator][rep]['model_vars']
+                for rep in range(max_rep)
+            ]
+            df_concat_pure = pd.concat(df_list_pure)
+            aggregated_pure_comparison_data[allocator] = df_concat_pure.groupby(df_concat_pure.index).mean()
+
+
 #########################################################################################
+    st.subheader("Comparison between team allocation methods.")
+    st.write("First we make a direct comparison between the three different team allocation methods: ")
+    st.write(
+        """
+        1. Random team allocation.
+        2. Optimized team allocation (using our numerical optimization to maximise project success probability).
+        3. Optimized team allocation, with flexible project start time.
+        
+        Note: these plots use the parameter values for preset C: "The Emergent Organization".
+        """
+    )
+
+    col0a, col0b = st.beta_columns([2, 1])
+
+    col0a.subheader("")
+    bar_data = pd.DataFrame({
+        'team allocator': allocation_methods,
+        'terminal ROI': [
+            np.mean(aggregated_pure_comparison_data[allocator].loc[-25:]['Roi'])
+            for allocator in allocation_methods
+        ]
+    })
+    bar_chart = alt.Chart(bar_data).mark_bar().encode(
+        x=alt.X('team allocator', axis=alt.Axis(labelAngle=90)),
+        y='terminal ROI',
+        color=alt.Color(
+            'team allocator', scale=alt.Scale(
+                domain=allocation_methods,
+                range=['blue', 'orange', 'green']
+            ),
+            legend=None
+        ),
+        opacity=alt.value(0.3)
+    ).properties(padding={"left": 5, "top": 30, "right": 5, "bottom": 5})
+    col0b.altair_chart(bar_chart, use_container_width=True)
+
+    # bar_chart_wrapper(
+    #     col0b, bar_data, x='team allocator', y='terminal ROI',
+    #     title="",
+    #     domain=allocation_methods, colours=['blue', 'orange', 'green'],
+    #     colour_var='team allocator',
+    #     use_container_width=True, column=None, rotation=0
+    # )
+
+    chart_data = None
+    for allocator in allocation_methods:
+
+        if chart_data is None:
+            chart_data = (
+                aggregated_pure_comparison_data[allocator][['time', 'Roi']]
+                .copy().rename(columns={'Roi': 'value'})
+            )
+            chart_data['variable'] = [allocator for i in range(len(chart_data))]
+
+        else:
+            temp_data = (
+                aggregated_pure_comparison_data[allocator][['time', 'Roi']]
+                .copy().rename(columns={'Roi': 'value'})
+            )
+            temp_data['variable'] = [allocator for i in range(len(temp_data))]
+            chart_data = chart_data.append(temp_data)
+
+    time_series_plot(
+        chart_data, allocation_methods,
+        ['blue', 'orange', 'green'], "",
+        ylabel="ROI", element=col0a
+    )
+
+
+    #########################################################################################
+    st.subheader("Comparison between simulation presets [A-E].")
     st.write("The following charts show metric values averaged over the final 25 timesteps of a simulation.")
 
     col1, col2 = st.beta_columns([1, 1])
