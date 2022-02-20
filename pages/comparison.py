@@ -74,6 +74,58 @@ def bar_chart_wrapper(element, bar_data, x, y, title, domain, colours,
     element.altair_chart(bar_chart, use_container_width=use_container_width)
 
 
+def load_method_comparison_data(max_rep):
+    """Loads data for the comparison of team allocation methods that are not loaded as presets
+    into the comparison data on application launch.
+
+    Note: May want to move this loading to application launch also
+    """
+
+    allocation_methods = {
+        'Random': {
+            'method': 'Random',
+            'budget_flag': True
+        },
+        'Optimised': {
+            'method': 'Optimised',
+            'budget_flag': True
+        },
+        'Flexible start': {
+            'method': 'Flexible start time',
+            'budget_flag': True
+        },
+        'Flexible w/o budget': {
+            'method': 'Flexible start time',
+            'budget_flag': False
+        }
+    }
+    parameter_dict = st.session_state.config.allocation_comparison_parameters
+
+    method_comparison_data = {
+        allocator: {
+            rep: {}
+            for rep in range(max_rep)
+        }
+        for allocator in allocation_methods.keys()
+    }
+
+    for allocator, method_dict in allocation_methods.items():
+        for rep in range(max_rep):
+
+            method_comparison_data[allocator][rep] = load_models(
+                project_count=parameter_dict['project_count'],
+                dept_workload=parameter_dict['dept_workload'],
+                budget_func=method_dict['budget_flag'],
+                train_load=parameter_dict['train_load'],
+                skill_decay=parameter_dict['skill_decay'],
+                rep=rep,
+                team_allocation=method_dict['method'],
+                preset_e=parameter_dict['preset_e_flag']
+            )
+
+    return allocation_methods, method_comparison_data
+
+
 def page_code():
 
     set_default_parameters()
@@ -94,50 +146,8 @@ def page_code():
     # First we compute the source data for the charts by averaging over the replicate simulations:
     # (Note: could add switch to allow visualistion of individual simulation runs?)
     max_rep = st.session_state.config.config_params['max_replicates']
-    allocation_methods = {
-        'Random': {
-            'method': 'Random',
-            'budget_flag': True
-        },
-        'Optimised': {
-            'method': 'Optimised',
-            'budget_flag': True
-        },
-        'Flexible start': {
-            'method': 'Flexible start time',
-            'budget_flag': True
-        },
-        'Flexible w/o budget': {
-            'method': 'Flexible start time',
-            'budget_flag': False
-        }
-    }
 
-# Temporarily, we load data for the additional team allocation methods that are not loaded as presets
-#    into the comparison data. (May want to move this loading to application launch also.)
-    parameter_dict = st.session_state.config.allocation_comparison_parameters
-
-    pure_comparison_data = {
-        allocator: {
-            rep: {}
-            for rep in range(max_rep)
-        }
-        for allocator in allocation_methods.keys()
-    }
-
-    for allocator, method_dict in allocation_methods.items():
-        for rep in range(max_rep):
-
-            pure_comparison_data[allocator][rep] = load_models(
-                project_count=parameter_dict['project_count'],
-                dept_workload=parameter_dict['dept_workload'],
-                budget_func=method_dict['budget_flag'],
-                train_load=parameter_dict['train_load'],
-                skill_decay=parameter_dict['skill_decay'],
-                rep=rep,
-                team_allocation=method_dict['method'],
-                preset_e=parameter_dict['preset_e_flag']
-            )
+    allocation_methods, method_comparison_data = load_method_comparison_data(max_rep)
 
     if max_rep == 1:
         source_data = {
@@ -146,7 +156,7 @@ def page_code():
         }
 
         aggregated_pure_comparison_data = {
-            allocator: pure_comparison_data[allocator][st.session_state.replicate]['model_vars']
+            allocator: method_comparison_data[allocator][st.session_state.replicate]['model_vars']
             for allocator in allocation_methods.keys()
         }
     else:
@@ -163,7 +173,7 @@ def page_code():
 
         for allocator in allocation_methods.keys():
             df_list_pure = [
-                pure_comparison_data[allocator][rep]['model_vars']
+                method_comparison_data[allocator][rep]['model_vars']
                 for rep in range(max_rep)
             ]
             df_concat_pure = pd.concat(df_list_pure)
