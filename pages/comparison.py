@@ -135,13 +135,6 @@ def page_code():
 
     st.title("Comparison")
 
-    st.write("Here we compare the performance of the model when simulated using the "
-             "following parameter presets:")
-
-    for preset, preset_details in st.session_state.config.simulation_presets.items():
-        with st.beta_expander(preset + ": " + preset_details['preset_name']):
-            st.write(preset_details['blurb'])
-
 #########################################################################################
     # First we compute the source data for the charts by averaging over the replicate simulations:
     # (Note: could add switch to allow visualistion of individual simulation runs?)
@@ -182,14 +175,16 @@ def page_code():
 
 #########################################################################################
     st.subheader("Comparison between team allocation methods.")
-    st.write("First we make a direct comparison between the three different team allocation methods: ")
+    st.write("First we make a direct comparison between four different team allocation methods: ")
     st.write(
         """
         1. Random team allocation.
         2. Optimized team allocation (using our numerical optimization to maximise project success probability).
         3. Optimized team allocation, with flexible project start time.
+        4. Optimized team allocation, flexible start time and no budget constraint on teams.
         
-        Note: these plots use the parameter values for preset C: "The Emergent Organization".
+        Note: These plots show simulation results for 5 projects per timestep. Other parameter values are equal to 
+        those of preset C (defined below).
         """
     )
     method_colours = ['red', 'orange', 'blue',  'green']
@@ -249,8 +244,16 @@ def page_code():
         ylabel="ROI", element=col0a
     )
 
-    #########################################################################################
+#########################################################################################
+
     st.subheader("Comparison between simulation presets [A-E].")
+    st.write("Now we compare the performance of the model when simulated using the "
+             "following parameter presets:")
+
+    for preset, preset_details in st.session_state.config.simulation_presets.items():
+        with st.beta_expander(preset + ": " + preset_details['preset_name']):
+            st.write(preset_details['blurb'])
+
     st.write("The following charts show metric values averaged over the final 25 timesteps of a simulation.")
 
     col1, col2 = st.beta_columns([1, 1])
