@@ -94,34 +94,49 @@ def page_code():
     # First we compute the source data for the charts by averaging over the replicate simulations:
     # (Note: could add switch to allow visualistion of individual simulation runs?)
     max_rep = st.session_state.config.config_params['max_replicates']
-    allocation_methods = ['Random', 'Optimised', 'Flexible start time']
+    allocation_methods = {
+        'Random': {
+            'method': 'Random',
+            'budget_flag': True
+        },
+        'Optimised': {
+            'method': 'Optimised',
+            'budget_flag': True
+        },
+        'Flexible start': {
+            'method': 'Flexible start time',
+            'budget_flag': True
+        },
+        'Flexible w/o budget': {
+            'method': 'Flexible start time',
+            'budget_flag': False
+        }
+    }
 
 # Temporarily, we load data for the additional team allocation methods that are not loaded as presets
 #    into the comparison data. (May want to move this loading to application launch also.)
-    preset = 'C'
-    parameter_dict = st.session_state.config.simulation_presets[preset]
-    preset_e_flag = True if preset == 'E' else False
+    parameter_dict = st.session_state.config.allocation_comparison_parameters
 
     pure_comparison_data = {
         allocator: {
             rep: {}
             for rep in range(max_rep)
         }
-        for allocator in allocation_methods
+        for allocator in allocation_methods.keys()
     }
 
-    for allocator in allocation_methods:
+    for allocator, method_dict in allocation_methods.items():
         for rep in range(max_rep):
 
             pure_comparison_data[allocator][rep] = load_models(
                 project_count=parameter_dict['project_count'],
                 dept_workload=parameter_dict['dept_workload'],
-                budget_func=parameter_dict['budget_func'],
+                budget_func=method_dict['budget_flag'],
                 train_load=parameter_dict['train_load'],
                 skill_decay=parameter_dict['skill_decay'],
                 rep=rep,
-                team_allocation=allocator,
-                preset_e=preset_e_flag
+                team_allocation=method_dict['method'],
+                preset_e=parameter_dict['preset_e_flag']
             )
 
     if max_rep == 1:
@@ -132,7 +147,7 @@ def page_code():
 
         aggregated_pure_comparison_data = {
             allocator: pure_comparison_data[allocator][st.session_state.replicate]['model_vars']
-            for allocator in allocation_methods
+            for allocator in allocation_methods.keys()
         }
     else:
         source_data = {}
@@ -146,7 +161,7 @@ def page_code():
             df_concat = pd.concat(df_list)
             source_data[preset] = df_concat.groupby(df_concat.index).mean()
 
-        for allocator in allocation_methods:
+        for allocator in allocation_methods.keys():
             df_list_pure = [
                 pure_comparison_data[allocator][rep]['model_vars']
                 for rep in range(max_rep)
@@ -167,24 +182,24 @@ def page_code():
         Note: these plots use the parameter values for preset C: "The Emergent Organization".
         """
     )
-
+    method_colours = ['red', 'orange', 'blue',  'green']
     col0a, col0b = st.beta_columns([2, 1])
 
     col0a.subheader("")
     bar_data = pd.DataFrame({
-        'team allocator': allocation_methods,
+        'team allocator': allocation_methods.keys(),
         'terminal ROI': [
             np.mean(aggregated_pure_comparison_data[allocator].loc[-25:]['Roi'])
-            for allocator in allocation_methods
+            for allocator in allocation_methods.keys()
         ]
     })
     bar_chart = alt.Chart(bar_data).mark_bar().encode(
-        x=alt.X('team allocator', axis=alt.Axis(labelAngle=90)),
+        x=alt.X('team allocator', axis=alt.Axis(labelAngle=90), sort=list(allocation_methods.keys())),
         y='terminal ROI',
         color=alt.Color(
             'team allocator', scale=alt.Scale(
-                domain=allocation_methods,
-                range=['blue', 'orange', 'green']
+                domain=list(allocation_methods.keys()),
+                range=method_colours
             ),
             legend=None
         ),
@@ -201,7 +216,7 @@ def page_code():
     # )
 
     chart_data = None
-    for allocator in allocation_methods:
+    for allocator in allocation_methods.keys():
 
         if chart_data is None:
             chart_data = (
@@ -219,11 +234,10 @@ def page_code():
             chart_data = chart_data.append(temp_data)
 
     time_series_plot(
-        chart_data, allocation_methods,
-        ['blue', 'orange', 'green'], "",
+        chart_data, list(allocation_methods.keys()),
+        method_colours, "",
         ylabel="ROI", element=col0a
     )
-
 
     #########################################################################################
     st.subheader("Comparison between simulation presets [A-E].")
