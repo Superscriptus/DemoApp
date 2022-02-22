@@ -74,9 +74,11 @@ def load_models(
         project_count, dept_workload, budget_func,
         skill_decay, train_load, rep,
         team_allocation, duration=100,
-        load_networks=True, preset_e=False
+        load_networks=True, preset_e=False,
+        use_preloaded_data=True
 ):
-    if ('preset_active' in st.session_state
+    if (use_preloaded_data
+            and 'preset_active' in st.session_state
             and 'preset' in st.session_state
             and st.session_state.preset_active):
         return_data = st.session_state.comparison_data[st.session_state.preset][st.session_state.replicate]

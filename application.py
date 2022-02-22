@@ -75,7 +75,8 @@ class Application:
                         skill_decay=parameter_dict['skill_decay'],
                         rep=rep,
                         team_allocation=parameter_dict['team_allocation'],
-                        preset_e=preset_e_flag
+                        preset_e=preset_e_flag,
+                        use_preloaded_data=False
                     )
 
             st.session_state.simulation_data = st.session_state.comparison_data['A'][st.session_state.replicate]
