@@ -226,7 +226,8 @@ def page_code():
                         rep=rep,
                         team_allocation=parameter_dict['team_allocation'],
                         load_networks=False,
-                        preset_e=preset_e_flag
+                        preset_e=preset_e_flag,
+                        use_preloaded_data=False
                     )['model_vars']
                 )
 
