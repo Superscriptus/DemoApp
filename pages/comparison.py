@@ -33,7 +33,8 @@ def time_series_plot(chart_data, domain, colours, title, ylabel, element=None):
                 range=colours
             )
         ),
-        strokeDash=dash_condition
+        strokeDash=dash_condition,
+        tooltip=[alt.Tooltip('value', format='.2f', title=ylabel)]
     ).properties(title=title)
 
     if element is None:
@@ -56,7 +57,8 @@ def bar_chart_wrapper(element, bar_data, x, y, title, domain, colours,
                 )
             ),
             column=column,
-            opacity=alt.value(0.3)
+            opacity=alt.value(0.3),
+            tooltip=[alt.Tooltip(y, format='.2f')]
         ).properties(title=title).configure_legend(orient='bottom')
     else:
         bar_chart = alt.Chart(bar_data).mark_bar().encode(
@@ -68,7 +70,8 @@ def bar_chart_wrapper(element, bar_data, x, y, title, domain, colours,
                     range=colours
                 )
             ),
-            opacity=alt.value(0.3)
+            opacity=alt.value(0.3),
+            tooltip=[alt.Tooltip(y, format='.2f')]
         ).properties(title=title).configure_legend(orient='bottom')
 
     element.altair_chart(bar_chart, use_container_width=use_container_width)
@@ -211,7 +214,8 @@ def page_code():
             ),
             legend=None
         ),
-        opacity=alt.value(0.3)
+        opacity=alt.value(0.3),
+        tooltip=[alt.Tooltip('terminal ROI', format='.2f')]
     ).properties(padding={"left": 5, "top": 30, "right": 5, "bottom": 5})
     col0b.altair_chart(bar_chart, use_container_width=True)
 
@@ -473,6 +477,10 @@ def page_code():
                 range=colours
             )
         ),
+        tooltip=[
+            alt.Tooltip('AverageWorkerOvr', format='.2f'),
+            alt.Tooltip('ROI', format='.2f')
+        ]
     ).properties(title="")
 
     st.altair_chart(chart, use_container_width=True)
