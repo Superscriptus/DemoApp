@@ -139,6 +139,7 @@ def page_code():
     # First we compute the source data for the charts by averaging over the replicate simulations:
     # (Note: could add switch to allow visualistion of individual simulation runs?)
     max_rep = st.session_state.config.config_params['max_replicates']
+    max_rep_method_comparison = st.session_state.config.allocation_comparison_parameters['replicate_count']
 
     allocation_methods, method_comparison_data = load_method_comparison_data(max_rep)
 
@@ -148,14 +149,8 @@ def page_code():
             for preset in st.session_state.config.simulation_presets.keys()
         }
 
-        aggregated_pure_comparison_data = {
-            allocator: method_comparison_data[allocator][st.session_state.replicate]['model_vars']
-            for allocator in allocation_methods.keys()
-        }
     else:
         source_data = {}
-        aggregated_pure_comparison_data = {}
-
         for preset in st.session_state.config.simulation_presets.keys():
             df_list = [
                 st.session_state.comparison_data[preset][rep]['model_vars']
@@ -164,6 +159,13 @@ def page_code():
             df_concat = pd.concat(df_list)
             source_data[preset] = df_concat.groupby(df_concat.index).mean()
 
+    if max_rep_method_comparison == 1:
+        aggregated_pure_comparison_data = {
+            allocator: method_comparison_data[allocator][st.session_state.replicate]['model_vars']
+            for allocator in allocation_methods.keys()
+        }
+    else:
+        aggregated_pure_comparison_data = {}
         for allocator in allocation_methods.keys():
             df_list_pure = [
                 method_comparison_data[allocator][rep]['model_vars']
@@ -211,14 +213,6 @@ def page_code():
         opacity=alt.value(0.3)
     ).properties(padding={"left": 5, "top": 30, "right": 5, "bottom": 5})
     col0b.altair_chart(bar_chart, use_container_width=True)
-
-    # bar_chart_wrapper(
-    #     col0b, bar_data, x='team allocator', y='terminal ROI',
-    #     title="",
-    #     domain=allocation_methods, colours=['blue', 'orange', 'green'],
-    #     colour_var='team allocator',
-    #     use_container_width=True, column=None, rotation=0
-    # )
 
     chart_data = None
     for allocator in allocation_methods.keys():

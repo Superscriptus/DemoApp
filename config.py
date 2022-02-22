@@ -110,7 +110,8 @@ class Config:
             'dept_workload': 0.1,
             'skill_decay': 0.995,
             'train_load': 0.1,
-            'preset_e_flag': False
+            'preset_e_flag': False,
+            'replicate_count': 1
         }
 
         self.default_simulation_parameters = {
