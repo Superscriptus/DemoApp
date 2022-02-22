@@ -120,7 +120,8 @@ def load_method_comparison_data(max_rep):
                 skill_decay=parameter_dict['skill_decay'],
                 rep=rep,
                 team_allocation=method_dict['method'],
-                preset_e=parameter_dict['preset_e_flag']
+                preset_e=parameter_dict['preset_e_flag'],
+                use_preloaded_data=False
             )
 
     return allocation_methods, method_comparison_data
@@ -141,7 +142,7 @@ def page_code():
     max_rep = st.session_state.config.config_params['max_replicates']
     max_rep_method_comparison = st.session_state.config.allocation_comparison_parameters['replicate_count']
 
-    allocation_methods, method_comparison_data = load_method_comparison_data(max_rep)
+    allocation_methods, method_comparison_data = load_method_comparison_data(max_rep_method_comparison)
 
     if max_rep == 1:
         source_data = {
@@ -169,7 +170,7 @@ def page_code():
         for allocator in allocation_methods.keys():
             df_list_pure = [
                 method_comparison_data[allocator][rep]['model_vars']
-                for rep in range(max_rep)
+                for rep in range(max_rep_method_comparison)
             ]
             df_concat_pure = pd.concat(df_list_pure)
             aggregated_pure_comparison_data[allocator] = df_concat_pure.groupby(df_concat_pure.index).mean()
@@ -420,7 +421,8 @@ def page_code():
                         rep=rep,
                         team_allocation=parameter_dict['team_allocation'],
                         load_networks=False,
-                        preset_e=preset_e_flag
+                        preset_e=preset_e_flag,
+                        use_preloaded_data=False
                     )['model_vars']
                 )
 
