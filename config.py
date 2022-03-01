@@ -101,6 +101,18 @@ class Config:
                 'team_allocation': 'Flexible start time'
             }
         }
+        self.allocation_comparison_parameters = {
+            'preset_name': 'Allocation comparison',
+            'blurb': 'These parameter values are used for comparison between the different team allocation methods '
+                     'on the Comparison page. (Note budget_func and team_allocation are not provided because they are '
+                     'varied externally to produce the comparison.',
+            'project_count': 5,
+            'dept_workload': 0.1,
+            'skill_decay': 0.995,
+            'train_load': 0.1,
+            'preset_e_flag': False,
+            'replicate_count': 1
+        }
 
         self.default_simulation_parameters = {
             'project_count': 10,
