@@ -5,7 +5,7 @@ def page_code():
 
     st.title("About")
 
-    col1, col2 = st.beta_columns([1, 9])
+    col1, col2 = st.columns([1, 9])
     col1.image('images/icon.png')
     col2.header("Welcome to SuperScript!")
 

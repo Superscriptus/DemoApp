@@ -350,7 +350,7 @@ def set_default_parameters():
 def create_sidebar_controls():
 
     st.sidebar.write("Select parameter presets:")
-    row_presets = st.sidebar.beta_columns([1, 1, 1, 1, 1])
+    row_presets = st.sidebar.columns([1, 1, 1, 1, 1])
     create_preset_button(row_presets[0], "A")
     create_preset_button(row_presets[1], "B")
     create_preset_button(row_presets[2], "C")
@@ -358,11 +358,11 @@ def create_sidebar_controls():
     create_preset_button(row_presets[4], "E")
 
     st.sidebar.write("Set value for all parameters:")
-    with st.sidebar.beta_expander("Expand for full parameter control"):
+    with st.sidebar.expander("Expand for full parameter control"):
 
         set_default_parameters()
 
-        row_0 = st.beta_columns([2, 1])
+        row_0 = st.columns([2, 1])
 
         with row_0[0]:
             team_allocation = st.selectbox(
@@ -388,7 +388,7 @@ def create_sidebar_controls():
                 help="Budgetary constraint on/off."
             )
 
-        row_1 = st.beta_columns([1, 2])
+        row_1 = st.columns([1, 2])
 
         with row_1[0]:
             project_count = st.selectbox(

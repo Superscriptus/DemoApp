@@ -194,7 +194,7 @@ def page_code():
         """
     )
     method_colours = ['red', 'orange', 'blue',  'green']
-    col0a, col0b = st.beta_columns([2, 1])
+    col0a, col0b = st.columns([2, 1])
 
     col0a.subheader("")
     bar_data = pd.DataFrame({
@@ -250,12 +250,12 @@ def page_code():
              "following parameter presets:")
 
     for preset, preset_details in st.session_state.config.simulation_presets.items():
-        with st.beta_expander(preset + ": " + preset_details['preset_name']):
+        with st.expander(preset + ": " + preset_details['preset_name']):
             st.write(preset_details['blurb'])
 
     st.write("The following charts show metric values averaged over the final 25 timesteps of a simulation.")
 
-    col1, col2 = st.beta_columns([1, 1])
+    col1, col2 = st.columns([1, 1])
 
     col1.subheader("")
     bar_data = pd.DataFrame({
@@ -302,7 +302,7 @@ def page_code():
         use_container_width=True, column=None, rotation=0
     )
 #########################################################################################
-    col3, col4 = st.beta_columns([1, 1])
+    col3, col4 = st.columns([1, 1])
     col3.subheader("")
 
     bar_data = pd.DataFrame({
@@ -340,7 +340,7 @@ def page_code():
     st.subheader("Return on investment (ROI)")
     st.write("The following chart shows the effect of varying the skill decay on the ROI, for on the presets A-E.")
 
-    col5, = st.beta_columns([1])
+    col5, = st.columns([1])
     col5.subheader("")
 
     all_skill_decays = [0.95, 0.99, 0.995]
@@ -395,7 +395,7 @@ def page_code():
     )
 
     st.write("And below, we see the effect of varying the training load on the ROI, for on the presets A-E.")
-    col6, = st.beta_columns([1])
+    col6, = st.columns([1])
     col6.subheader("")
 
     all_train_loads = [0.0, 0.1, 0.3, 2.0]
